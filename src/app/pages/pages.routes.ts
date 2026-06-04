@@ -1,11 +1,18 @@
 import { Routes } from '@angular/router';
-import { Documentation } from './documentation/documentation';
-import { Crud } from './crud/crud';
-import { Empty } from './empty/empty';
+import { ReuniaoListar } from '@/app/pages/reuniao/reuniao-listar/reuniao-listar';
+import { ReuniaoEditar } from '@/app/pages/reuniao/reuniao-editar/reuniao-editar';
+import { Dashboard } from '@/app/pages/dashboard/dashboard';
 
 export default [
-    { path: 'documentation', component: Documentation },
-    { path: 'crud', component: Crud },
-    { path: 'empty', component: Empty },
-    { path: '**', redirectTo: '/notfound' }
+    { path: 'home', component: Dashboard },
+    {
+        path: 'reuniao',
+        children: [
+            { path: '', component: ReuniaoListar },
+            { path: ':id', component: ReuniaoEditar }
+        ]
+    }
+    // { path: 'perfil', component: Perfil },
+    // { path: 'usuarios', component: UsuariosListar },
+    // { path: 'usuarios/:id', component: UsuariosEditar }
 ] as Routes;

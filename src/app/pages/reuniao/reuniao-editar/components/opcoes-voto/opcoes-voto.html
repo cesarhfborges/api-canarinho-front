@@ -1,0 +1,115 @@
+<p-card class="border border-slate-200 bg-white shadow-sm">
+    <div class="mb-4 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-bold text-surface-900">
+                Opções de Voto
+            </h2>
+            <p class="text-xs text-surface-500">
+                Opções disponíveis para votação nesta pauta.
+            </p>
+        </div>
+        <p-button
+            label="Adicionar Opção"
+            icon="pi pi-plus"
+            [outlined]="true"
+            size="small"
+            (onClick)="abrirModalOpcao()" />
+
+    </div>
+    <p-table
+        [value]="lista()"
+        [loading]="loading()"
+        size="small"
+        dataKey="id"
+        [resizableColumns]="false"
+        stripedRows
+
+    >
+        <ng-template pTemplate="header">
+            <tr>
+                <th pResizableColumn class="w-20 min-w-20">#</th>
+                <th pResizableColumn class="w-20 min-w-20">Icone</th>
+                <th pResizableColumn>Titulo</th>
+                <th pResizableColumn>Descrição</th>
+                <th class="w-32">
+                    Ações
+                </th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-opcao let-index="rowIndex">
+            <tr [attr.data-id]="opcao.id">
+                <td>
+                    <p class="font-medium text-surface-700">
+                        {{ opcao.ordem }}
+                    </p>
+                </td>
+                <td>
+                    @if (opcao.icone !== null) {
+                        <p class="font-medium text-surface-700">
+                            <i [class]="opcao.icone"></i>
+                        </p>
+                    }
+                </td>
+                <td>
+                    <span class="font-medium text-surface-700">
+                        {{ opcao.titulo }}
+                    </span>
+                </td>
+                <td>
+                    <span class="font-medium text-surface-700">
+                        {{ opcao.descricao }}
+                    </span>
+                </td>
+                <td>
+                    <div class="flex justify-center gap-1">
+                        <p-button
+                            icon="pi pi pi-arrow-down"
+                            severity="secondary"
+                            [text]="true"
+                            pTooltip="Mover acima"
+                            tooltipPosition="top"
+                            [disabled]="(index + 1) >= lista().length"
+                            (click)="aoReOrdenar(index, 'down')"
+                        />
+                        <p-button
+                            icon="pi pi pi-arrow-up"
+                            severity="secondary"
+                            [text]="true"
+                            pTooltip="Mover abaixo"
+                            tooltipPosition="top"
+                            [disabled]="index < 1"
+                            (click)="aoReOrdenar(index, 'up')"
+                        />
+                        <p-button
+                            icon="pi pi-pencil"
+                            severity="info"
+                            [text]="true"
+                            (onClick)="abrirModalOpcao(opcao)"
+                            pTooltip="Editar"
+                            tooltipPosition="top"
+                        />
+                        <p-button
+                            icon="pi pi-trash"
+                            severity="danger"
+                            [text]="true"
+                            (onClick)="confirmarExcluir($event, opcao.id)"
+                            pTooltip="Excluir"
+                            tooltipPosition="top"
+                        />
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5">
+                    <div class="py-4 text-center text-surface-400">
+                        <i class="pi pi-inbox block text-xl"></i>
+                        Nenhuma opção cadastrada para esta pauta.
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

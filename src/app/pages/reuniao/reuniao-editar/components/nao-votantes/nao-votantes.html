@@ -1,0 +1,93 @@
+<p-card class="border border-slate-200 bg-white shadow-sm">
+    <div class="mb-4 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-bold text-surface-900">
+                Usuários Não Votantes
+            </h2>
+
+            <p class="text-xs text-surface-500">
+                Usuários impedidos de participar da votação desta pauta.
+            </p>
+        </div>
+        <p-button
+            label="Bloquear Usuário"
+            icon="pi pi-user-minus"
+            severity="warn"
+            [outlined]="true"
+            size="small"
+            (onClick)="abrirModalBloqueio()"
+        />
+    </div>
+    <p-table
+        [value]="lista()"
+        [loading]="carregando()"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-sm"
+    >
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Usuário</th>
+                <th>Motivo</th>
+                <th class="w-32 text-center">
+                    Ações
+                </th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-bloqueio>
+
+            <tr>
+
+                <td>
+                    <span class="font-medium text-surface-700">
+                        {{ bloqueio.funcionarioId }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="text-surface-600">
+                        {{ bloqueio.motivo }}
+                    </span>
+                </td>
+
+                <td>
+
+                    <div class="flex justify-center">
+
+                        <p-button
+                            icon="pi pi-user-minus"
+                            severity="danger"
+                            [text]="true"
+                            pTooltip="Permitir votação"
+                            (onClick)="removerBloqueio(bloqueio.id)" />
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+
+            <tr>
+                <td colspan="3">
+
+                    <div class="py-6 text-center text-surface-400">
+
+                        <i class="pi pi-users mb-2 block text-xl"></i>
+
+                        Nenhum usuário bloqueado nesta pauta.
+
+                    </div>
+
+                </td>
+            </tr>
+
+        </ng-template>
+
+    </p-table>
+
+</p-card>

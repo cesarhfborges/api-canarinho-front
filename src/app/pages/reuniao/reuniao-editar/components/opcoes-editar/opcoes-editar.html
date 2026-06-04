@@ -1,0 +1,70 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-4 pt-2">
+            <div class="flex flex-col gap-1">
+                <label for="titulo" class="text-sm font-semibold text-slate-700">Título</label>
+                <p-select
+                    [options]="icones"
+                    formControlName="icone"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Selecione o icone"
+                    variant="outlined"
+                    [showClear]="true"
+                    [filter]="true"
+                    filterBy="label"
+                    [virtualScroll]="true"
+                    [virtualScrollItemSize]="32"
+                    fluid
+                >
+                    <ng-template #selectedItem let-selectedOption>
+                        <div class="flex items-center gap-2">
+                            <i [class]="selectedOption.value"></i>
+                            <div>{{ selectedOption.label }}</div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-item #item>
+                        <div class="flex items-center gap-2">
+                            <i [class]="item.value"></i>
+                            <div>{{ item.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="titulo" class="text-sm font-semibold text-slate-700">Título</label>
+                <input
+                    pInputText
+                    id="titulo"
+                    placeholder="Ex: Aprovação de Contas 2025"
+                    formControlName="titulo"
+                />
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="descricao" class="text-sm font-semibold text-slate-700">Descrição / Contexto</label>
+                <textarea
+                    pInputTextarea
+                    id="descricao"
+                    rows="4"
+                    placeholder="Detalhes que o eleitor precisa saber..."
+                    formControlName="descricao"
+                ></textarea>
+            </div>
+        </div>
+        <div class="flex justify-between border-t pt-4">
+            <p-button
+                label="Cancelar"
+                icon="pi pi-times"
+                variant="outlined"
+                severity="secondary"
+                (click)="close()"
+            />
+
+            <p-button
+                label="Salvar"
+                icon="pi pi-check"
+                type="submit"
+            />
+        </div>
+    </div>
+</form>
