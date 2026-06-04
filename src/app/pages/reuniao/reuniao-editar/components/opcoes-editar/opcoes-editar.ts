@@ -9,10 +9,13 @@ import { ICONES_SISTEMA } from '@/app/shared/icones-sistema';
 import { Icone } from '@/app/shared/models/icone';
 import { OpcaoVotoService } from '@/app/core/services/opcao-voto-service';
 import { lastValueFrom } from 'rxjs';
+import { RadioButton } from 'primeng/radiobutton';
+import { TipoVoto } from '@/app/core/models/opcao-voto';
+import { JsonPipe } from '@angular/common';
 
 @Component({
     selector: 'app-opcoes-editar',
-    imports: [Button, InputText, ReactiveFormsModule, Textarea, Select],
+    imports: [Button, InputText, ReactiveFormsModule, Textarea, Select, RadioButton, JsonPipe],
     templateUrl: './opcoes-editar.html',
     styleUrl: './opcoes-editar.scss'
 })
@@ -23,6 +26,11 @@ export class OpcoesEditar implements OnInit {
     readonly pautaId = input.required<number>();
 
     protected icones: Icone[] = ICONES_SISTEMA;
+    protected tiposVoto: { label: string; value: TipoVoto }[] = [
+        { label: 'Normal', value: TipoVoto.NORMAL },
+        { label: 'Em branco', value: TipoVoto.EM_BRANCO },
+        { label: 'Nulo', value: TipoVoto.NULO }
+    ];
 
     private fb = inject(NonNullableFormBuilder);
     private dialogRef = inject(DynamicDialogRef);
@@ -33,7 +41,8 @@ export class OpcoesEditar implements OnInit {
         this.form = this.fb.group({
             icone: [null, []],
             titulo: ['', [Validators.required]],
-            descricao: ['', [Validators.required]]
+            descricao: ['', [Validators.required]],
+            tipo: ['NORMAL', [Validators.required]]
         });
     }
 

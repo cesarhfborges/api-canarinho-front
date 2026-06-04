@@ -1,7 +1,7 @@
 <p-card class="border border-slate-200 bg-white shadow-sm">
     <div class="mb-4 flex items-center justify-between">
         <div>
-            <h2 class="text-lg font-bold text-surface-900">
+            <h2 class="text-lg font-bold text-surface-900 m-0!">
                 Opções de Voto
             </h2>
             <p class="text-xs text-surface-500">
@@ -12,9 +12,9 @@
             label="Adicionar Opção"
             icon="pi pi-plus"
             [outlined]="true"
-            size="small"
-            (onClick)="abrirModalOpcao()" />
-
+            size="large"
+            (onClick)="abrirModalOpcao()"
+        />
     </div>
     <p-table
         [value]="lista()"
@@ -23,16 +23,23 @@
         dataKey="id"
         [resizableColumns]="false"
         stripedRows
-
+        showGridlines
     >
         <ng-template pTemplate="header">
             <tr>
-                <th pResizableColumn class="w-20 min-w-20">#</th>
-                <th pResizableColumn class="w-20 min-w-20">Icone</th>
-                <th pResizableColumn>Titulo</th>
-                <th pResizableColumn>Descrição</th>
-                <th class="w-32">
-                    Ações
+                <th pResizableColumn class="w-[8%] min-w-[64px]">
+                    <p class="font-medium text-center m-0!">#</p>
+                </th>
+                <th pResizableColumn class="w-[8%] min-w-[64px]">
+                    <p class="font-medium text-center m-0!">Icone</p>
+                </th>
+                <th pResizableColumn class="w-[74%] min-w-[140px]">Titulo</th>
+<!--                <th pResizableColumn>Descrição</th>-->
+                <th pResizableColumn class="w-[10%] min-w-[90px]">Tipo</th>
+                <th class="w-[170px]">
+                    <p class="font-medium text-center">
+                        Ações
+                    </p>
                 </th>
             </tr>
         </ng-template>
@@ -40,26 +47,42 @@
         <ng-template pTemplate="body" let-opcao let-index="rowIndex">
             <tr [attr.data-id]="opcao.id">
                 <td>
-                    <p class="font-medium text-surface-700">
+                    <p class="font-medium text-center">
                         {{ opcao.ordem }}
                     </p>
                 </td>
                 <td>
                     @if (opcao.icone !== null) {
-                        <p class="font-medium text-surface-700">
+                        <p class="font-medium text-center">
                             <i [class]="opcao.icone"></i>
                         </p>
                     }
                 </td>
                 <td>
-                    <span class="font-medium text-surface-700">
+                    <p class="font-medium line-clamp-1">
                         {{ opcao.titulo }}
-                    </span>
+                    </p>
                 </td>
+<!--                <td>-->
+<!--                    <p class="font-medium line-clamp-1">-->
+<!--                        {{ opcao.descricao }}-->
+<!--                    </p>-->
+<!--                </td>-->
                 <td>
-                    <span class="font-medium text-surface-700">
-                        {{ opcao.descricao }}
-                    </span>
+                    @switch(opcao.tipo) {
+                        @case('NORMAL') {
+                            <p-tag severity="success" value="Normal" />
+                        }
+                        @case ('EM_BRANCO') {
+                            <p-tag severity="secondary" value="Em branco" />
+                        }
+                        @case ('NULO') {
+                            <p-tag severity="contrast" value="Nulo" />
+                        }
+                        @default {
+                            <p-tag severity="danger" value="Error" />
+                        }
+                    }
                 </td>
                 <td>
                     <div class="flex justify-center gap-1">
@@ -103,7 +126,7 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     <div class="py-4 text-center text-surface-400">
                         <i class="pi pi-inbox block text-xl"></i>
                         Nenhuma opção cadastrada para esta pauta.

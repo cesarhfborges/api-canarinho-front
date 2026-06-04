@@ -13,10 +13,11 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { Tooltip } from 'primeng/tooltip';
 import { JsonPipe } from '@angular/common';
 import { ReordenarOpcaoVoto } from '@/app/core/models/reordenar-opcao-voto';
+import { Tag } from 'primeng/tag';
 
 @Component({
     selector: 'app-opcoes-voto',
-    imports: [TableModule, Button, Card, Tooltip, JsonPipe],
+    imports: [TableModule, Button, Card, Tooltip, JsonPipe, Tag],
     templateUrl: './opcoes-voto.html',
     styleUrl: './opcoes-voto.scss'
 })

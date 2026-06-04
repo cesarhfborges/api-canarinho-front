@@ -7,10 +7,11 @@ import { Button } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { Card } from 'primeng/card';
 import { Reuniao } from '@/app/core/models/reuniao';
+import { Tooltip } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-nao-votantes',
-    imports: [Button, TableModule, Card],
+    imports: [Button, TableModule, Card, Tooltip],
     templateUrl: './nao-votantes.html',
     styleUrl: './nao-votantes.scss'
 })
@@ -20,7 +21,7 @@ export class NaoVotantes {
 
     protected lista = signal<BloqueioVoto[]>([]);
 
-    protected carregando = signal(false);
+    protected loading = signal(false);
 
     private readonly bloqueioVotoService = inject(BloqueioVotoService);
 
@@ -36,12 +37,12 @@ export class NaoVotantes {
     }
 
     private async carregarBloqueios(reuniaoId: number, pautaId: number): Promise<void> {
-        this.carregando.set(true);
+        this.loading.set(true);
         try {
             const bloqueios = await firstValueFrom(this.bloqueioVotoService.listar(reuniaoId, pautaId));
             this.lista.set(bloqueios);
         } finally {
-            this.carregando.set(false);
+            this.loading.set(false);
         }
     }
 
