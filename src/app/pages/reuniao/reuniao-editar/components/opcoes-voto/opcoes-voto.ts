@@ -87,8 +87,10 @@ export class OpcoesVoto {
                     this.lista.update((lista) => {
                         return lista.map((item) => (item.id === result.id ? result : item));
                     });
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Opção atualizada com sucesso.' });
                 } else {
                     this.lista.update((lista) => [...lista, result]);
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Opção cadastrada com sucesso.' });
                 }
                 this.loading.set(false);
             }
