@@ -39,12 +39,12 @@
         <ng-template pTemplate="body" let-bloqueio>
             <tr>
                 <td>
-                    <span class="font-medium text-surface-700">
+                    <span class="font-medium">
                         {{ bloqueio.funcionario.nome }} {{ bloqueio.funcionario.sobrenome }}
                     </span>
                 </td>
                 <td>
-                    <span class="text-surface-600">
+                    <span class="">
                         {{ bloqueio.motivo }}
                     </span>
                 </td>
@@ -55,7 +55,7 @@
                             severity="danger"
                             [text]="true"
                             pTooltip="Permitir votação"
-                            (onClick)="removerBloqueio(bloqueio.id)"
+                            (onClick)="confirmarExcluir($event, bloqueio.id)"
                         />
                     </div>
                 </td>

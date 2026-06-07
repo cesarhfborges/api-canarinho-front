@@ -16,7 +16,19 @@ export class BloqueioVotoService {
         return this.http.get<BloqueioVoto[]>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${pautaId}/bloqueios-voto`, { params });
     }
 
-    public get(reuniaoId: number, id: number): Observable<BloqueioVoto> {
-        return this.http.get<BloqueioVoto>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas${id}`);
+    public get(reuniaoId: number, pautaId: number): Observable<BloqueioVoto> {
+        return this.http.get<BloqueioVoto>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${pautaId}/bloqueios-voto`);
+    }
+
+    public create(reuniaoId: number, pautaId: number, data: any): Observable<BloqueioVoto> {
+        return this.http.post<BloqueioVoto>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${pautaId}/bloqueios-voto`, data);
+    }
+
+    public update(reuniaoId: number, pautaId: number, id: number, data: any): Observable<BloqueioVoto> {
+        return this.http.post<BloqueioVoto>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${pautaId}/bloqueios-voto/${id}`, data);
+    }
+
+    public excluir(reuniaoId: number, pautaId: number, id: number): Observable<any> {
+        return this.http.delete<any>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${pautaId}/bloqueios-voto/${id}`);
     }
 }

@@ -6,11 +6,13 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FuncionariosService } from '@/app/core/services/funcionarios-service';
 import { Funcionario } from '@/app/core/models/Funcionario';
-import { TitleCasePipe } from '@angular/common';
+import { JsonPipe, TitleCasePipe } from '@angular/common';
+import { lastValueFrom } from 'rxjs';
+import { BloqueioVotoService } from '@/app/core/services/bloqueio-voto-service';
 
 @Component({
     selector: 'app-nao-votante-editar',
-    imports: [Button, InputText, ReactiveFormsModule, Select, TitleCasePipe],
+    imports: [Button, InputText, ReactiveFormsModule, Select, TitleCasePipe, JsonPipe],
     templateUrl: './nao-votante-editar.html',
     styleUrl: './nao-votante-editar.scss'
 })
@@ -26,10 +28,11 @@ export class NaoVotanteEditar implements OnInit {
     private dialogRef = inject(DynamicDialogRef);
     private dialogConfig = inject(DynamicDialogConfig);
     private funcionariosService = inject(FuncionariosService);
+    private bloqueioVotoService = inject(BloqueioVotoService);
 
     constructor() {
         this.form = this.fb.group({
-            usuario: [null, [Validators.required]],
+            funcionarioId: [null, [Validators.required]],
             motivo: ['', [Validators.required]]
         });
     }
@@ -38,7 +41,9 @@ export class NaoVotanteEditar implements OnInit {
         this.funcionariosService.listar({ sort: 'id', direction: 'ASC' }).subscribe({
             next: (data) => {
                 console.log('NaoVotanteEditar: ', data);
-                this.usuarios.set(data.filter((i) => !this.selecionados().includes(i.id)));
+                const limpo = data.filter((i) => !this.selecionados().includes(i.id));
+                console.log('NaoVotanteEditar: ', limpo);
+                this.usuarios.set(limpo);
             }
         });
     }
@@ -49,21 +54,21 @@ export class NaoVotanteEditar implements OnInit {
 
     async submit(): Promise<void> {
         try {
-            // console.log('submit', this.form.value);
-            // this.form.markAllAsTouched();
-            // this.form.markAllAsDirty();
-            // if (this.form.invalid) {
-            //     return;
-            // }
-            //
-            // let res = undefined;
-            //
-            // if (this.dialogConfig.data?.opcao?.id) {
-            //     res = await lastValueFrom(this.opcaoVotoService.update(this.reuniaoId(), this.pautaId(), this.dialogConfig.data.opcao.id, this.form.value));
-            // } else {
-            //     res = await lastValueFrom(this.opcaoVotoService.create(this.reuniaoId(), this.pautaId(), this.form.value));
-            // }
-            // this.dialogRef.close(res);
+            console.log('submit', this.form.value);
+            this.form.markAllAsTouched();
+            this.form.markAllAsDirty();
+            if (this.form.invalid) {
+                return;
+            }
+
+            let res = undefined;
+
+            if (this.dialogConfig.data?.opcao?.id) {
+                res = await lastValueFrom(this.bloqueioVotoService.update(this.reuniaoId(), this.pautaId(), this.dialogConfig.data.opcao.id, this.form.value));
+            } else {
+                res = await lastValueFrom(this.bloqueioVotoService.create(this.reuniaoId(), this.pautaId(), this.form.value));
+            }
+            this.dialogRef.close(res);
         } catch (error) {
             console.log(error);
         }
