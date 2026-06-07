@@ -25,13 +25,7 @@ export default {
                 project: ['tsconfig.json', 'e2e/tsconfig.json'],
                 createDefaultProgram: true
             },
-            extends: [
-                'eslint:recommended',
-                'plugin:@typescript-eslint/recommended',
-                'plugin:@angular-eslint/recommended',
-                'plugin:@angular-eslint/template/process-inline-templates',
-                'prettier'
-            ],
+            extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:@angular-eslint/recommended', 'plugin:@angular-eslint/template/process-inline-templates', 'prettier'],
             rules: {
                 'max-len': [
                     'error',
@@ -92,14 +86,27 @@ export default {
         {
             files: ['*.html'],
             extends: ['plugin:@angular-eslint/template/recommended', 'prettier'],
-            rules: {}
+            rules: {
+                'max-len': [
+                    'error',
+                    {
+                        code: 120
+                    }
+                ]
+            }
         },
         {
             files: ['*.js'],
             rules: {
                 parserOptions: {
                     allowImportExportEverywhere: true
-                }
+                },
+                'max-len': [
+                    'error',
+                    {
+                        code: 120
+                    }
+                ]
             }
         }
     ]
