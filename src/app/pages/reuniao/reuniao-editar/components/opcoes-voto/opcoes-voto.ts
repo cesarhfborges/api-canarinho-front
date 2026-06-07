@@ -1,5 +1,5 @@
 import { Component, effect, ElementRef, inject, input, signal } from '@angular/core';
-import { TableModule, TableRowReorderEvent } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { firstValueFrom } from 'rxjs';
 import { OpcaoVoto } from '@/app/core/models/opcao-voto';
@@ -11,13 +11,12 @@ import { DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { OpcoesEditar } from '@/app/pages/reuniao/reuniao-editar/components/opcoes-editar/opcoes-editar';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Tooltip } from 'primeng/tooltip';
-import { JsonPipe } from '@angular/common';
 import { ReordenarOpcaoVoto } from '@/app/core/models/reordenar-opcao-voto';
 import { Tag } from 'primeng/tag';
 
 @Component({
     selector: 'app-opcoes-voto',
-    imports: [TableModule, Button, Card, Tooltip, JsonPipe, Tag],
+    imports: [TableModule, Button, Card, Tooltip, Tag],
     templateUrl: './opcoes-voto.html',
     styleUrl: './opcoes-voto.scss'
 })
@@ -26,11 +25,9 @@ export class OpcoesVoto {
     readonly pauta = input.required<Pauta>();
 
     protected lista = signal<OpcaoVoto[]>([]);
-
-    private readonly elementRef = inject(ElementRef);
-
     protected loading = signal<boolean>(false);
 
+    private readonly elementRef = inject(ElementRef);
     private readonly dialogService = inject(DialogService);
     private readonly messageService = inject(MessageService);
     private readonly opcaoVotoService = inject(OpcaoVotoService);
@@ -118,28 +115,6 @@ export class OpcoesVoto {
         });
     }
 
-    private async excluirOpcao(id: number): Promise<void> {
-        try {
-            await firstValueFrom(this.opcaoVotoService.excluir(this.reuniao().id, this.pauta().id, id));
-            this.lista.update((lista) => lista.filter((opcao) => opcao.id !== id));
-            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
-        } catch (error) {
-            this.messageService.add({ severity: 'error', summary: 'Ops', detail: 'Não foi possível executar esta ação.' });
-        }
-    }
-
-    private async carregarOpcoes(reuniaoId: number, pautaId: number): Promise<void> {
-        this.loading.set(true);
-
-        try {
-            const opcoes = await firstValueFrom(this.opcaoVotoService.listar(reuniaoId, pautaId));
-            console.log(opcoes);
-            this.lista.set(opcoes);
-        } finally {
-            this.loading.set(false);
-        }
-    }
-
     protected async aoReOrdenar(index: number, direction: 'up' | 'down'): Promise<void> {
         const before = new Map<number, DOMRect>();
 
@@ -220,6 +195,28 @@ export class OpcoesVoto {
                 );
             });
         });
+    }
+
+    private async excluirOpcao(id: number): Promise<void> {
+        try {
+            await firstValueFrom(this.opcaoVotoService.excluir(this.reuniao().id, this.pauta().id, id));
+            this.lista.update((lista) => lista.filter((opcao) => opcao.id !== id));
+            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted' });
+        } catch (error) {
+            this.messageService.add({ severity: 'error', summary: 'Ops', detail: 'Não foi possível executar esta ação.' });
+        }
+    }
+
+    private async carregarOpcoes(reuniaoId: number, pautaId: number): Promise<void> {
+        this.loading.set(true);
+
+        try {
+            const opcoes = await firstValueFrom(this.opcaoVotoService.listar(reuniaoId, pautaId));
+            console.log(opcoes);
+            this.lista.set(opcoes);
+        } finally {
+            this.loading.set(false);
+        }
     }
 
     private obterLinhasTabela(): HTMLElement[] {

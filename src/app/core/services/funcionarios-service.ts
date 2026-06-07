@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@/environments/environment';
 import { Funcionario } from '@/app/core/models/Funcionario';
@@ -17,4 +17,3 @@ export class FuncionariosService {
         return this.http.get<Funcionario[]>(`${environment.apiUrl}/funcionarios`, { params });
     }
 }
-// http://localhost:8080/api/funcionarios?sort=id&direction=ASC

@@ -6,13 +6,13 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { FuncionariosService } from '@/app/core/services/funcionarios-service';
 import { Funcionario } from '@/app/core/models/Funcionario';
-import { JsonPipe, TitleCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { lastValueFrom } from 'rxjs';
 import { BloqueioVotoService } from '@/app/core/services/bloqueio-voto-service';
 
 @Component({
     selector: 'app-nao-votante-editar',
-    imports: [Button, InputText, ReactiveFormsModule, Select, TitleCasePipe, JsonPipe],
+    imports: [Button, InputText, ReactiveFormsModule, Select, TitleCasePipe],
     templateUrl: './nao-votante-editar.html',
     styleUrl: './nao-votante-editar.scss'
 })
