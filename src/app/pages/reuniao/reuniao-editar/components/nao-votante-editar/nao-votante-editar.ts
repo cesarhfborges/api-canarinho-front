@@ -61,7 +61,7 @@ export class NaoVotanteEditar implements OnInit {
                 return;
             }
 
-            let res = undefined;
+            let res = null;
 
             if (this.dialogConfig.data?.opcao?.id) {
                 res = await lastValueFrom(this.bloqueioVotoService.update(this.reuniaoId(), this.pautaId(), this.dialogConfig.data.opcao.id, this.form.value));
