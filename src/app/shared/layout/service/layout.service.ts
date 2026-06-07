@@ -92,7 +92,7 @@ export class LayoutService {
         }
     }
 
-    onMenuToggle() {
+    onMenuToggle(): void {
         if (this.isOverlay()) {
             this.layoutState.update((prev) => ({ ...prev, overlayMenuActive: !this.layoutState().overlayMenuActive }));
         }
@@ -104,19 +104,19 @@ export class LayoutService {
         }
     }
 
-    showConfigSidebar() {
+    showConfigSidebar(): void {
         this.layoutState.update((prev) => ({ ...prev, configSidebarVisible: true }));
     }
 
-    hideConfigSidebar() {
+    hideConfigSidebar(): void {
         this.layoutState.update((prev) => ({ ...prev, configSidebarVisible: false }));
     }
 
-    isDesktop() {
+    isDesktop(): boolean {
         return window.innerWidth > 991;
     }
 
-    isMobile() {
+    isMobile(): boolean {
         return !this.isDesktop();
     }
 }

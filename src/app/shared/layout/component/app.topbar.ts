@@ -99,7 +99,7 @@ export class AppTopbar {
         {
             label: 'Sair',
             icon: 'pi pi-sign-out',
-            command: () => {
+            command: (): void => {
                 this.logout();
             }
         }
@@ -111,7 +111,7 @@ export class AppTopbar {
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
 
-    toggleDarkMode() {
+    toggleDarkMode(): void {
         this.layoutService.layoutConfig.update((state) => ({
             ...state,
             darkTheme: !state.darkTheme
@@ -139,7 +139,9 @@ export class AppTopbar {
                         this.messageService.add({ severity: 'success', summary: 'Atenção', detail: 'Logout efetuado com sucesso.' });
                         void this._router.navigate(['/login']);
                     },
-                    error: (err) => {}
+                    error: (err) => {
+                        console.log(err);
+                    }
                 });
             }
             // reject: () => {

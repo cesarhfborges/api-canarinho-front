@@ -34,6 +34,7 @@ export class AuthService {
     public logout(): Observable<any> {
         return this.http.post<any>(`${environment.apiUrl}/auth/logout`, {}).pipe(
             tap((response) => {
+                console.log(response);
                 this.sessionService.destroySession();
             })
         );

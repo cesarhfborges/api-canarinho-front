@@ -2,7 +2,8 @@ import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { SessionService } from '@/app/core/services/session-service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const authGuard: CanActivateFn = (_route, _state) => {
     const sessionService = inject(SessionService);
     const router = inject(Router);
 

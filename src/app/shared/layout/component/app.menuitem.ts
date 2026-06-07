@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RippleModule } from 'primeng/ripple';
@@ -13,7 +13,14 @@ import { LayoutService } from '@/app/shared/layout/service/layout.service';
             <div class="layout-menuitem-root-text">{{ item().label }}</div>
         }
         @if ((!hasRouterLink() || hasChildren()) && isVisible()) {
-            <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" tabindex="0" pRipple>
+            <a
+                [attr.href]="item().url"
+                (click)="itemClick($event)"
+                [ngClass]="item().class"
+                [attr.target]="item().target"
+                tabindex="0"
+                pRipple
+            >
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
                 <span class="layout-menuitem-text">{{ item().label }}</span>
                 @if (hasChildren()) {
@@ -27,7 +34,14 @@ import { LayoutService } from '@/app/shared/layout/service/layout.service';
                 [ngClass]="item().class"
                 [routerLink]="item().routerLink"
                 routerLinkActive="active-route"
-                [routerLinkActiveOptions]="item().routerLinkActiveOptions || { paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
+                [routerLinkActiveOptions]="
+                    item().routerLinkActiveOptions || {
+                        paths: 'exact',
+                        queryParams: 'ignored',
+                        matrixParams: 'ignored',
+                        fragment: 'ignored'
+                    }
+                "
                 [fragment]="item().fragment"
                 [queryParamsHandling]="item().queryParamsHandling"
                 [preserveFragment]="item().preserveFragment"
@@ -47,9 +61,19 @@ import { LayoutService } from '@/app/shared/layout/service/layout.service';
             </a>
         }
         @if (hasChildren() && isVisible() && (root() || isActive())) {
-            <ul [animate.enter]="initialized() ? 'p-submenu-enter' : ''" [animate.leave]="'p-submenu-leave'" [class.layout-root-submenulist]="root()">
+            <ul
+                [animate.enter]="initialized() ? 'p-submenu-enter' : ''"
+                [animate.leave]="'p-submenu-leave'"
+                [class.layout-root-submenulist]="root()"
+            >
                 @for (child of item().items; track child?.label) {
-                    <li app-menuitem [item]="child" [parentPath]="fullPath()" [root]="false" [class]="child['badgeClass']"></li>
+                    <li
+                        app-menuitem
+                        [item]="child"
+                        [parentPath]="fullPath()"
+                        [root]="false"
+                        [class]="child['badgeClass']"
+                    ></li>
                 }
             </ul>
         }
@@ -92,7 +116,7 @@ import { LayoutService } from '@/app/shared/layout/service/layout.service';
         `
     ]
 })
-export class AppMenuitem {
+export class AppMenuitem implements OnInit, AfterViewInit {
     layoutService = inject(LayoutService);
 
     router = inject(Router);
@@ -137,16 +161,16 @@ export class AppMenuitem {
         });
     }
 
-    ngOnInit() {
-        if (this.item()?.routerLink) {
-            this.updateActiveStateFromRoute();
-        }
-    }
-
     ngAfterViewInit() {
         setTimeout(() => {
             this.initialized.set(true);
         });
+    }
+
+    ngOnInit() {
+        if (this.item()?.routerLink) {
+            this.updateActiveStateFromRoute();
+        }
     }
 
     updateActiveStateFromRoute() {
