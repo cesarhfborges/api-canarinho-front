@@ -1,6 +1,6 @@
 <div class="min-h-screen flex flex-col gap-4">
     @if (reuniao(); as reuniao) {
-        <p-card class="border border-slate-200 bg-white shadow-sm">
+        <p-card class="dark:border dark:border-gray-500/40 shadow-sm">
             <ng-template #title>
                 <h2>{{ reuniao.titulo }} #{{ id }}</h2>
                 <p class="text-2xs">{{ reuniao.dataHoraInicio | date }}</p>
