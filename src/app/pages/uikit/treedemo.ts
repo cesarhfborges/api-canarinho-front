@@ -18,7 +18,7 @@ import { NodeService } from '@/app/pages/service/node.service';
 
         <div class="card">
             <div class="font-semibold text-xl mb-4">TreeTable</div>
-            <p-treetable [value]="treeTableValue()" [columns]="cols" selectionMode="checkbox" [(selectionKeys)]="selectedTreeTableValue" dataKey="key" [scrollable]="true" [tableStyle]="{ 'min-width': '50rem' }">
+            <p-treeTable [value]="treeTableValue()" [columns]="cols" selectionMode="checkbox" [(selectionKeys)]="selectedTreeTableValue" dataKey="key" [scrollable]="true" [tableStyle]="{ 'min-width': '50rem' }">
                 <ng-template #header let-columns>
                     <tr>
                         <th *ngFor="let col of columns">
@@ -37,7 +37,7 @@ import { NodeService } from '@/app/pages/service/node.service';
                         </td>
                     </tr>
                 </ng-template>
-            </p-treetable>
+            </p-treeTable>
         </div>
     `,
     providers: [NodeService]

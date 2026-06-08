@@ -1,20 +1,20 @@
 import { Component, inject, input, OnInit } from '@angular/core';
 import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ICONES_SISTEMA } from '@/app/shared/icones-sistema';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Textarea } from 'primeng/textarea';
 import { Select } from 'primeng/select';
-import { ICONES_SISTEMA } from '@/app/shared/icones-sistema';
 import { Icone } from '@/app/shared/models/icone';
 import { OpcaoVotoService } from '@/app/core/services/opcao-voto-service';
 import { lastValueFrom } from 'rxjs';
-import { RadioButton } from 'primeng/radiobutton';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { TipoVoto } from '@/app/core/models/opcao-voto';
 
 @Component({
     selector: 'app-opcoes-editar',
-    imports: [Button, InputText, ReactiveFormsModule, Textarea, Select, RadioButton],
+    imports: [Button, InputText, ReactiveFormsModule, Textarea, Select, RadioButtonModule],
     templateUrl: './opcoes-editar.html',
     styleUrl: './opcoes-editar.scss'
 })

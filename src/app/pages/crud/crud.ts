@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -58,7 +58,14 @@ interface ExportColumn {
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
                 <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                <p-button
+                    severity="secondary"
+                    label="Delete"
+                    icon="pi pi-trash"
+                    outlined
+                    (onClick)="deleteSelectedProducts()"
+                    [disabled]="!selectedProducts || !selectedProducts.length"
+                />
             </ng-template>
 
             <ng-template #end>
@@ -128,7 +135,12 @@ interface ExportColumn {
                     <td style="min-width: 12rem">{{ product.code }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
                     <td>
-                        <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.name" style="width: 64px" class="rounded" />
+                        <img
+                            [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image"
+                            [alt]="product.name"
+                            style="width: 64px"
+                            class="rounded"
+                        />
                     </td>
                     <td>{{ product.price | currency: 'USD' }}</td>
                     <td>{{ product.category }}</td>
@@ -139,8 +151,20 @@ interface ExportColumn {
                         <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" />
                     </td>
                     <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                        <p-button
+                            icon="pi pi-pencil"
+                            class="mr-2"
+                            [rounded]="true"
+                            [outlined]="true"
+                            (click)="editProduct(product)"
+                        />
+                        <p-button
+                            icon="pi pi-trash"
+                            severity="danger"
+                            [rounded]="true"
+                            [outlined]="true"
+                            (click)="deleteProduct(product)"
+                        />
                     </td>
                 </tr>
             </ng-template>
@@ -149,7 +173,12 @@ interface ExportColumn {
         <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
-                    <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.image" class="block m-auto pb-4" *ngIf="product.image" />
+                    <img
+                        [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image"
+                        [alt]="product.image"
+                        class="block m-auto pb-4"
+                        *ngIf="product.image"
+                    />
                     <div>
                         <label for="name" class="block font-bold mb-3">Name</label>
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
@@ -157,31 +186,67 @@ interface ExportColumn {
                     </div>
                     <div>
                         <label for="description" class="block font-bold mb-3">Description</label>
-                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+                        <textarea
+                            id="description"
+                            pTextarea
+                            [(ngModel)]="product.description"
+                            required
+                            rows="3"
+                            cols="20"
+                            fluid
+                        ></textarea>
                     </div>
 
                     <div>
                         <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                        <p-select [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
+                        <p-select
+                            [(ngModel)]="product.inventoryStatus"
+                            inputId="inventoryStatus"
+                            [options]="statuses"
+                            optionLabel="label"
+                            optionValue="label"
+                            placeholder="Select a Status"
+                            fluid
+                        />
                     </div>
 
                     <div>
                         <span class="block font-bold mb-4">Category</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category" />
+                                <p-radiobutton
+                                    id="category1"
+                                    name="category"
+                                    value="Accessories"
+                                    [(ngModel)]="product.category"
+                                />
                                 <label for="category1">Accessories</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category" />
+                                <p-radiobutton
+                                    id="category2"
+                                    name="category"
+                                    value="Clothing"
+                                    [(ngModel)]="product.category"
+                                />
                                 <label for="category2">Clothing</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category" />
+                                <p-radiobutton
+                                    id="category3"
+                                    name="category"
+                                    value="Electronics"
+                                    [(ngModel)]="product.category"
+                                />
                                 <label for="category3">Electronics</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category" />
+                                <p-radiobutton
+                                    id="category4"
+                                    name="category"
+                                    value="Fitness"
+                                    [(ngModel)]="product.category"
+                                />
                                 <label for="category4">Fitness</label>
                             </div>
                         </div>
@@ -190,7 +255,14 @@ interface ExportColumn {
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="price" class="block font-bold mb-3">Price</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
+                            <p-inputnumber
+                                id="price"
+                                [(ngModel)]="product.price"
+                                mode="currency"
+                                currency="USD"
+                                locale="en-US"
+                                fluid
+                            />
                         </div>
                         <div class="col-span-6">
                             <label for="quantity" class="block font-bold mb-3">Quantity</label>
@@ -229,11 +301,9 @@ export class Crud implements OnInit {
 
     cols!: Column[];
 
-    constructor(
-        private productService: ProductService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) {}
+    private productService = inject(ProductService);
+    private messageService = inject(MessageService);
+    private confirmationService = inject(ConfirmationService);
 
     exportCSV() {
         this.dt.exportCSV();

@@ -8,11 +8,23 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
 import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.floatingconfigurator';
+import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, ReactiveFormsModule],
+    imports: [
+        ButtonModule,
+        CheckboxModule,
+        InputTextModule,
+        PasswordModule,
+        FormsModule,
+        RouterModule,
+        RippleModule,
+        AppFloatingConfigurator,
+        ReactiveFormsModule,
+        Logotipo
+    ],
     templateUrl: './login.html'
 })
 export class Login {
