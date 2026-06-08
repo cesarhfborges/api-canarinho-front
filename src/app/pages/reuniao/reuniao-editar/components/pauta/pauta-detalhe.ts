@@ -99,7 +99,6 @@ export class PautaDetalhe implements OnInit {
     protected async confirmarExcluir(id: number): Promise<void> {
         console.log('excluir opção', id);
         this.confirmationService.confirm({
-            // target: event.target as EventTarget,
             header: 'Atenção',
             message: 'Deseja excluir este registro?',
             icon: 'pi pi-info-circle',
