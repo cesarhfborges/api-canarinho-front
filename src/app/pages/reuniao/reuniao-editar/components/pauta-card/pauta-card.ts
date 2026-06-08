@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { Pauta } from '@/app/core/models/pauta';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
@@ -20,6 +20,8 @@ export class PautaCard {
     readonly onEditar = output<Pauta>();
 
     readonly onExcluir = output<number>();
+
+    protected aberto = signal<boolean>(false);
 
     protected selecionar(): void {
         this.onSelecionar.emit(this.pauta());

@@ -5,11 +5,11 @@
     (keydown.enter)="selecionar()"
     (keydown.space)="selecionar(); $event.preventDefault()"
     [class]="
-        'group cursor-pointer rounded-lg border p-4 transition-all ' +
+        'group cursor-pointer rounded-lg border p-4 transition-[box-shadow,background-color,transform] duration-200 ease-out active:translate-y-1px focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gray-500 focus-visible:shadow-[2px_2px_8px_1px_rgba(0,0,0,0.4)] hover:outline-2 hover:-outline-offset-2 hover:outline-gray-500 hover:shadow-[2px_2px_8px_1px_rgba(0,0,0,0.4)] ' +
         (
             estaSelecionada()
-                ? 'border-primary bg-primary/10 hover:bg-primary/20 shadow-sm'
-                : 'border-gray-500/40 hover:border-primary hover:bg-primary/20'
+                ? 'border-primary bg-primary/10 hover:bg-primary/30 shadow-sm'
+                : 'border-gray-500/40 hover:border-gray-500 hover:bg-gray-400/20'
         )
     ">
 
@@ -60,10 +60,8 @@
     </p>
 
     <div
-        class="flex border-t border-dashed pt-3 transition-colors"
-        [class.border-primary]="estaSelecionada()"
-        [class.border-surface-200]="!estaSelecionada()"
-        [class.group-hover:border-primary]="!estaSelecionada()"
+        class="flex border-t border-dashed pt-3 transition-colors duration-200 group-hover:border-surface-700 dark:group-hover:border-surface-400"
+        [class]="estaSelecionada() ? 'border-primary' : 'border-zinc-400'"
     >
         <div class="flex-1">
             <p-button
@@ -83,18 +81,18 @@
         </div>
         <div class="flex-1 flex justify-end">
             <p-button
-                icon="pi pi-pencil"
+                [icon]="aberto() ? 'pi pi-lock-open' : 'pi pi-lock'"
                 severity="info"
                 [text]="true"
                 size="small"
-                (onClick)="editar($event)"
+                (click)="aberto.set(!aberto())"
             />
             <p-button
-                icon="pi pi-trash"
-                severity="danger"
+                [icon]="aberto() ? 'pi pi-lock' : 'pi pi-unlock'"
+                [severity]="aberto() ? 'info' : 'danger'"
                 [text]="true"
                 size="small"
-                (onClick)="excluir($event)"
+                (click)="aberto.set(!aberto())"
             />
         </div>
     </div>
