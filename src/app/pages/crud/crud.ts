@@ -173,16 +173,19 @@ interface ExportColumn {
         <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
-                    <img
-                        [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image"
-                        [alt]="product.image"
-                        class="block m-auto pb-4"
-                        *ngIf="product.image"
-                    />
+                    @if (product.image) {
+                        <img
+                            [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image"
+                            [alt]="product.image"
+                            class="block m-auto pb-4"
+                        />
+                    }
                     <div>
                         <label for="name" class="block font-bold mb-3">Name</label>
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
+                        @if (submitted && !product.name) {
+                            <small class="text-red-500">Name is required.</small>
+                        }
                     </div>
                     <div>
                         <label for="description" class="block font-bold mb-3">Description</label>
@@ -214,7 +217,7 @@ interface ExportColumn {
                         <span class="block font-bold mb-4">Category</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton
+                                <p-radio-button
                                     id="category1"
                                     name="category"
                                     value="Accessories"
@@ -223,7 +226,7 @@ interface ExportColumn {
                                 <label for="category1">Accessories</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton
+                                <p-radio-button
                                     id="category2"
                                     name="category"
                                     value="Clothing"
@@ -232,7 +235,7 @@ interface ExportColumn {
                                 <label for="category2">Clothing</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton
+                                <p-radio-button
                                     id="category3"
                                     name="category"
                                     value="Electronics"
@@ -241,7 +244,7 @@ interface ExportColumn {
                                 <label for="category3">Electronics</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton
+                                <p-radio-button
                                     id="category4"
                                     name="category"
                                     value="Fitness"
@@ -255,7 +258,7 @@ interface ExportColumn {
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="price" class="block font-bold mb-3">Price</label>
-                            <p-inputnumber
+                            <p-input-number
                                 id="price"
                                 [(ngModel)]="product.price"
                                 mode="currency"
@@ -266,7 +269,7 @@ interface ExportColumn {
                         </div>
                         <div class="col-span-6">
                             <label for="quantity" class="block font-bold mb-3">Quantity</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+                            <p-input-number id="quantity" [(ngModel)]="product.quantity" fluid />
                         </div>
                     </div>
                 </div>
@@ -405,8 +408,8 @@ export class Crud implements OnInit {
 
     createId(): string {
         let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 5; i++) {
             id += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return id;
@@ -427,7 +430,7 @@ export class Crud implements OnInit {
 
     saveProduct() {
         this.submitted = true;
-        let _products = this.products();
+        const _products = this.products();
         if (this.product.name?.trim()) {
             if (this.product.id) {
                 _products[this.findIndexById(this.product.id)] = this.product;

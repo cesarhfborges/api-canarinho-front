@@ -47,7 +47,7 @@ export class OpcoesEditar implements OnInit {
 
     ngOnInit(): void {
         console.log('OpcoesEditar', this.dialogConfig.data);
-        if (!!this.dialogConfig.data?.opcao) {
+        if (this.dialogConfig.data?.opcao) {
             this.form.patchValue(this.dialogConfig.data.opcao);
         }
     }
@@ -65,7 +65,7 @@ export class OpcoesEditar implements OnInit {
                 return;
             }
 
-            let res = undefined;
+            let res;
 
             if (this.dialogConfig.data?.opcao?.id) {
                 res = await lastValueFrom(

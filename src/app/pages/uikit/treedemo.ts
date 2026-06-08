@@ -18,23 +18,39 @@ import { NodeService } from '@/app/pages/service/node.service';
 
         <div class="card">
             <div class="font-semibold text-xl mb-4">TreeTable</div>
-            <p-treeTable [value]="treeTableValue()" [columns]="cols" selectionMode="checkbox" [(selectionKeys)]="selectedTreeTableValue" dataKey="key" [scrollable]="true" [tableStyle]="{ 'min-width': '50rem' }">
+            <p-treeTable
+                [value]="treeTableValue()"
+                [columns]="cols"
+                selectionMode="checkbox"
+                [(selectionKeys)]="selectedTreeTableValue"
+                dataKey="key"
+                [scrollable]="true"
+                [tableStyle]="{ 'min-width': '50rem' }"
+            >
                 <ng-template #header let-columns>
                     <tr>
-                        <th *ngFor="let col of columns">
-                            {{ col.header }}
-                        </th>
+                        @for (col of columns; track $index) {
+                            <th>
+                                {{ col.header }}
+                            </th>
+                        }
                     </tr>
                 </ng-template>
                 <ng-template #body let-rowNode let-rowData="rowData" let-columns="columns">
                     <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
-                        <td *ngFor="let col of columns; let i = index">
-                            <span class="flex items-center gap-2">
-                                <p-treeTableToggler [rowNode]="rowNode" *ngIf="i === 0" />
-                                <p-treeTableCheckbox [value]="rowNode" *ngIf="i === 0" />
-                                {{ rowData[col.field] }}
-                            </span>
-                        </td>
+                        @for (col of columns; let i = $index; track $index) {
+                            <td>
+                                <span class="flex items-center gap-2">
+                                    @if (i === 0) {
+                                        <p-treeTableToggler [rowNode]="rowNode"/>
+                                    }
+                                    @if (i === 0) {
+                                        <p-treeTableCheckbox [value]="rowNode"/>
+                                    }
+                                    {{ rowData[col.field] }}
+                                </span>
+                            </td>
+                        }
                     </tr>
                 </ng-template>
             </p-treeTable>
