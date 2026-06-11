@@ -12,6 +12,7 @@ import { appRoutes } from './app.routes';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { provideHighlightOptions } from 'ngx-highlightjs';
 import { DialogService } from 'primeng/dynamicdialog';
+import { SessionService } from '@/app/core/services/session-service';
 
 registerLocaleData(localePt);
 
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
         DialogService,
         MessageService,
         ConfirmationService,
+        SessionService,
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
         {
