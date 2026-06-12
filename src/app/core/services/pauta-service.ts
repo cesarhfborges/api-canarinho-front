@@ -15,7 +15,7 @@ export class PautaService {
     }
 
     public get(reuniaoId: number, id: number): Observable<Pauta> {
-        return this.http.get<Pauta>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas${id}`);
+        return this.http.get<Pauta>(`${environment.apiUrl}/reunioes/${reuniaoId}/pautas/${id}`);
     }
 
     public update(reuniaoId: number, id: number, data: any): Observable<Pauta> {

@@ -11,6 +11,7 @@ import { Card } from 'primeng/card';
 import { OpcoesVoto } from '@/app/pages/reuniao/reuniao-editar/components/opcoes-voto/opcoes-voto';
 import { NaoVotantes } from '@/app/pages/reuniao/reuniao-editar/components/nao-votantes/nao-votantes';
 import { DatePipe } from '@angular/common';
+import { ReuniaoSocketService } from '@/app/core/services/reuniao-socket-service';
 
 @Component({
     selector: 'app-reuniao-editar',
@@ -26,11 +27,13 @@ export class ReuniaoEditar implements OnInit {
     protected pautaSelecionada = signal<Pauta | null>(null);
 
     private readonly reuniaoService = inject(ReuniaoService);
+    private readonly socket = inject(ReuniaoSocketService);
 
     async ngOnInit(): Promise<void> {
         if (this.id) {
             await this.carregarReuniao(this.id);
         }
+        this.socket.connect();
     }
 
     protected selecionarPauta(pauta: Pauta): void {

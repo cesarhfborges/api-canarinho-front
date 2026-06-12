@@ -2,7 +2,7 @@ import { Component, computed, DestroyRef, inject, input, OnInit, output, signal 
 
 import { DatePipe, DecimalPipe } from '@angular/common';
 
-import { interval, lastValueFrom, startWith } from 'rxjs';
+import { firstValueFrom, interval, lastValueFrom, startWith } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Button } from 'primeng/button';
@@ -13,6 +13,9 @@ import { DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Pauta } from '@/app/core/models/pauta';
 import { VotacaoService } from '@/app/core/services/votacao-service';
 import { AbrirVotacao } from '@/app/pages/reuniao/reuniao-editar/components/abrir-votacao/abrir-votacao';
+import { ReuniaoSocketService } from '@/app/core/services/reuniao-socket-service';
+import { PautaService } from '@/app/core/services/pauta-service';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'app-pauta-card',
@@ -64,6 +67,8 @@ export class PautaCard implements OnInit {
     private readonly dialogService = inject(DialogService);
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
+    private readonly pautaService = inject(PautaService);
+    private readonly socket = inject(ReuniaoSocketService);
 
     ngOnInit(): void {
         interval(1000)
@@ -71,6 +76,19 @@ export class PautaCard implements OnInit {
             .subscribe(() => {
                 this.agora.set(Date.now());
             });
+        this.socket
+            .subscribe(`/topic/reunioes/${this.reuniaoId()}`)
+            .pipe(filter((evento: any) => evento.pautaId === this.pauta().id))
+            .subscribe((evento) => {
+                console.log(evento);
+                void this.carregarPauta();
+            });
+    }
+
+    async carregarPauta(): Promise<void> {
+        const pautas = await firstValueFrom(this.pautaService.get(this.reuniaoId(), this.pauta().id));
+        console.log('carregarPauta: ', pautas);
+        // this.pauta = pauta;
     }
 
     async fecharVotacao(event: Event): Promise<void> {
