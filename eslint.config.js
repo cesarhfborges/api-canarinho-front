@@ -22,6 +22,12 @@ module.exports = defineConfig([
             '@typescript-eslint/no-inferrable-types': 'off',
             '@typescript-eslint/explicit-function-return-type': 'off',
             '@angular-eslint/no-output-on-prefix': 'off',
+            '@angular-eslint/template/label-has-associated-control': [
+                'warn',
+                {
+                    controlComponents: ['p-select', 'p-dropdown']
+                }
+            ],
             '@angular-eslint/directive-selector': [
                 'error',
                 {

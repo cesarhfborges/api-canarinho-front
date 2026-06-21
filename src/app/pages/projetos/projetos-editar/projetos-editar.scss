@@ -1,0 +1,37 @@
+:host ::ng-deep {
+    p-tree {
+        padding: 0;
+        .p-tree-root {
+            ul {
+                //background-color: red;
+                gap: 1rem;
+
+                li {
+                    div.p-tree-node-content {
+                        padding-left: 1rem;
+                        background: var(--p-button-secondary-background);
+
+                        span.p-tree-node-label {
+                            flex-grow: 1;
+                        }
+                    }
+                    ul {
+                        //background-color: green;
+                        //overflow: hidden;
+                        //animation: expandir 0.5s ease-in-out forwards;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@keyframes expandir {
+    from {
+        height: 0;
+    }
+    to {
+        /* Troque pelo tamanho final desejado */
+        min-height: 10px;
+    }
+}

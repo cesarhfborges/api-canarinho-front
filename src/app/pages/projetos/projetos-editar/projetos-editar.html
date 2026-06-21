@@ -1,0 +1,63 @@
+<div class="flex flex-col gap-4">
+    <p-card header="Simple Card" class="flex-none">
+        <ng-template #title>
+            API Endpoint {{id}}
+        </ng-template>
+        <p class="m-0">
+            http://localhost:4200/api/v1/:project
+        </p>
+        <ng-template #footer>
+            <div class="flex gap-4 mt-1">
+                <p-button label="Novo endpoint" severity="info" />
+                <p-button label="Gerar Todos" severity="secondary" />
+                <p-button label="Reset" severity="secondary" />
+            </div>
+        </ng-template>
+    </p-card>
+    <div class="card flex-auto">
+        <p-tree [value]="files()" class="w-full">
+            <ng-template let-node pTemplate="default">
+                <div
+                    class="flex items-center justify-between gap-4 rounded-md px-3 py-2 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                >
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <span class="font-medium truncate">
+                            {{ node.key }} - {{ node.label }}
+<!--                            - &#123; Qtd.: {{node?.data?.qtd ?? 0}} &#125;-->
+                        </span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <p-button
+                            [text]="false"
+                            [outlined]="true"
+                            icon="pi pi-file-export"
+                            pTooltip="Dados"
+                            tooltipPosition="top"
+                            severity="secondary"
+                        />
+
+                        <p-button
+                            [text]="false"
+                            [outlined]="true"
+                            icon="pi pi-pen-to-square"
+                            pTooltip="Editar"
+                            tooltipPosition="top"
+                            severity="info"
+                            (click)="editar(node.data)"
+                        />
+
+                        <p-button
+                            [text]="false"
+                            [outlined]="true"
+                            icon="pi pi-trash"
+                            pTooltip="Exluir"
+                            tooltipPosition="top"
+                            severity="danger"
+                        />
+                    </div>
+                </div>
+            </ng-template>
+        </p-tree>
+    </div>
+</div>

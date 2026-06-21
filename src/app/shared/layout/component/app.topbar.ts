@@ -9,6 +9,7 @@ import { TieredMenu } from 'primeng/tieredmenu';
 import { Ripple } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
+import { environment } from '@/environments/environment';
 
 @Component({
     selector: 'app-topbar',
@@ -27,9 +28,63 @@ import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
             </div>
 
             <div class="layout-topbar-actions">
+                @if (!production) {
+                    <div
+                        class="flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-100 px-3 py-2 dark:bg-red-950/40"
+                    >
+                        <span
+                            class="text-[0.8rem] leading-[0.8rem] font-extrabold uppercase tracking-normal text-red-700 dark:text-red-300"
+                        >
+                            Development
+                        </span>
+
+                        <span
+                            class="flex min-w-14 items-center justify-center rounded-md bg-red-600 px-2 py-1 text-xs font-extrabold text-white sm:hidden"
+                        >
+                            MOB
+                        </span>
+
+                        <span
+                            class="hidden min-w-14 items-center justify-center rounded-md bg-blue-600 px-2 py-1 text-xs font-extrabold text-white sm:flex md:hidden"
+                        >
+                            SM
+                        </span>
+
+                        <span
+                            class="hidden min-w-14 items-center justify-center rounded-md bg-cyan-600 px-2 py-1 text-xs font-extrabold text-white md:flex lg:hidden"
+                        >
+                            MD
+                        </span>
+
+                        <span
+                            class="hidden min-w-14 items-center justify-center rounded-md bg-amber-600 px-2 py-1 text-xs font-extrabold text-white lg:flex xl:hidden"
+                        >
+                            LG
+                        </span>
+
+                        <span
+                            class="hidden min-w-14 items-center justify-center rounded-md bg-green-600 px-2 py-1 text-xs font-extrabold text-white xl:flex 2xl:hidden"
+                        >
+                            XL
+                        </span>
+
+                        <span
+                            class="hidden min-w-14 items-center justify-center rounded-md bg-purple-600 px-2 py-1 text-xs font-extrabold text-white 2xl:flex"
+                        >
+                            2XL
+                        </span>
+                    </div>
+                }
+
                 <div class="layout-config-menu">
                     <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
-                        <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
+                        <i
+                            [ngClass]="{
+                                'pi ': true,
+                                'pi-moon': layoutService.isDarkTheme(),
+                                'pi-sun': !layoutService.isDarkTheme()
+                            }"
+                        ></i>
                     </button>
                     <div class="relative">
                         <button
@@ -63,15 +118,18 @@ import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
                 <!--                    </button>-->
                 <!--                </div>-->
                 <!--            </div>-->
-
                 <button type="button" class="layout-topbar-action" (click)="menu.toggle($event)">
                     <i class="pi pi-user"></i>
                     <span>Profile</span>
                 </button>
                 <p-tieredMenu #menu [model]="items" [popup]="true">
                     <ng-template #item let-item>
-                        <a pRipple class="flex items-center px-4 py-3 cursor-pointer" [class]="item.linkClass"
-                           [routerLink]="item?.routerLink">
+                        <a
+                            pRipple
+                            class="flex items-center px-4 py-3 cursor-pointer"
+                            [class]="item.linkClass"
+                            [routerLink]="item?.routerLink"
+                        >
                             <span [ngClass]="item.icon" class="mr-2"></span>
                             <span class="ms-2">{{ item.label }}</span>
                             <!-- <p-badge *ngIf="item.badge" class="ms-auto" [value]="item.badge" />-->
@@ -107,6 +165,9 @@ export class AppTopbar {
 
     layoutService = inject(LayoutService);
     authService = inject(AuthService);
+
+    protected production = environment.production;
+
     private _router = inject(Router);
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
@@ -136,7 +197,11 @@ export class AppTopbar {
             accept: () => {
                 this.authService.logout().subscribe({
                     next: () => {
-                        this.messageService.add({ severity: 'success', summary: 'Atenção', detail: 'Logout efetuado com sucesso.' });
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Atenção',
+                            detail: 'Logout efetuado com sucesso.'
+                        });
                         void this._router.navigate(['/login']);
                     },
                     error: (err) => {

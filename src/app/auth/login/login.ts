@@ -36,8 +36,8 @@ export class Login {
     public errorMessage = signal<string | null>(null);
 
     public loginForm = this.fb.group({
-        username: ['admin@admin.com', [Validators.required, Validators.email]],
-        password: ['admin123', [Validators.required, Validators.minLength(6)]],
+        username: ['admin', [Validators.required]],
+        password: ['canarinho1234', [Validators.required, Validators.minLength(6)]],
         remember: [false, [Validators.required]]
     });
 
@@ -53,7 +53,8 @@ export class Login {
         const credentials = this.loginForm.getRawValue();
 
         this.authService.login(credentials).subscribe({
-            next: () => {
+            next: (response: any) => {
+                console.log(response);
                 void this.router.navigate(['/home']);
             },
             error: (err) => {

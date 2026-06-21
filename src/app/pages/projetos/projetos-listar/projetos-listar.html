@@ -1,0 +1,45 @@
+<p-card>
+    <p-data-view [value]="listaProjetos()">
+        <ng-template #list let-items>
+            <div class="grid grid-cols-12 gap-4 grid-nogutter">
+                @for (item of items; track item.id; let first = $first) {
+                    <div
+                        [class]="{
+                            'col-span-12': item,
+                            'border-t': !first,
+                            'border-surface-200': !first,
+                            'dark:border-surface-700': !first
+                        }"
+                    >
+                        <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 p-6 gap-6">
+                            <div class="flex flex-row flex-auto items-center gap-2">
+                                <div
+                                    class="h-[50px] w-[50px] flex items-center gap-2 justify-center rounded-full bg-surface-500 dark:bg-surface-500"
+                                >
+                                    <span class="text-surface-0 dark:text-surface-0 font-medium text-sm">
+                                        {{ item.name.charAt(0) }}
+                                    </span>
+                                </div>
+                                <div class="flex-auto text-lg font-medium text-surface-900 dark:text-surface-0">
+                                    <p class="m-0! p-0!">{{ item.name }}</p>
+                                    <p class="m-0! p-0!">{{ item.slug }}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-8">
+                                <div class="flex justify-between md:justify-end md:flex-row gap-2">
+                                    <p-button [outlined]="true" icon="pi pi-ellipsis-v" />
+                                    <p-button
+                                        class="whitespace-nowrap"
+                                        icon="pi pi-folder-open"
+                                        label="Abrir"
+                                        [routerLink]="['/projetos', item.id]"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </ng-template>
+    </p-data-view>
+</p-card>

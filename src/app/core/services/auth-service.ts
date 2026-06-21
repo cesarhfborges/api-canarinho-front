@@ -11,9 +11,16 @@ export interface LoginCredentials {
 }
 
 interface LoginResponse {
-    auth_token: string;
-    expires_in: Date;
-    type: string;
+    success: boolean;
+    message: string;
+    user: {
+        id: number;
+        name: string;
+        username: string;
+        email: string;
+        created_at: Date;
+        updated_at: Date;
+    };
 }
 
 @Injectable({
@@ -24,15 +31,15 @@ export class AuthService {
     private sessionService = inject(SessionService);
 
     public login(credentials: LoginCredentials): Observable<LoginResponse> {
-        return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
-            tap((response) => {
-                this.sessionService.createSession(response.auth_token);
+        return this.http.post<LoginResponse>(`${environment.apiUrl}/admin/login`, credentials).pipe(
+            tap(() => {
+                this.sessionService.createSession();
             })
         );
     }
 
     public logout(): Observable<any> {
-        return this.http.post<any>(`${environment.apiUrl}/auth/logout`, {}).pipe(
+        return this.http.post<any>(`${environment.apiUrl}/admin/logout`, {}).pipe(
             tap((response) => {
                 console.log(response);
                 this.sessionService.destroySession();

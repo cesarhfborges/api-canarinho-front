@@ -1,10 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { SessionService } from '@/app/core/services/session-service';
 
 export const headersInterceptor: HttpInterceptorFn = (req, next) => {
-    const sessionService = inject(SessionService);
-    const token = sessionService.getToken();
+    // const sessionService = inject(SessionService);
+    // const token = sessionService.getToken();
 
     const headers: Record<string, string> = {
         Application: 'web',
@@ -16,9 +14,9 @@ export const headersInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
     // Se houver uma sessão ativa com token, anexa ao cabeçalho
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
+    // if (token) {
+    //     headers['Authorization'] = `Bearer ${token}`;
+    // }
 
     const clonedReq = req.clone({
         setHeaders: headers,

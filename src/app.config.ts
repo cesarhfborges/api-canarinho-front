@@ -28,6 +28,7 @@ export const appConfig: ApplicationConfig = {
             provide: DATE_PIPE_DEFAULT_OPTIONS,
             useValue: { dateFormat: 'dd/MM/yyyy HH:mm:ss' },
         },
+        provideAppInitializer(initializeAppFactory),
         provideHttpClient(withInterceptors([headersInterceptor, errorInterceptor])),
         provideRouter(
             appRoutes,
@@ -36,7 +37,7 @@ export const appConfig: ApplicationConfig = {
                 scrollPositionRestoration: 'enabled'
             }),
             withComponentInputBinding(),
-            withEnabledBlockingInitialNavigation()
+            // withEnabledBlockingInitialNavigation()
         ),
         provideHttpClient(withFetch()),
         provideZonelessChangeDetection(),
@@ -49,7 +50,6 @@ export const appConfig: ApplicationConfig = {
                 startFrom: 0
             },
             highlightOptions: {}
-        }),
-        provideAppInitializer(initializeAppFactory)
+        })
     ]
 };

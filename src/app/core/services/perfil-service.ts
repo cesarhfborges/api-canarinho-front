@@ -6,8 +6,10 @@ import { environment } from '@/environments/environment';
 export interface UserProfile {
     id: number;
     name: string;
+    username: string;
     email: string;
-    // Adicione outros campos do seu backend aqui
+    created_at: Date;
+    updated_at: Date;
 }
 
 @Injectable({
@@ -18,7 +20,9 @@ export class PerfilService {
     private readonly http = inject(HttpClient);
 
     public getPerfil(): Observable<UserProfile> {
-        return this.http.get<UserProfile>(`${environment.apiUrl}/perfil`).pipe(tap((profile) => this.userProfile.set(profile)));
+        return this.http
+            .get<UserProfile>(`${environment.apiUrl}/admin/me`)
+            .pipe(tap((profile) => this.userProfile.set(profile)));
     }
 
     public clearPerfil(): void {

@@ -1,24 +1,22 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
 })
 export class SessionService {
-    private tokenSignal = signal<string | null>(localStorage.getItem('auth_token'));
+    private readonly _authenticated = signal(false);
 
-    public hasActiveSession = computed(() => !!this.tokenSignal());
+    readonly authenticated = this._authenticated.asReadonly();
 
-    public getToken(): string | null {
-        return this.tokenSignal();
+    public isAuthenticated(): boolean {
+        return this._authenticated();
     }
 
-    public createSession(token: string): void {
-        localStorage.setItem('auth_token', token);
-        this.tokenSignal.set(token);
+    public createSession(): void {
+        this._authenticated.set(true);
     }
 
     public destroySession(): void {
-        localStorage.removeItem('auth_token');
-        this.tokenSignal.set(null);
+        this._authenticated.set(false);
     }
 }
