@@ -46,7 +46,7 @@ export class ProjetosEditar implements OnInit {
     loadingEndpoints = signal<Record<number, boolean>>({});
     files = signal<TreeNode[]>([]);
     tokens = signal<any[]>([]);
-    
+
     showTokenDialog = signal<boolean>(false);
     newTokenName = signal<string>('');
 
@@ -57,6 +57,8 @@ export class ProjetosEditar implements OnInit {
     private readonly _endpointsService = inject(EndpointsService);
     private readonly _tokensService = inject(TokensService);
     private readonly messageService = inject(MessageService);
+
+    generatingAll = signal<boolean>(false);
 
     constructor() {
         this.id = Number(this.route.snapshot.paramMap.get('id'));
@@ -73,11 +75,14 @@ export class ProjetosEditar implements OnInit {
     editar(value: any) {
         const ref = this._dialogService.open(EndpointEditar, {
             header: value ? `Edit resource - ${value.name}` : 'New resource',
+            modal: true,
+            closable: true,
             data: {
                 resource: value,
                 projectId: this.id
             },
             breakpoints: {
+                '1920px': '75vw',
                 '960px': '85vw',
                 '640px': '90vw'
             }
@@ -125,7 +130,7 @@ export class ProjetosEditar implements OnInit {
                         };
                     })
                 );
-                
+
                 const loadedTokens = await lastValueFrom(this._tokensService.listar(this.id));
                 this.tokens.set(loadedTokens);
             } catch (err) {
@@ -201,6 +206,55 @@ export class ProjetosEditar implements OnInit {
         } finally {
             this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: false }));
         }
+    }
+
+    async gerarTodos() {
+        if (this.id === null) return;
+
+        const endpoints = this.files();
+        if (!endpoints || endpoints.length === 0) return;
+
+        this.generatingAll.set(true);
+        let hasError = false;
+
+        // Set ALL endpoints to loading initially to lock the UI
+        const newLoadingState = { ...this.loadingEndpoints() };
+        for (const item of endpoints) {
+            newLoadingState[item.data.endpoint.id] = true;
+        }
+        this.loadingEndpoints.set(newLoadingState);
+
+        for (const item of endpoints) {
+            const endpointId = item.data.endpoint.id;
+
+            try {
+                // Creates automatically 10 items for each
+                await lastValueFrom(this._endpointsService.generateMock(this.id, endpointId, 10));
+                // Update local model so UI reflects it immediately
+                item.data.endpoint.count = 10;
+                // Set only this endpoint to false as it finished
+                this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: false }));
+            } catch (err) {
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: `Falha ao gerar dados para ${item.label}`, life: 3000 });
+                console.error(err);
+                hasError = true;
+                break; // Stop processing further endpoints on error
+            }
+        }
+
+        // If an error occurred, we need to unlock any endpoints that are still loading
+        if (hasError) {
+            const resetState = { ...this.loadingEndpoints() };
+            for (const item of endpoints) {
+                resetState[item.data.endpoint.id] = false;
+            }
+            this.loadingEndpoints.set(resetState);
+        } else {
+            this.messageService.add({ severity: 'success', summary: 'Concluído', detail: 'Dados mockados gerados para todos os endpoints (10 itens cada).', life: 3000 });
+        }
+
+        await this.carregar();
+        this.generatingAll.set(false);
     }
 
     getEndpointURL(value: string): string {

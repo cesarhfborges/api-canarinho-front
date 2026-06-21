@@ -169,7 +169,37 @@ export class EndpointEditar implements OnInit {
             resource?.endpoints?.forEach((endpoint) => {
                 this.endpointsFormArray.push(this.createGroupEndpoint(endpoint));
             });
+        } else {
+            // Create mode: Add default ID schema
+            this.resourceSchemaFormArray.push(this.createGroupSchema({
+                name: 'id',
+                type:  'Object.ID',
+                value: ''
+            }));
+
+            // Create mode: Add 5 default endpoints
+            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'GET', url: '/', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
+            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'GET', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
+            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'POST', url: '/', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
+            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'PUT', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
+            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'DELETE', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
         }
+
+        // Reactivity: Auto-update URLs when name changes
+        this.form.get('name')?.valueChanges.subscribe(val => {
+            const safeName = val ? val : '';
+            this.endpointsFormArray.controls.forEach((ctrl) => {
+                const method = ctrl.get('method')?.value;
+                const hasId = ctrl.get('url')?.value?.includes('/:id');
+                if (method === 'GET' && hasId) {
+                    ctrl.get('url')?.setValue(`/${safeName}/:id`);
+                } else if (method === 'GET' || method === 'POST') {
+                    ctrl.get('url')?.setValue(`/${safeName}`);
+                } else if (method === 'PUT' || method === 'DELETE') {
+                    ctrl.get('url')?.setValue(`/${safeName}/:id`);
+                }
+            });
+        });
     }
 
     createGroupSchema(value?: Schema): FormGroup {
@@ -181,33 +211,14 @@ export class EndpointEditar implements OnInit {
     }
 
     createGroupEndpoint(value?: Endpoint): FormGroup {
-        const group = this.fb.group({});
-
-        if ('enabled' in (value ?? {})) {
-            group.addControl('enabled', this.fb.control(value!.enabled));
-        }
-
-        if ('method' in (value ?? {})) {
-            group.addControl('method', this.fb.control(value!.method));
-        }
-
-        if ('paginate' in (value ?? {})) {
-            group.addControl('paginate', this.fb.control(value!.paginate));
-        }
-
-        if ('per_page_default' in (value ?? {})) {
-            group.addControl('per_page_default', this.fb.control(value!.per_page_default));
-        }
-
-        if ('response' in (value ?? {})) {
-            group.addControl('response', this.fb.control(value!.response));
-        }
-
-        if ('url' in (value ?? {})) {
-            group.addControl('url', this.fb.control(value!.url));
-        }
-
-        return group;
+        return this.fb.group({
+            enabled: [value?.enabled ?? true],
+            method: [value?.method ?? 'GET'],
+            paginate: [value?.paginate ?? false],
+            per_page_default: [value?.per_page_default ?? 10],
+            response: [value?.response ?? '$mockData'],
+            url: [value?.url ?? '']
+        });
     }
 
     addSchema(): void {

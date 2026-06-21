@@ -31,6 +31,9 @@
                 />
 
                 <p-button
+                    (onClick)="gerarTodos()"
+                    [disabled]="generatingAll()"
+                    [loading]="generatingAll()"
                     icon="pi pi-play"
                     label="Gerar Todos"
                     severity="secondary"
@@ -132,7 +135,7 @@
                             [disabled]="isLoading(node.data.endpoint.id)"
                             [max]="500"
                             [min]="0"
-                            class="flex-1 lg:w-56"
+                            class="flex-1 lg:w-128"
                         />
 
                         <span
@@ -199,7 +202,7 @@
                             <h2 class="text-xl font-semibold">Tokens Ativos</h2>
                             <p-button (onClick)="abrirModalToken()" icon="pi pi-plus" label="Gerar Token" severity="success" />
                         </div>
-                        
+
                         <p-table [value]="tokens()" responsiveLayout="scroll">
                             <ng-template pTemplate="header">
                                 <tr>

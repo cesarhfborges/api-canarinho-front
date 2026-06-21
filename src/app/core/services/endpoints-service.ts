@@ -11,7 +11,7 @@ export class EndpointsService {
     private readonly http = inject(HttpClient);
 
     public listar(projetoId: number): Observable<Resource[]> {
-        return this.http.get<Resource[]>(`${environment.apiUrl}/admin/projects/${projetoId}/endpoints`);
+        return this.http.get<Resource[]>(`${environment.apiUrl}/admin/projects/${projetoId}/endpoints`, {params: {'orderBy': 'id'}});
     }
 
     public obter(projetoId: number, id: number): Observable<Resource> {
