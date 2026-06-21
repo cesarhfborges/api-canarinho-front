@@ -74,7 +74,12 @@
                                         formControlName="name"
                                         pInputText
                                         type="text"
+                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
                                     />
+                                    
+                                    @if (schema.get('name')?.invalid && schema.get('name')?.touched) {
+                                        <small class="text-red-500">Key é obrigatória.</small>
+                                    }
 
                                 </div>
 
@@ -91,7 +96,12 @@
                                         class="w-full"
                                         formControlName="type"
                                         placeholder="Selecione"
+                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
                                     />
+                                    
+                                    @if (schema.get('type')?.invalid && schema.get('type')?.touched) {
+                                        <small class="text-red-500">Type é obrigatório.</small>
+                                    }
 
                                 </div>
 

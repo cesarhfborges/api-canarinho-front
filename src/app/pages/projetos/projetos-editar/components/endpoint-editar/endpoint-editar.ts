@@ -15,10 +15,10 @@ import { TagModule } from 'primeng/tag';
 import fakerMethods from '@/app/core/utils/faker-methods';
 import { SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { JsonPipe } from '@angular/common';
-import { environment } from '@/environments/environment';
+import { NgClass } from '@angular/common';
 import { Highlight } from 'ngx-highlightjs';
 import { TooltipModule } from 'primeng/tooltip';
+import { environment } from '@/environments/environment';
 
 @Component({
     selector: 'app-endpoint-editar',
@@ -33,9 +33,9 @@ import { TooltipModule } from 'primeng/tooltip';
         ToggleSwitchModule,
         TagModule,
         ButtonModule,
-        JsonPipe,
         Highlight,
-        TooltipModule
+        TooltipModule,
+        NgClass
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss'
@@ -67,12 +67,15 @@ export class EndpointEditar implements OnInit {
 
     constructor() {
         this.form = this.fb.group({
-            name: ['', [
-                Validators.required,
-                Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-                Validators.minLength(3),
-                Validators.maxLength(50),
-            ]],
+            name: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+                    Validators.minLength(3),
+                    Validators.maxLength(50)
+                ]
+            ],
             resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
@@ -165,8 +168,8 @@ export class EndpointEditar implements OnInit {
 
     createGroupSchema(value?: Schema): FormGroup {
         return this.fb.group({
-            name: [value?.name ?? ''],
-            type: [value?.type ?? ''],
+            name: [value?.name ?? '', Validators.required],
+            type: [value?.type ?? '', Validators.required],
             value: [value?.value ?? '']
         });
     }
