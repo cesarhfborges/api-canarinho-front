@@ -6,7 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { TreeNode } from 'primeng/api';
 import { TreeModule } from 'primeng/tree';
 import { TooltipModule } from 'primeng/tooltip';
@@ -15,11 +15,14 @@ import { TokensService } from '@/app/core/services/tokens.service';
 import { ActivatedRoute } from '@angular/router';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { EndpointEditar } from '@/app/pages/projetos/projetos-editar/components/endpoint-editar/endpoint-editar';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ProjetosService } from '@/app/core/services/projetos-service';
+import { PerfilService } from '@/app/core/services/perfil-service';
 import { SliderModule, SliderSlideEndEvent } from 'primeng/slider';
 import { TagModule } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { environment } from '@/environments/environment';
+import { EndpointVisualizar } from '@/app/pages/projetos/projetos-editar/components/endpoint-visualizar/endpoint-visualizar';
 
 @Component({
     selector: 'app-projetos-editar',
@@ -36,19 +39,23 @@ import { environment } from '@/environments/environment';
         TableModule,
         DialogModule,
         InputTextModule,
-        DatePipe
+        DatePipe,
+        NgClass
     ],
     templateUrl: './projetos-editar.html',
     styleUrl: './projetos-editar.scss'
 })
 export class ProjetosEditar implements OnInit {
     loading = signal<boolean>(false);
-    loadingEndpoints = signal<Record<number, boolean>>({});
+    loadingEndpoints = signal<Record<number, string | null>>({});
+    visibleTokens = signal<Record<number, boolean>>({});
     files = signal<TreeNode[]>([]);
     tokens = signal<any[]>([]);
 
     showTokenDialog = signal<boolean>(false);
     newTokenName = signal<string>('');
+    project = signal<any>(null);
+    username = signal<string>('');
 
     public readonly _dialogService = inject(DialogService);
     public readonly id: number | null = null;
@@ -56,7 +63,10 @@ export class ProjetosEditar implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly _endpointsService = inject(EndpointsService);
     private readonly _tokensService = inject(TokensService);
+    private readonly _projetosService = inject(ProjetosService);
+    private readonly _perfilService = inject(PerfilService);
     private readonly messageService = inject(MessageService);
+    private readonly confirmationService = inject(ConfirmationService);
 
     generatingAll = signal<boolean>(false);
 
@@ -65,7 +75,24 @@ export class ProjetosEditar implements OnInit {
     }
 
     isLoading(endpointId: number): boolean {
-        return this.loadingEndpoints()[endpointId] ?? false;
+        return !!this.loadingEndpoints()[endpointId];
+    }
+
+    getEndpointStatus(endpointId: number): string | null {
+        return this.loadingEndpoints()[endpointId] ?? null;
+    }
+
+    toggleTokenVisibility(tokenId: number): void {
+        this.visibleTokens.update((prev) => ({ ...prev, [tokenId]: !prev[tokenId] }));
+    }
+
+    isTokenVisible(tokenId: number): boolean {
+        return this.visibleTokens()[tokenId] ?? false;
+    }
+
+    onTabChange(event: any): void {
+        // Clear token visibility when switching tabs
+        this.visibleTokens.set({});
     }
 
     ngOnInit(): void {
@@ -96,28 +123,86 @@ export class ProjetosEditar implements OnInit {
         });
     }
 
-    excluir(value: any) {
-        if (confirm(`Tem certeza que deseja excluir o endpoint ${value.name}?`)) {
-            this.loading.set(true);
-            this._endpointsService.excluir(value.id).subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint excluído com sucesso.', life: 3000 });
-                    void this.carregar();
-                    this.loading.set(false);
-                },
-                error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao excluir o endpoint.', life: 3000 });
-                    console.error(err);
-                    this.loading.set(false);
-                }
-            });
+    visualizarDados(value: any) {
+        // Validate if there is a token available
+        if (this.tokens().length === 0) {
+            this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Você precisa gerar ao menos um Token na aba de Tokens antes de pré-visualizar os dados.', life: 5000 });
+            return;
         }
+
+        const firstToken = this.tokens()[0].token;
+
+        this._dialogService.open(EndpointVisualizar, {
+            header: `Preview - ${value.name}`,
+            modal: true,
+            closable: true,
+            data: {
+                endpoint: value,
+                projectSlug: this.project()?.slug,
+                username: this.username(),
+                token: firstToken
+            },
+            breakpoints: {
+                '1920px': '75vw',
+                '960px': '85vw',
+                '640px': '90vw'
+            }
+        });
+    }
+
+    excluir(event: Event, value: any) {
+        this.confirmationService.confirm({
+            target: event.target as EventTarget,
+            message: `Tem certeza que deseja excluir o endpoint ${value.name}?`,
+            header: 'Excluir Endpoint',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancelar',
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Excluir',
+                severity: 'danger'
+            },
+            accept: () => {
+                this.loading.set(true);
+                this.loadingEndpoints.update((prev) => ({ ...prev, [value.id]: 'excluindo' }));
+                this._endpointsService.excluir(value.id).subscribe({
+                    next: () => {
+                        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint excluído com sucesso.', life: 3000 });
+                        void this.carregar();
+                        this.loadingEndpoints.update((prev) => ({ ...prev, [value.id]: null }));
+                        this.loading.set(false);
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao excluir o endpoint.', life: 3000 });
+                        console.error(err);
+                        this.loadingEndpoints.update((prev) => ({ ...prev, [value.id]: null }));
+                        this.loading.set(false);
+                    }
+                });
+            }
+        });
     }
 
     private async carregar() {
         if (this.id !== null) {
             try {
                 this.loading.set(true);
+
+                // Load user profile if missing
+                if (!this._perfilService.userProfile()) {
+                    await lastValueFrom(this._perfilService.getPerfil());
+                }
+                this.username.set(this._perfilService.userProfile()?.username ?? '');
+
+                // Load Project Details
+                const projectData = await lastValueFrom(this._projetosService.obter(this.id));
+                this.project.set(projectData);
+
+                // Load Endpoints
                 const endpoints = await this.getEndpoints(this.id);
                 this.files.set(
                     endpoints.map((e) => {
@@ -131,6 +216,7 @@ export class ProjetosEditar implements OnInit {
                     })
                 );
 
+                // Load Tokens
                 const loadedTokens = await lastValueFrom(this._tokensService.listar(this.id));
                 this.tokens.set(loadedTokens);
             } catch (err) {
@@ -165,21 +251,37 @@ export class ProjetosEditar implements OnInit {
         });
     }
 
-    excluirToken(token: any) {
-        if (confirm(`Tem certeza que deseja revogar o token ${token.name}?`)) {
-            this.loading.set(true);
-            this._tokensService.excluir(token.id).subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Token revogado.', life: 3000 });
-                    void this.carregar();
-                },
-                error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao revogar o token.', life: 3000 });
-                    console.error(err);
-                    this.loading.set(false);
-                }
-            });
-        }
+    excluirToken(event: Event, token: any) {
+        this.confirmationService.confirm({
+            target: event.target as EventTarget,
+            message: `Tem certeza que deseja revogar o token ${token.name}?`,
+            header: 'Revogar Token',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancelar',
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Revogar',
+                severity: 'danger'
+            },
+            accept: () => {
+                this.loading.set(true);
+                this._tokensService.excluir(token.id).subscribe({
+                    next: () => {
+                        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Token revogado.', life: 3000 });
+                        void this.carregar();
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao revogar o token.', life: 3000 });
+                        console.error(err);
+                        this.loading.set(false);
+                    }
+                });
+            }
+        });
     }
 
     async getEndpoints(id: number): Promise<any[]> {
@@ -195,7 +297,7 @@ export class ProjetosEditar implements OnInit {
     }
 
     private async updateCount(endpointId: number, count: number) {
-        this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: true }));
+        this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: 'gerando' }));
         try {
             await lastValueFrom(this._endpointsService.generateMock(this.id!, endpointId, count));
             this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Mocks gerados com sucesso.', life: 3000 });
@@ -204,7 +306,7 @@ export class ProjetosEditar implements OnInit {
             this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao gerar os dados mockados.', life: 3000 });
             console.error(err);
         } finally {
-            this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: false }));
+            this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: null }));
         }
     }
 
@@ -220,7 +322,7 @@ export class ProjetosEditar implements OnInit {
         // Set ALL endpoints to loading initially to lock the UI
         const newLoadingState = { ...this.loadingEndpoints() };
         for (const item of endpoints) {
-            newLoadingState[item.data.endpoint.id] = true;
+            newLoadingState[item.data.endpoint.id] = 'gerando';
         }
         this.loadingEndpoints.set(newLoadingState);
 
@@ -232,8 +334,8 @@ export class ProjetosEditar implements OnInit {
                 await lastValueFrom(this._endpointsService.generateMock(this.id, endpointId, 10));
                 // Update local model so UI reflects it immediately
                 item.data.endpoint.count = 10;
-                // Set only this endpoint to false as it finished
-                this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: false }));
+                // Set only this endpoint to null as it finished
+                this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: null }));
             } catch (err) {
                 this.messageService.add({ severity: 'error', summary: 'Erro', detail: `Falha ao gerar dados para ${item.label}`, life: 3000 });
                 console.error(err);
@@ -246,7 +348,7 @@ export class ProjetosEditar implements OnInit {
         if (hasError) {
             const resetState = { ...this.loadingEndpoints() };
             for (const item of endpoints) {
-                resetState[item.data.endpoint.id] = false;
+                resetState[item.data.endpoint.id] = null;
             }
             this.loadingEndpoints.set(resetState);
         } else {

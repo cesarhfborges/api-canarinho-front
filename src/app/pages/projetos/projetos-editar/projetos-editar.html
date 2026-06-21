@@ -52,7 +52,7 @@
     </p-card>
 
     <!-- TABS -->
-    <p-tabs value="0">
+    <p-tabs (valueChange)="onTabChange($event)" value="0">
         <p-tablist>
             <p-tab value="0">
                 <i class="pi pi-server mr-2"></i>
@@ -69,28 +69,28 @@
             <p-tabpanel value="0">
                 <div class="card flex-auto">
                     <p-tree
-            [value]="files()"
-            class="w-full"
-        >
-
-            <ng-template
-                let-node
-                pTemplate="default"
-            >
-
-                <div
-                    [class.opacity-60]="isLoading(node.data.endpoint.id)"
-                    class="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 py-3 px-3 border-b border-surface-200 dark:border-surface-700 last:border-b-0 rounded-md hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
-                >
-
-                    <!-- NOME -->
-                    <div
-                        class="flex-1 min-w-0"
+                        [value]="files()"
+                        class="w-full"
                     >
 
-                        <div
-                            class="flex items-center gap-2 min-w-0"
+                        <ng-template
+                            let-node
+                            pTemplate="default"
                         >
+
+                            <div
+                                [class.opacity-60]="isLoading(node.data.endpoint.id)"
+                                class="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 py-3 px-3 border-b border-surface-200 dark:border-surface-700 last:border-b-0 rounded-md hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+                            >
+
+                                <!-- NOME -->
+                                <div
+                                    class="flex-1 min-w-0"
+                                >
+
+                                    <div
+                                        class="flex items-center gap-2 min-w-0"
+                                    >
 
                             <span
                                 class="font-semibold truncate"
@@ -98,30 +98,28 @@
                                 {{ node.key }} - {{ node.label }}
                             </span>
 
-                            @if (isLoading(node.data.endpoint.id)) {
-
-                                <span
-                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary-50 text-primary text-xs dark:bg-primary-900/20"
-                                >
-
-                                    <i
-                                        class="pi pi-spin pi-spinner"
-                                    ></i>
-
-                                    Gerando
-
+                                        @if (getEndpointStatus(node.data.endpoint.id); as status) {
+                                            <span
+                                                [ngClass]="{
+                                        'bg-primary-50 text-primary dark:bg-primary-900/20': status === 'gerando',
+                                        'bg-danger-50 text-danger dark:bg-danger-900/20': status === 'excluindo',
+                                        'bg-orange-50 text-orange-500 dark:bg-orange-900/20': status === 'atualizando'
+                                    }"
+                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                                            >
+                                    <i class="pi pi-spin pi-spinner"></i>
+                                                {{ status === 'gerando' ? 'Gerando...' : (status === 'excluindo' ? 'Excluindo...' : 'Atualizando...') }}
                                 </span>
+                                        }
 
-                            }
+                                    </div>
 
-                        </div>
+                                </div>
 
-                    </div>
-
-                    <!-- QUANTIDADE -->
-                    <div
-                        class="flex items-center gap-3 w-full lg:w-auto lg:min-w-[360px]"
-                    >
+                                <!-- QUANTIDADE -->
+                                <div
+                                    class="flex items-center gap-3 w-full lg:w-auto lg:min-w-[360px]"
+                                >
 
                         <span
                             class="text-sm text-surface-500 whitespace-nowrap"
@@ -129,121 +127,144 @@
                             Quantidade
                         </span>
 
-                        <p-slider
-                            (onSlideEnd)="gerarDadosMock($event, node.data)"
-                            [(ngModel)]="node.data.endpoint.count"
-                            [disabled]="isLoading(node.data.endpoint.id)"
-                            [max]="500"
-                            [min]="0"
-                            class="flex-1 lg:w-128"
-                        />
+                                    <p-slider
+                                        (onSlideEnd)="gerarDadosMock($event, node.data)"
+                                        [(ngModel)]="node.data.endpoint.count"
+                                        [disabled]="isLoading(node.data.endpoint.id)"
+                                        [max]="500"
+                                        [min]="0"
+                                        [step]="1"
+                                        class="flex-1 lg:w-128"
+                                    />
 
-                        <span
-                            class="font-semibold text-primary min-w-[48px] text-center"
-                        >
+                                    <span
+                                        class="font-semibold text-primary min-w-[48px] text-center"
+                                    >
                             {{ node.data.endpoint.count }}
                         </span>
 
-                    </div>
+                                </div>
 
-                    <!-- AÇÕES -->
-                    <div
-                        class="flex justify-end gap-2 shrink-0"
-                    >
+                                <!-- AÇÕES -->
+                                <div
+                                    class="flex justify-end gap-2 shrink-0"
+                                >
 
-                        <p-button
-                            [disabled]="isLoading(node.data.endpoint.id)"
-                            [outlined]="true"
-                            icon="pi pi-database"
-                            pTooltip="Visualizar dados"
-                            severity="secondary"
-                            size="small"
-                            tooltipPosition="top"
-                        />
+                                    <p-button
+                                        (onClick)="visualizarDados(node.data.endpoint)"
+                                        [disabled]="isLoading(node.data.endpoint.id)"
+                                        [outlined]="true"
+                                        icon="pi pi-database"
+                                        pTooltip="Visualizar dados"
+                                        severity="secondary"
+                                        size="small"
+                                        tooltipPosition="top"
+                                    />
 
-                        <p-button
-                            (click)="editar(node.data.endpoint)"
-                            [disabled]="isLoading(node.data.endpoint.id)"
-                            [outlined]="true"
-                            icon="pi pi-cog"
-                            pTooltip="Configurar endpoint"
-                            severity="info"
-                            size="small"
-                            tooltipPosition="top"
-                        />
+                                    <p-button
+                                        (click)="editar(node.data.endpoint)"
+                                        [disabled]="isLoading(node.data.endpoint.id)"
+                                        [outlined]="true"
+                                        icon="pi pi-cog"
+                                        pTooltip="Configurar endpoint"
+                                        severity="info"
+                                        size="small"
+                                        tooltipPosition="top"
+                                    />
 
-                        <p-button
-                            (onClick)="excluir(node.data.endpoint)"
-                            [disabled]="isLoading(node.data.endpoint.id)"
-                            [outlined]="true"
-                            icon="pi pi-trash"
-                            pTooltip="Excluir endpoint"
-                            severity="danger"
-                            size="small"
-                            tooltipPosition="top"
-                        />
+                                    <p-button
+                                        (onClick)="excluir($event, node.data.endpoint)"
+                                        [disabled]="isLoading(node.data.endpoint.id)"
+                                        [outlined]="true"
+                                        icon="pi pi-trash"
+                                        pTooltip="Excluir endpoint"
+                                        severity="danger"
+                                        size="small"
+                                        tooltipPosition="top"
+                                    />
 
-                    </div>
+                                </div>
+
+                            </div>
+
+                        </ng-template>
+
+                    </p-tree>
 
                 </div>
 
-            </ng-template>
+            </p-tabpanel>
 
-        </p-tree>
-
+            <!-- TOKENS TAB -->
+            <p-tabpanel value="1">
+                <div class="card flex-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Tokens Ativos</h2>
+                        <p-button (onClick)="abrirModalToken()" icon="pi pi-plus" label="Gerar Token"
+                                  severity="success" />
                     </div>
 
-                </p-tabpanel>
+                    <p-table [value]="tokens()" responsiveLayout="scroll" [tableStyle]="{ 'min-width': '40rem', 'table-layout': 'fixed' }">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th class="w-[25%]">Nome</th>
+                                <th class="w-[40%]">Token</th>
+                                <th class="w-[20%]">Criado em</th>
+                                <th class="w-[15%] text-center">Ações</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template let-token pTemplate="body">
+                            <tr>
+                                <td class="font-medium truncate" [title]="token.name">{{ token.name }}</td>
+                                <td class="font-mono text-sm text-surface-500">
+                                    <div class="flex items-center gap-2 overflow-hidden w-full">
+                                        <span class="truncate flex-1" [title]="token.token">
+                                            {{ isTokenVisible(token.id) ? token.token : '***************************************************' }}
+                                        </span>
+                                        <p-button 
+                                            (onClick)="toggleTokenVisibility(token.id)" 
+                                            [icon]="isTokenVisible(token.id) ? 'pi pi-eye-slash' : 'pi pi-eye'" 
+                                            [text]="true" 
+                                            [rounded]="true" 
+                                            severity="secondary" 
+                                            size="small" 
+                                            pTooltip="Alternar visibilidade"
+                                            tooltipPosition="top"
+                                            class="shrink-0"
+                                        />
+                                    </div>
+                                </td>
+                                <td class="text-sm truncate">{{ token.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td class="text-center">
+                                    <p-button (onClick)="excluirToken($event, token)" [disabled]="loading()" pTooltip="Revogar Token" tooltipPosition="top" icon="pi pi-trash" severity="danger" [outlined]="true" size="small" />
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="4" class="text-center p-4">Nenhum token gerado para este projeto.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </p-tabpanel>
 
-                <!-- TOKENS TAB -->
-                <p-tabpanel value="1">
-                    <div class="card flex-auto">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold">Tokens Ativos</h2>
-                            <p-button (onClick)="abrirModalToken()" icon="pi pi-plus" label="Gerar Token" severity="success" />
-                        </div>
-
-                        <p-table [value]="tokens()" responsiveLayout="scroll">
-                            <ng-template pTemplate="header">
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Token</th>
-                                    <th>Criado em</th>
-                                    <th class="w-24">Ações</th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-token>
-                                <tr>
-                                    <td class="font-medium">{{ token.name }}</td>
-                                    <td class="font-mono text-sm text-surface-500">{{ token.token }}</td>
-                                    <td class="text-sm">{{ token.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-                                    <td>
-                                        <p-button (onClick)="excluirToken(token)" pTooltip="Revogar Token" tooltipPosition="top" icon="pi pi-trash" severity="danger" [outlined]="true" size="small" />
-                                    </td>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="emptymessage">
-                                <tr>
-                                    <td colspan="4" class="text-center p-4">Nenhum token gerado para este projeto.</td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </div>
-                </p-tabpanel>
-
-            </p-tabpanels>
-        </p-tabs>
+        </p-tabpanels>
+    </p-tabs>
 
 </div>
 
 <!-- DIALOG NOVO TOKEN -->
-<p-dialog [(visible)]="showTokenDialog" [modal]="true" header="Gerar Novo Token" [style]="{width: '400px'}">
+<p-dialog [(visible)]="showTokenDialog" [modal]="true" [style]="{width: '400px'}" header="Gerar Novo Token">
     <div class="flex flex-col gap-4 pt-2">
-        <label for="tokenName" class="font-semibold text-surface-700">Nome de identificação</label>
-        <input id="tokenName" type="text" pInputText placeholder="Ex: Produção, FrontEnd Demo" [ngModel]="newTokenName()" (ngModelChange)="newTokenName.set($event)" />
+        <label class="font-semibold text-surface-700" for="tokenName">Nome de identificação</label>
+        <input (ngModelChange)="newTokenName.set($event)" [ngModel]="newTokenName()" id="tokenName" pInputText
+               placeholder="Ex: Produção, FrontEnd Demo" type="text" />
     </div>
     <ng-template pTemplate="footer">
-        <p-button label="Cancelar" icon="pi pi-times" (onClick)="showTokenDialog.set(false)" [outlined]="true" severity="secondary" />
-        <p-button label="Gerar" icon="pi pi-check" (onClick)="gerarToken()" [disabled]="!newTokenName()" severity="success" />
+        <p-button (onClick)="showTokenDialog.set(false)" [outlined]="true" icon="pi pi-times" label="Cancelar"
+                  severity="secondary" />
+        <p-button (onClick)="gerarToken()" [disabled]="!newTokenName()" icon="pi pi-check" label="Gerar"
+                  severity="success" />
     </ng-template>
 </p-dialog>
