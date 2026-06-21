@@ -1,0 +1,33 @@
+<div class="flex flex-col gap-4">
+    <p-table [value]="data()" [columns]="columns()" [paginator]="true" [rows]="10"
+        [tableStyle]="{ 'min-width': '50rem' }" [lazy]="true" (onLazyLoad)="carregarDados($event)"
+        [totalRecords]="totalRecords()" [loading]="loading()" styleClass="p-datatable-gridlines p-datatable-sm">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                @for (col of columns; track col.field) {
+                <th [pSortableColumn]="col.field">
+                    {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
+                </th>
+                }
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+            <tr>
+                @for (col of columns; track col.field) {
+                <td class="max-w-[200px] truncate" [title]="rowData[col.field] | json">
+                    @if (isObject(rowData[col.field])) {
+                    <span class="text-xs text-surface-400 font-mono">{{ rowData[col.field] | json }}</span>
+                    } @else {
+                    {{ rowData[col.field] }}
+                    }
+                </td>
+                }
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="100%" class="text-center p-4">Nenhum dado retornado pela API.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
