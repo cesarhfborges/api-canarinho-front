@@ -17,8 +17,8 @@
                 <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
                     <label for="endpoint-name">Nome</label>
                     <input
-                        id="endpoint-name"
                         formControlName="name"
+                        id="endpoint-name"
                         pInputText
                         type="text"
                     />
@@ -478,6 +478,7 @@
                     />
 
                     <p-button
+                        (onClick)="salvar()"
                         fluid
                         icon="pi pi-save"
                         label="Salvar"
@@ -488,20 +489,6 @@
                 </div>
 
             </section>
-
-        </div>
-
-
-        <!-- DEBUG -->
-        <div class="mt-8">
-
-            <div class="font-semibold mb-2">
-                Preview
-            </div>
-
-            <pre class="p-4 rounded-lg bg-surface-100 dark:bg-surface-900 overflow-auto text-sm">
-                <code>{{ form.value | json }}</code>
-            </pre>
 
         </div>
 

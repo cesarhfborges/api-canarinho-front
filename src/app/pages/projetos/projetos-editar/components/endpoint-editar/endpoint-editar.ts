@@ -6,6 +6,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { Schema } from '@/app/core/models/schema';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { Resource } from '@/app/core/models/resource';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -62,6 +63,7 @@ export class EndpointEditar implements OnInit {
     private readonly fb = inject(FormBuilder);
     private dialogRef = inject(DynamicDialogRef);
     private dialogConfig = inject(DynamicDialogConfig);
+    private readonly _endpointsService = inject(EndpointsService);
 
     constructor() {
         this.form = this.fb.group({
@@ -209,6 +211,29 @@ export class EndpointEditar implements OnInit {
 
     close(): void {
         this.dialogRef.close();
+    }
+
+    salvar(): void {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        const data = this.form.value;
+        const resourceId = this.dialogConfig.data?.resource?.id;
+        const projectId = this.dialogConfig.data?.projectId;
+
+        if (resourceId) {
+            this._endpointsService.atualizar(resourceId, data).subscribe({
+                next: (res) => this.dialogRef.close(res),
+                error: (err) => console.error(err)
+            });
+        } else if (projectId) {
+            this._endpointsService.criar(projectId, data).subscribe({
+                next: (res) => this.dialogRef.close(res),
+                error: (err) => console.error(err)
+            });
+        }
     }
 
     getMethodSeverity(method: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
