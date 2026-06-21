@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
 import { SelectChangeEvent, SelectModule } from 'primeng/select';
@@ -15,7 +15,9 @@ import { TagModule } from 'primeng/tag';
 import fakerMethods from '@/app/core/utils/faker-methods';
 import { SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { NgClass } from '@angular/common';
+import { JsonPipe, NgClass } from '@angular/common';
+import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
+import { MessageService } from 'primeng/api';
 import { Highlight } from 'ngx-highlightjs';
 import { TooltipModule } from 'primeng/tooltip';
 import { environment } from '@/environments/environment';
@@ -35,7 +37,8 @@ import { environment } from '@/environments/environment';
         ButtonModule,
         Highlight,
         TooltipModule,
-        NgClass
+        NgClass,
+        JsonPipe
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss'
@@ -64,6 +67,9 @@ export class EndpointEditar implements OnInit {
     private dialogRef = inject(DynamicDialogRef);
     private dialogConfig = inject(DynamicDialogConfig);
     private readonly _endpointsService = inject(EndpointsService);
+    private readonly messageService = inject(MessageService);
+
+    saving = signal<boolean>(false);
 
     constructor() {
         this.form = this.fb.group({
@@ -218,9 +224,13 @@ export class EndpointEditar implements OnInit {
 
     salvar(): void {
         if (this.form.invalid) {
+            console.log('Invalid Controls:', findInvalidControlsRecursive(this.form));
             this.form.markAllAsTouched();
+            this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Por favor, preencha todos os campos obrigatórios corretamente.', life: 3000 });
             return;
         }
+
+        this.saving.set(true);
 
         const data = this.form.value;
         const resourceId = this.dialogConfig.data?.resource?.id;
@@ -228,14 +238,32 @@ export class EndpointEditar implements OnInit {
 
         if (resourceId) {
             this._endpointsService.atualizar(resourceId, data).subscribe({
-                next: (res) => this.dialogRef.close(res),
-                error: (err) => console.error(err)
+                next: (res) => {
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint atualizado com sucesso.', life: 3000 });
+                    this.saving.set(false);
+                    this.dialogRef.close(res);
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao atualizar o endpoint.', life: 3000 });
+                    console.error(err);
+                    this.saving.set(false);
+                }
             });
         } else if (projectId) {
             this._endpointsService.criar(projectId, data).subscribe({
-                next: (res) => this.dialogRef.close(res),
-                error: (err) => console.error(err)
+                next: (res) => {
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint criado com sucesso.', life: 3000 });
+                    this.saving.set(false);
+                    this.dialogRef.close(res);
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao criar o endpoint.', life: 3000 });
+                    console.error(err);
+                    this.saving.set(false);
+                }
             });
+        } else {
+            this.saving.set(false);
         }
     }
 

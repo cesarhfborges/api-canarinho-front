@@ -4,6 +4,7 @@ import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { DataView } from 'primeng/dataview';
 import { RouterLink } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-projetos-listar',
@@ -13,18 +14,26 @@ import { RouterLink } from '@angular/router';
 })
 export class ProjetosListar implements OnInit {
     listaProjetos = signal<any[]>([]);
+    loading = signal<boolean>(false);
 
     private readonly _projetosService = inject(ProjetosService);
+    private readonly messageService = inject(MessageService);
 
     ngOnInit(): void {
         this.carregarProjetos();
     }
 
     carregarProjetos(): void {
+        this.loading.set(true);
         this._projetosService.listar().subscribe({
             next: (result) => {
-                console.log(result);
                 this.listaProjetos.set(result);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar a lista de projetos.', life: 3000 });
+                console.error(err);
+                this.loading.set(false);
             }
         });
     }

@@ -70,13 +70,13 @@
 
                                     <input
                                         [id]="`schema-${$index}-id`"
+                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
                                         [readOnly]="schema.get('type')?.value === 'Object.ID'"
                                         formControlName="name"
                                         pInputText
                                         type="text"
-                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
                                     />
-                                    
+
                                     @if (schema.get('name')?.invalid && schema.get('name')?.touched) {
                                         <small class="text-red-500">Key é obrigatória.</small>
                                     }
@@ -90,15 +90,15 @@
 
                                     <p-select
                                         (onChange)="change($event, $index)"
+                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
                                         [options]="objectTypes"
                                         [readonly]="schema.get('type')?.value === 'Object.ID'"
                                         appendTo="body"
                                         class="w-full"
                                         formControlName="type"
                                         placeholder="Selecione"
-                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
                                     />
-                                    
+
                                     @if (schema.get('type')?.invalid && schema.get('type')?.touched) {
                                         <small class="text-red-500">Type é obrigatório.</small>
                                     }
@@ -489,6 +489,8 @@
 
                     <p-button
                         (onClick)="salvar()"
+                        [disabled]="saving()"
+                        [loading]="saving()"
                         fluid
                         icon="pi pi-save"
                         label="Salvar"
@@ -504,3 +506,9 @@
 
     </p-fluid>
 </form>
+
+<pre>
+    <code>
+        {{ form.value|json }}
+    </code>
+</pre>

@@ -15,6 +15,7 @@ import { TokensService } from '@/app/core/services/tokens.service';
 import { ActivatedRoute } from '@angular/router';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { EndpointEditar } from '@/app/pages/projetos/projetos-editar/components/endpoint-editar/endpoint-editar';
+import { MessageService } from 'primeng/api';
 import { SliderModule, SliderSlideEndEvent } from 'primeng/slider';
 import { TagModule } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
@@ -55,6 +56,7 @@ export class ProjetosEditar implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly _endpointsService = inject(EndpointsService);
     private readonly _tokensService = inject(TokensService);
+    private readonly messageService = inject(MessageService);
 
     constructor() {
         this.id = Number(this.route.snapshot.paramMap.get('id'));
@@ -91,9 +93,17 @@ export class ProjetosEditar implements OnInit {
 
     excluir(value: any) {
         if (confirm(`Tem certeza que deseja excluir o endpoint ${value.name}?`)) {
+            this.loading.set(true);
             this._endpointsService.excluir(value.id).subscribe({
                 next: () => {
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint excluído com sucesso.', life: 3000 });
                     void this.carregar();
+                    this.loading.set(false);
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao excluir o endpoint.', life: 3000 });
+                    console.error(err);
+                    this.loading.set(false);
                 }
             });
         }
@@ -101,21 +111,29 @@ export class ProjetosEditar implements OnInit {
 
     private async carregar() {
         if (this.id !== null) {
-            const endpoints = await this.getEndpoints(this.id);
-            this.files.set(
-                endpoints.map((e) => {
-                    return {
-                        key: e.id,
-                        label: e.name,
-                        data: {
-                            endpoint: e
-                        }
-                    };
-                })
-            );
-            
-            const loadedTokens = await lastValueFrom(this._tokensService.listar(this.id));
-            this.tokens.set(loadedTokens);
+            try {
+                this.loading.set(true);
+                const endpoints = await this.getEndpoints(this.id);
+                this.files.set(
+                    endpoints.map((e) => {
+                        return {
+                            key: e.id,
+                            label: e.name,
+                            data: {
+                                endpoint: e
+                            }
+                        };
+                    })
+                );
+                
+                const loadedTokens = await lastValueFrom(this._tokensService.listar(this.id));
+                this.tokens.set(loadedTokens);
+            } catch (err) {
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao carregar os dados do projeto.', life: 3000 });
+                console.error(err);
+            } finally {
+                this.loading.set(false);
+            }
         }
     }
 
@@ -129,18 +147,32 @@ export class ProjetosEditar implements OnInit {
         this.loading.set(true);
         this._tokensService.criar(this.id!, { name: this.newTokenName() }).subscribe({
             next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Token gerado com sucesso.', life: 3000 });
                 this.showTokenDialog.set(false);
                 void this.carregar();
                 this.loading.set(false);
             },
-            error: () => this.loading.set(false)
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível gerar o token.', life: 3000 });
+                console.error(err);
+                this.loading.set(false);
+            }
         });
     }
 
     excluirToken(token: any) {
         if (confirm(`Tem certeza que deseja revogar o token ${token.name}?`)) {
+            this.loading.set(true);
             this._tokensService.excluir(token.id).subscribe({
-                next: () => void this.carregar()
+                next: () => {
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Token revogado.', life: 3000 });
+                    void this.carregar();
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao revogar o token.', life: 3000 });
+                    console.error(err);
+                    this.loading.set(false);
+                }
             });
         }
     }
@@ -154,20 +186,20 @@ export class ProjetosEditar implements OnInit {
             return;
         }
 
-        const endpointId = data.endpoint.id;
+        await this.updateCount(data.endpoint.id, $event.value);
+    }
 
-        this.loadingEndpoints.update((state) => ({
-            ...state,
-            [endpointId]: true
-        }));
-
+    private async updateCount(endpointId: number, count: number) {
+        this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: true }));
         try {
-            await lastValueFrom(this._endpointsService.generateMock(this.id!, endpointId, $event.value));
+            await lastValueFrom(this._endpointsService.generateMock(this.id!, endpointId, count));
+            this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Mocks gerados com sucesso.', life: 3000 });
+            await this.carregar();
+        } catch (err) {
+            this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao gerar os dados mockados.', life: 3000 });
+            console.error(err);
         } finally {
-            this.loadingEndpoints.update((state) => ({
-                ...state,
-                [endpointId]: false
-            }));
+            this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: false }));
         }
     }
 
