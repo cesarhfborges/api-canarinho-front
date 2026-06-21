@@ -13,4 +13,13 @@ export class EndpointsService {
     public listar(projetoId: number): Observable<Resource[]> {
         return this.http.get<Resource[]>(`${environment.apiUrl}/admin/projects/${projetoId}/endpoints`);
     }
+
+    public generateMock(projetoId: number, endpointId: number, count: number): Observable<Resource[]> {
+        return this.http.post<Resource[]>(
+            `${environment.apiUrl}/admin/projects/${projetoId}/endpoints/${endpointId}/generate`,
+            {
+                count: count
+            }
+        );
+    }
 }

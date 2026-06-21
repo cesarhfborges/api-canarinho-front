@@ -37,9 +37,9 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-4" formArrayName="schemas">
+                <div class="flex flex-col gap-4" formArrayName="resourceSchema">
 
-                    @for (schema of schemasFormArray.controls; track $index) {
+                    @for (schema of resourceSchemaFormArray.controls; track $index) {
 
                         <div
                             [formGroupName]="$index"
@@ -387,7 +387,7 @@
                                                                 <label
                                                                     [for]="`endpoint-${$index}-per-page`"
                                                                     class="font-medium whitespace-nowrap"
-                                                                    pTooltip="Esta configuração define quantos itens podem ser retornados por vez, e pode ser alterada."
+                                                                    pTooltip="Esta configuração define o pdrão de quantos itens serão retornados por página"
                                                                     tooltipPosition="top"
                                                                 >
                                                                     Itens por página:

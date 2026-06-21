@@ -6,6 +6,7 @@ export interface Resource {
     project_id: number;
     name: string;
     generator: null;
+    count: number;
     endpoints: Endpoint[];
     resourceSchema: Schema[];
     created_at: Date;

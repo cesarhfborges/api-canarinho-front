@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TreeNode } from 'primeng/api';
@@ -7,16 +8,30 @@ import { TooltipModule } from 'primeng/tooltip';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { ActivatedRoute } from '@angular/router';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
-import { lastValueFrom } from 'rxjs';
 import { EndpointEditar } from '@/app/pages/projetos/projetos-editar/components/endpoint-editar/endpoint-editar';
+import { SliderModule, SliderSlideEndEvent } from 'primeng/slider';
+import { TagModule } from 'primeng/tag';
+import { FormsModule } from '@angular/forms';
+import { environment } from '@/environments/environment';
 
 @Component({
     selector: 'app-projetos-editar',
-    imports: [CardModule, ButtonModule, TreeModule, TooltipModule, DynamicDialogModule],
+    imports: [
+        CardModule,
+        ButtonModule,
+        TreeModule,
+        TooltipModule,
+        DynamicDialogModule,
+        SliderModule,
+        TagModule,
+        FormsModule
+    ],
     templateUrl: './projetos-editar.html',
     styleUrl: './projetos-editar.scss'
 })
 export class ProjetosEditar implements OnInit {
+    loading = signal<boolean>(false);
+    loadingEndpoints = signal<Record<number, boolean>>({});
     files = signal<TreeNode[]>([]);
     public readonly _dialogService = inject(DialogService);
     public readonly id: number | null = null;
@@ -28,6 +43,10 @@ export class ProjetosEditar implements OnInit {
         this.id = Number(this.route.snapshot.paramMap.get('id'));
     }
 
+    isLoading(endpointId: number): boolean {
+        return this.loadingEndpoints()[endpointId] ?? false;
+    }
+
     ngOnInit(): void {
         if (this.id !== null) {
             void this.getEndpoints(this.id).then((endpoints) => {
@@ -37,7 +56,9 @@ export class ProjetosEditar implements OnInit {
                         return {
                             key: e.id,
                             label: e.name,
-                            data: e
+                            data: {
+                                endpoint: e
+                            }
                         };
                     })
                 );
@@ -65,5 +86,32 @@ export class ProjetosEditar implements OnInit {
 
     async getEndpoints(id: number): Promise<any[]> {
         return await lastValueFrom(this._endpointsService.listar(id));
+    }
+
+    protected async gerarDadosMock($event: SliderSlideEndEvent, data: any): Promise<void> {
+        if ($event.value === undefined) {
+            return;
+        }
+
+        const endpointId = data.endpoint.id;
+
+        this.loadingEndpoints.update((state) => ({
+            ...state,
+            [endpointId]: true
+        }));
+
+        try {
+            await lastValueFrom(this._endpointsService.generateMock(this.id!, endpointId, $event.value));
+        } finally {
+            this.loadingEndpoints.update((state) => ({
+                ...state,
+                [endpointId]: false
+            }));
+        }
+    }
+
+    getEndpointURL(value: string): string {
+        const base = `${environment.apiUrl}/admin/`;
+        return base + value;
     }
 }

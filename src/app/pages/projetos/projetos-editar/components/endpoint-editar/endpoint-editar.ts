@@ -71,13 +71,13 @@ export class EndpointEditar implements OnInit {
                 Validators.minLength(3),
                 Validators.maxLength(50),
             ]],
-            schemas: this.fb.array<FormGroup>([]),
+            resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
     }
 
-    get schemasFormArray(): FormArray {
-        return this.form.get('schemas') as FormArray;
+    get resourceSchemaFormArray(): FormArray {
+        return this.form.get('resourceSchema') as FormArray;
     }
 
     get endpointsFormArray(): FormArray {
@@ -152,7 +152,7 @@ export class EndpointEditar implements OnInit {
             this.form.patchValue(resource);
 
             resource?.resourceSchema?.forEach((schema) => {
-                this.schemasFormArray.push(this.createGroupSchema(schema));
+                this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
             });
 
             resource?.endpoints?.forEach((endpoint) => {
@@ -200,11 +200,11 @@ export class EndpointEditar implements OnInit {
     }
 
     addSchema(): void {
-        this.schemasFormArray.push(this.createGroupSchema());
+        this.resourceSchemaFormArray.push(this.createGroupSchema());
     }
 
     removeSchema(index: number): void {
-        this.schemasFormArray.removeAt(index);
+        this.resourceSchemaFormArray.removeAt(index);
     }
 
     close(): void {
@@ -232,6 +232,6 @@ export class EndpointEditar implements OnInit {
     }
 
     protected change($event: SelectChangeEvent, index: number): void {
-        this.schemasFormArray.at(index)?.get('value')?.reset();
+        this.resourceSchemaFormArray.at(index)?.get('value')?.reset();
     }
 }

@@ -81,7 +81,7 @@ export default [
         label: 'Cores',
         items: [
             { label: 'Cor', value: '[color.human]' },
-            { label: 'HEX', value: '[color.rgb]' },
+            { label: 'HEX', value: '[color.hex]' },
             { label: 'RGB', value: '[color.rgb]' }
         ]
     },
