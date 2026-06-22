@@ -1,4 +1,8 @@
 <p-card>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold m-0">Meus Projetos</h2>
+        <p-button label="Cadastrar Novo" icon="pi pi-plus" (onClick)="abrirModal()" />
+    </div>
     <p-data-view [value]="listaProjetos()" emptyMessage=" ">
         <ng-template #list let-items>
             @if (loading()) {
@@ -30,7 +34,7 @@
                         </div>
                         <div class="flex flex-col items-end gap-8">
                             <div class="flex justify-between md:justify-end md:flex-row gap-2">
-                                <p-button [outlined]="true" icon="pi pi-ellipsis-v" />
+                                <p-button [outlined]="true" icon="pi pi-pencil" (onClick)="abrirModal(item)" />
                                 <p-button class="whitespace-nowrap" icon="pi pi-folder-open" label="Abrir"
                                     [routerLink]="['/projetos', item.id]" />
                             </div>
