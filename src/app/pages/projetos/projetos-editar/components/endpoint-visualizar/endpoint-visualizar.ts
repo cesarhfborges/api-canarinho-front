@@ -23,6 +23,7 @@ export class EndpointVisualizar implements OnInit {
     data = signal<any[]>([]);
     columns = signal<{ field: string; header: string }[]>([]);
     totalRecords = signal<number>(0);
+    requestUrl = signal<string>('');
 
     ngOnInit(): void {
         // Inicialização é feita pelo onLazyLoad da tabela se for lazy, mas caso a tabela dispare logo:
@@ -52,6 +53,8 @@ export class EndpointVisualizar implements OnInit {
         if (event?.sortField) {
             url += `&sort_by=${event.sortField}&sort_order=${event.sortOrder === 1 ? 'asc' : 'desc'}`;
         }
+        
+        this.requestUrl.set(url);
         
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${token}`

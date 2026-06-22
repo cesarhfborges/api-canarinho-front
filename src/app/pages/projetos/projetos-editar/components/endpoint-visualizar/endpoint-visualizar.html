@@ -1,4 +1,9 @@
 <div class="flex flex-col gap-4">
+    <div class="p-3 bg-surface-100 dark:bg-surface-800 rounded-md font-mono text-sm break-all">
+        <span class="text-primary font-semibold mr-2">GET</span>
+        <span>{{ requestUrl() || 'Carregando URL...' }}</span>
+    </div>
+
     <p-table [value]="data()" [columns]="columns()" [paginator]="true" [rows]="10"
         [tableStyle]="{ 'min-width': '50rem' }" [lazy]="true" (onLazyLoad)="carregarDados($event)"
         [totalRecords]="totalRecords()" [loading]="loading()" styleClass="p-datatable-gridlines p-datatable-sm">

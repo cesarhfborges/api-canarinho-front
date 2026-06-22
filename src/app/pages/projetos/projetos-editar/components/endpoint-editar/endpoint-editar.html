@@ -23,6 +23,13 @@
                         type="text"
                     />
                 </div>
+
+                <div class="col-span-full lg:col-span-3 flex flex-col gap-2 mt-2">
+                    <label>Endpoint Base</label>
+                    <div class="font-mono text-sm p-3 rounded-lg bg-surface-100 dark:bg-surface-800">
+                        {{ getEndpointURL('') }}
+                    </div>
+                </div>
             </section>
 
             <!-- SCHEMA -->
