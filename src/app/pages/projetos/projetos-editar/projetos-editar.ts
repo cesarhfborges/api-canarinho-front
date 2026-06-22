@@ -106,7 +106,9 @@ export class ProjetosEditar implements OnInit {
             closable: true,
             data: {
                 resource: value,
-                projectId: this.id
+                projectId: this.id,
+                username: this.username(),
+                projectSlug: this.project()?.slug
             },
             breakpoints: {
                 '1920px': '75vw',
@@ -360,7 +362,8 @@ export class ProjetosEditar implements OnInit {
     }
 
     getEndpointURL(value: string): string {
-        const base = `${environment.apiUrl}/admin/`;
-        return base + value;
+        const username = this.username() || ':username';
+        const projectSlug = this.project()?.slug || ':project';
+        return `${environment.apiUrl}/${username}/${projectSlug}`;
     }
 }

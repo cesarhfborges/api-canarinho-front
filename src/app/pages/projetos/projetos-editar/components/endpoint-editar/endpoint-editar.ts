@@ -294,8 +294,10 @@ export class EndpointEditar implements OnInit {
     }
 
     getEndpointURL(value: string): string {
-        const base = `${environment.apiUrl}/admin/demo`;
-        return base + value;
+        const username = this.dialogConfig.data?.username || ':username';
+        const projectSlug = this.dialogConfig.data?.projectSlug || ':project';
+        const base = `${environment.apiUrl}/${username}/${projectSlug}`;
+        return base + (value?.startsWith('/') ? value : `/${value || ''}`);
     }
 
     protected change($event: SelectChangeEvent, index: number): void {
