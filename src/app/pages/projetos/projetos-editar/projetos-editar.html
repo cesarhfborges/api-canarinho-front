@@ -71,6 +71,7 @@
                     <p-tree
                         [value]="files()"
                         class="w-full"
+                        [emptyMessage]="loading() ? 'Carregando' : 'Sem Dados a exibir'"
                     >
 
                         <ng-template
@@ -221,13 +222,13 @@
                                         <span class="truncate flex-1" [title]="token.token">
                                             {{ isTokenVisible(token.id) ? token.token : '***************************************************' }}
                                         </span>
-                                        <p-button 
-                                            (onClick)="toggleTokenVisibility(token.id)" 
-                                            [icon]="isTokenVisible(token.id) ? 'pi pi-eye-slash' : 'pi pi-eye'" 
-                                            [text]="true" 
-                                            [rounded]="true" 
-                                            severity="secondary" 
-                                            size="small" 
+                                        <p-button
+                                            (onClick)="toggleTokenVisibility(token.id)"
+                                            [icon]="isTokenVisible(token.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                                            [text]="true"
+                                            [rounded]="true"
+                                            severity="secondary"
+                                            size="small"
                                             pTooltip="Alternar visibilidade"
                                             tooltipPosition="top"
                                             class="shrink-0"

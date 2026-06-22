@@ -1,5 +1,5 @@
 <p-card>
-    <p-data-view [value]="listaProjetos()">
+    <p-data-view [value]="listaProjetos()" emptyMessage=" ">
         <ng-template #list let-items>
             @if (loading()) {
             <div class="p-6 text-center text-surface-500">
