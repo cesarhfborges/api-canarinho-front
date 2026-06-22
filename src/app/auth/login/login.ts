@@ -63,12 +63,13 @@ export class Login implements OnInit {
 
         this.isLoading.set(true);
         this.errorMessage.set(null);
+        this.loginForm.disable();
 
         const credentials = this.loginForm.getRawValue();
 
         this.authService.login(credentials).subscribe({
             next: (response: any) => {
-                console.log(response);
+                this.loginForm.enable();
                 void this.router.navigate(['/home']);
                 this.messageService.add({
                     severity: 'success',
@@ -77,7 +78,7 @@ export class Login implements OnInit {
                 });
             },
             error: (err) => {
-                console.error('Erro tratado no componente:', err);
+                this.loginForm.enable();
                 this.errorMessage.set('E-mail ou senha incorretos. Tente novamente.');
                 this.isLoading.set(false);
             }
