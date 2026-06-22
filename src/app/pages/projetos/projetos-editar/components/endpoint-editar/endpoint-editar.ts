@@ -13,11 +13,10 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { Endpoint } from '@/app/core/models/endpoint';
 import { TagModule } from 'primeng/tag';
 import fakerMethods from '@/app/core/utils/faker-methods';
-import { SelectItemGroup } from 'primeng/api';
+import { MessageService, SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { JsonPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
-import { MessageService } from 'primeng/api';
 import { Highlight } from 'ngx-highlightjs';
 import { TooltipModule } from 'primeng/tooltip';
 import { environment } from '@/environments/environment';
@@ -37,8 +36,7 @@ import { environment } from '@/environments/environment';
         ButtonModule,
         Highlight,
         TooltipModule,
-        NgClass,
-        JsonPipe
+        NgClass
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss'
@@ -62,14 +60,12 @@ export class EndpointEditar implements OnInit {
     ];
 
     readonly fakerMethods: SelectItemGroup[] = fakerMethods;
-
+    saving = signal<boolean>(false);
     private readonly fb = inject(FormBuilder);
     private dialogRef = inject(DynamicDialogRef);
     private dialogConfig = inject(DynamicDialogConfig);
     private readonly _endpointsService = inject(EndpointsService);
     private readonly messageService = inject(MessageService);
-
-    saving = signal<boolean>(false);
 
     constructor() {
         this.form = this.fb.group({
@@ -166,27 +162,69 @@ export class EndpointEditar implements OnInit {
                 this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
             });
 
-            resource?.endpoints?.forEach((endpoint) => {
-                this.endpointsFormArray.push(this.createGroupEndpoint(endpoint));
+            resource?.endpoints?.forEach((endpoint, index) => {
+                this.endpointsFormArray.push(this.createGroupEndpoint(endpoint, index === 0));
             });
         } else {
             // Create mode: Add default ID schema
-            this.resourceSchemaFormArray.push(this.createGroupSchema({
-                name: 'id',
-                type:  'Object.ID',
-                value: ''
-            }));
+            this.resourceSchemaFormArray.push(
+                this.createGroupSchema({
+                    name: 'id',
+                    type: 'Object.ID',
+                    value: ''
+                })
+            );
 
             // Create mode: Add 5 default endpoints
-            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'GET', url: '/', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
-            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'GET', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
-            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'POST', url: '/', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
-            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'PUT', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
-            this.endpointsFormArray.push(this.createGroupEndpoint({ method: 'DELETE', url: '/:id', enabled: true, paginate: false, per_page_default: 10, response: '$mockData' }));
+            this.endpointsFormArray.push(
+                this.createGroupEndpoint(
+                    {
+                        method: 'GET',
+                        url: '/',
+                        enabled: true,
+                        paginate: false,
+                        per_page_default: 10,
+                        response: '$mockData'
+                    },
+                    true
+                )
+            );
+            this.endpointsFormArray.push(
+                this.createGroupEndpoint({
+                    method: 'GET',
+                    url: '/:id',
+                    enabled: true,
+                    response: '$mockData'
+                })
+            );
+            this.endpointsFormArray.push(
+                this.createGroupEndpoint({
+                    method: 'POST',
+                    url: '/',
+                    enabled: true,
+                    response: '$mockData'
+                })
+            );
+            this.endpointsFormArray.push(
+                this.createGroupEndpoint({
+                    method: 'PUT',
+                    url: '/:id',
+                    enabled: true,
+                    response: '$mockData'
+                })
+            );
+            this.endpointsFormArray.push(
+                this.createGroupEndpoint({
+                    method: 'DELETE',
+                    url: '/:id',
+                    enabled: true,
+                    response: '$mockData'
+                })
+            );
         }
 
         // Reactivity: Auto-update URLs when name changes
-        this.form.get('name')?.valueChanges.subscribe(val => {
+        this.form.get('name')?.valueChanges.subscribe((val) => {
             const safeName = val ? val : '';
             this.endpointsFormArray.controls.forEach((ctrl) => {
                 const method = ctrl.get('method')?.value;
@@ -210,15 +248,20 @@ export class EndpointEditar implements OnInit {
         });
     }
 
-    createGroupEndpoint(value?: Endpoint): FormGroup {
-        return this.fb.group({
+    createGroupEndpoint(value?: Endpoint, first?: boolean): FormGroup {
+        const group: FormGroup = this.fb.group({
             enabled: [value?.enabled ?? true],
             method: [value?.method ?? 'GET'],
-            paginate: [value?.paginate ?? false],
-            per_page_default: [value?.per_page_default ?? 10],
             response: [value?.response ?? '$mockData'],
             url: [value?.url ?? '']
         });
+
+        if (value?.paginate !== undefined || first) {
+            group.addControl('paginate', this.fb.control(value?.paginate ?? false));
+            group.addControl('per_page_default', this.fb.control(value?.per_page_default ?? 10));
+        }
+
+        return group;
     }
 
     addSchema(): void {
@@ -237,7 +280,12 @@ export class EndpointEditar implements OnInit {
         if (this.form.invalid) {
             console.log('Invalid Controls:', findInvalidControlsRecursive(this.form));
             this.form.markAllAsTouched();
-            this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Por favor, preencha todos os campos obrigatórios corretamente.', life: 3000 });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Atenção',
+                detail: 'Por favor, preencha todos os campos obrigatórios corretamente.',
+                life: 3000
+            });
             return;
         }
 
@@ -250,12 +298,22 @@ export class EndpointEditar implements OnInit {
         if (resourceId) {
             this._endpointsService.atualizar(resourceId, data).subscribe({
                 next: (res) => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint atualizado com sucesso.', life: 3000 });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Endpoint atualizado com sucesso.',
+                        life: 3000
+                    });
                     this.saving.set(false);
                     this.dialogRef.close(res);
                 },
                 error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao atualizar o endpoint.', life: 3000 });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Ocorreu um erro ao atualizar o endpoint.',
+                        life: 3000
+                    });
                     console.error(err);
                     this.saving.set(false);
                 }
@@ -263,12 +321,22 @@ export class EndpointEditar implements OnInit {
         } else if (projectId) {
             this._endpointsService.criar(projectId, data).subscribe({
                 next: (res) => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Endpoint criado com sucesso.', life: 3000 });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Endpoint criado com sucesso.',
+                        life: 3000
+                    });
                     this.saving.set(false);
                     this.dialogRef.close(res);
                 },
                 error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao criar o endpoint.', life: 3000 });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Ocorreu um erro ao criar o endpoint.',
+                        life: 3000
+                    });
                     console.error(err);
                     this.saving.set(false);
                 }
