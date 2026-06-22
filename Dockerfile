@@ -13,7 +13,7 @@ COPY . .
 
 RUN sed -i "s|http://localhost:8000/api|${SERVER_URL}/api|g" src/environments/environment.ts
 
-RUN npm run build:hm
+RUN npm run build
 
 FROM nginx:alpine
 
