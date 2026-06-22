@@ -2,6 +2,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ARG SERVER_URL
 ENV NODE_OPTIONS="--max-old-space-size=768"
 
 COPY package.json package-lock.json ./
