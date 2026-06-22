@@ -1,25 +1,38 @@
-import { Component } from '@angular/core';
-import { NotificationsWidget } from './components/notificationswidget';
-import { StatsWidget } from './components/statswidget';
-// import { RecentSalesWidget } from './components/recentsaleswidget';
-import { BestSellingWidget } from './components/bestsellingwidget';
-import { RevenueStreamWidget } from './components/revenuestreamwidget';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DashboardStatsWidget } from './widgets/dashboard-stats-widget';
+import { TopEndpointsWidget } from './widgets/top-endpoints-widget';
+import { CallsChartWidget } from './widgets/calls-chart-widget';
+import { DashboardService, DashboardMetrics } from '@/app/core/services/dashboard-service';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [StatsWidget, BestSellingWidget, RevenueStreamWidget, NotificationsWidget],
+    imports: [CommonModule, DashboardStatsWidget, TopEndpointsWidget, CallsChartWidget],
     template: `
         <div class="grid grid-cols-12 gap-8">
-            <app-stats-widget class="contents" />
+            <app-dashboard-stats-widget class="contents" [metrics]="metrics()" />
             <div class="col-span-12 xl:col-span-6">
-<!--                <app-recent-sales-widget />-->
-                <app-best-selling-widget />
+                <app-top-endpoints-widget [metrics]="metrics()" />
             </div>
             <div class="col-span-12 xl:col-span-6">
-                <app-revenue-stream-widget />
-                <app-notifications-widget />
+                <app-calls-chart-widget [metrics]="metrics()" />
             </div>
         </div>
     `
 })
-export class Dashboard {}
+export class Dashboard implements OnInit {
+    private dashboardService = inject(DashboardService);
+
+    metrics = signal<DashboardMetrics | null>(null);
+
+    ngOnInit(): void {
+        this.dashboardService.getMetrics().subscribe({
+            next: (data) => {
+                this.metrics.set(data);
+            },
+            error: (err) => {
+                console.error('Erro ao carregar métricas', err);
+            }
+        });
+    }
+}

@@ -1,21 +1,25 @@
-import { afterNextRender, Component, effect, inject, signal } from '@angular/core';
+import { afterNextRender, Component, effect, inject, Input, signal, SimpleChanges, OnChanges } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { LayoutService } from '@/app/shared/layout/service/layout.service';
+import { DashboardMetrics } from '@/app/core/services/dashboard-service';
 
 @Component({
     standalone: true,
-    selector: 'app-revenue-stream-widget',
+    selector: 'app-calls-chart-widget',
     imports: [ChartModule],
-    template: `<div class="card mb-8!">
-        <div class="font-semibold text-xl mb-4">Revenue Stream</div>
-        <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" class="h-100" />
-    </div>`
+    template: `
+        <div class="card mb-8 h-full">
+            <div class="font-semibold text-xl mb-4">Requisições (Últimos 7 dias)</div>
+            <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" class="h-[300px]" />
+        </div>
+    `
 })
-export class RevenueStreamWidget {
+export class CallsChartWidget implements OnChanges {
+    @Input() metrics: DashboardMetrics | null = null;
+    
     layoutService = inject(LayoutService);
 
     chartData = signal<any>(null);
-
     chartOptions = signal<any>(null);
 
     constructor() {
@@ -33,41 +37,36 @@ export class RevenueStreamWidget {
         });
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['metrics'] && this.metrics) {
+            this.initChart();
+        }
+    }
+
     initChart() {
+        if (!this.metrics) return;
+
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         const textMutedColor = documentStyle.getPropertyValue('--text-color-secondary');
 
+        const labels = this.metrics.chart_last_7_days.map(item => {
+            const date = new Date(item.date);
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        });
+
+        const data = this.metrics.chart_last_7_days.map(item => item.hits);
+
         this.chartData.set({
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            labels: labels,
             datasets: [
                 {
                     type: 'bar',
-                    label: 'Subscriptions',
+                    label: 'Total de Chamadas',
                     backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                    data: [4000, 10000, 15000, 4000],
-                    barThickness: 32
-                },
-                {
-                    type: 'bar',
-                    label: 'Advertising',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
-                    data: [2100, 8400, 2400, 7500],
-                    barThickness: 32
-                },
-                {
-                    type: 'bar',
-                    label: 'Affiliate',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    data: [4100, 5200, 3400, 7400],
-                    borderRadius: {
-                        topLeft: 8,
-                        topRight: 8,
-                        bottomLeft: 0,
-                        bottomRight: 0
-                    },
-                    borderSkipped: false,
+                    data: data,
+                    borderRadius: 8,
                     barThickness: 32
                 }
             ]
@@ -85,7 +84,6 @@ export class RevenueStreamWidget {
             },
             scales: {
                 x: {
-                    stacked: true,
                     ticks: {
                         color: textMutedColor
                     },
@@ -95,9 +93,9 @@ export class RevenueStreamWidget {
                     }
                 },
                 y: {
-                    stacked: true,
                     ticks: {
-                        color: textMutedColor
+                        color: textMutedColor,
+                        stepSize: 1
                     },
                     grid: {
                         color: borderColor,
