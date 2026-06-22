@@ -1,62 +1,97 @@
-import { afterNextRender, Component, effect, inject, Input, signal, SimpleChanges, OnChanges } from '@angular/core';
+import { afterNextRender, Component, effect, inject, signal, OnInit } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 import { LayoutService } from '@/app/shared/layout/service/layout.service';
-import { DashboardMetrics } from '@/app/core/services/dashboard-service';
+import { DashboardService } from '@/app/core/services/dashboard-service';
 
 @Component({
     standalone: true,
     selector: 'app-calls-chart-widget',
-    imports: [ChartModule],
+    imports: [ChartModule, SelectModule, FormsModule],
     template: `
         <div class="card mb-8 h-full">
-            <div class="font-semibold text-xl mb-4">Requisições (Últimos 7 dias)</div>
+            <div class="flex justify-between items-center mb-4">
+                <div class="font-semibold text-xl">Histórico de Requisições</div>
+                <p-select [options]="filterOptions" [(ngModel)]="selectedFilter" (onChange)="onFilterChange()" optionLabel="label" optionValue="value" class="w-48" />
+            </div>
             <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" class="h-[300px]" />
         </div>
     `
 })
-export class CallsChartWidget implements OnChanges {
-    @Input() metrics: DashboardMetrics | null = null;
-    
+export class CallsChartWidget implements OnInit {
+    dashboardService = inject(DashboardService);
     layoutService = inject(LayoutService);
 
     chartData = signal<any>(null);
     chartOptions = signal<any>(null);
 
-    constructor() {
-        afterNextRender(() => {
-            setTimeout(() => {
-                this.initChart();
-            }, 150);
-        });
+    filterOptions = [
+        { label: 'Últimas 6 horas', value: 'hour' },
+        { label: 'Últimos 7 dias', value: 'day' }
+    ];
+    selectedFilter = 'hour';
 
+    constructor() {
         effect(() => {
+            // Re-render chart on theme change
             this.layoutService.layoutConfig().darkTheme;
             setTimeout(() => {
-                this.initChart();
+                if (this.chartData()) {
+                    this.initChart(this.chartData()); // re-apply theme options
+                }
             }, 150);
         });
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['metrics'] && this.metrics) {
-            this.initChart();
-        }
+    ngOnInit(): void {
+        this.loadData();
     }
 
-    initChart() {
-        if (!this.metrics) return;
+    onFilterChange() {
+        this.loadData();
+    }
 
+    loadData() {
+        const now = new Date();
+        const end = this.formatDateTime(now);
+        
+        let startObj = new Date();
+        if (this.selectedFilter === 'hour') {
+            startObj.setHours(startObj.getHours() - 6);
+        } else {
+            startObj.setDate(startObj.getDate() - 6);
+        }
+        const start = this.formatDateTime(startObj);
+
+        this.dashboardService.getChartData(start, end, this.selectedFilter).subscribe({
+            next: (data) => {
+                this.initChart(data);
+            },
+            error: (err) => console.error('Erro ao carregar dados do gráfico', err)
+        });
+    }
+
+    private formatDateTime(date: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    initChart(apiData: any[]) {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         const textMutedColor = documentStyle.getPropertyValue('--text-color-secondary');
 
-        const labels = this.metrics.chart_last_7_days.map(item => {
-            const date = new Date(item.date);
-            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const labels = apiData.map(item => {
+            const dateObj = new Date(item.date);
+            if (this.selectedFilter === 'hour') {
+                return dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+            return dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
         });
 
-        const data = this.metrics.chart_last_7_days.map(item => item.hits);
+        const data = apiData.map(item => item.hits);
 
         this.chartData.set({
             labels: labels,

@@ -1,0 +1,14 @@
+services:
+    app:
+        build: .
+        restart: unless-stopped
+        working_dir: /var/www/html
+        environment:
+            - SERVICE_URL_APP_80
+            - 'SERVER_URL=${SERVER_URL:?}'
+        healthcheck:
+            test: [ "CMD", "curl", "--fail", "http://127.0.0.1:80" ]
+            interval: 1m
+            timeout: 5s
+            retries: 5
+            start_period: 30s

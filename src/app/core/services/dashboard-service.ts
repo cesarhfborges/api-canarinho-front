@@ -21,7 +21,6 @@ export interface DashboardMetrics {
     calls_today: number;
     error_rate_percentage: number;
     top_endpoints: TopEndpoint[];
-    chart_last_7_days: ChartDailyHit[];
 }
 
 @Injectable({
@@ -32,5 +31,11 @@ export class DashboardService {
 
     public getMetrics(): Observable<DashboardMetrics> {
         return this.http.get<DashboardMetrics>(`${environment.apiUrl}/admin/dashboard/metrics`);
+    }
+
+    public getChartData(start: string, end: string, groupby: string): Observable<ChartDailyHit[]> {
+        return this.http.get<ChartDailyHit[]>(`${environment.apiUrl}/admin/dashboard/chart`, {
+            params: { start, end, groupby }
+        });
     }
 }

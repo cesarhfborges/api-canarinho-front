@@ -15,7 +15,7 @@ import { DashboardService, DashboardMetrics } from '@/app/core/services/dashboar
                 <app-top-endpoints-widget [metrics]="metrics()" />
             </div>
             <div class="col-span-12 xl:col-span-6">
-                <app-calls-chart-widget [metrics]="metrics()" />
+                <app-calls-chart-widget />
             </div>
         </div>
     `
