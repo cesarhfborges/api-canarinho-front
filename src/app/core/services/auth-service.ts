@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { SessionService } from '@/app/core/services/session-service';
+import { PerfilService, UserProfile } from '@/app/core/services/perfil-service';
 import { Observable, tap } from 'rxjs';
 import { environment } from '@/environments/environment';
 
@@ -13,14 +14,7 @@ export interface LoginCredentials {
 interface LoginResponse {
     success: boolean;
     message: string;
-    user: {
-        id: number;
-        name: string;
-        username: string;
-        email: string;
-        created_at: Date;
-        updated_at: Date;
-    };
+    user: UserProfile;
 }
 
 @Injectable({
@@ -29,11 +23,13 @@ interface LoginResponse {
 export class AuthService {
     private http = inject(HttpClient);
     private sessionService = inject(SessionService);
+    private perfilService = inject(PerfilService);
 
     public login(credentials: LoginCredentials): Observable<LoginResponse> {
         return this.http.post<LoginResponse>(`${environment.apiUrl}/admin/login`, credentials).pipe(
-            tap(() => {
+            tap((response) => {
                 this.sessionService.createSession();
+                this.perfilService.userProfile.set(response.user);
             })
         );
     }
@@ -43,6 +39,7 @@ export class AuthService {
             tap((response) => {
                 console.log(response);
                 this.sessionService.destroySession();
+                this.perfilService.clearPerfil();
             })
         );
     }
