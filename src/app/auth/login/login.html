@@ -1,19 +1,21 @@
 <app-floating-configurator />
 <div
-    class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
+    class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden bg-[url(/assets/imgs/wallpaper.jpg)] bg-cover bg-center bg-no-repeat">
     <div class="flex flex-col items-center justify-center">
         <div style="border-radius: 56px; padding: 0.25rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-            <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
+            <div class="w-full bg-surface-0 dark:bg-surface-900 py-14 px-8 sm:px-14 shadow-lg" style="border-radius: 53px">
 
                 <div class="text-center mb-8">
                     <app-logotipo class="block mb-8 w-24 shrink-0 mx-auto" />
-                    <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">
-                        SVO
+                    <div class="flex text-3xl font-bold mb-1 justify-center gap-2">
+                        <span class="text-green-800">API</span>
+                        <span class="text-yellow-400">Canarinho</span>
                     </div>
-                    <span class="text-muted-color font-medium">Efetue login para continuar</span>
+                    <div class="text-blue-700 dark:text-blue-400 font-bold mb-4">Sistema de API mock dinamico</div>
                 </div>
 
                 <div class="w-full md:w-100">
+                    <div class="dark:text-muted-color font-medium text-center mb-4">Efetue login para continuar</div>
                     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                         <label
                             for="email"
@@ -54,7 +56,7 @@
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-orange-500">Esqueci a senha</span>
                         </div>
-                        <p-button type="submit" label="Sign In" styleClass="w-full"></p-button>
+                        <p-button type="submit" label="Entrar" styleClass="w-full"></p-button>
                     </form>
                 </div>
             </div>

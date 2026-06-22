@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +9,8 @@ import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
 import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.floatingconfigurator';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
+import { environment } from '@/environments/environment';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-login',
@@ -25,9 +27,10 @@ import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
         ReactiveFormsModule,
         Logotipo
     ],
-    templateUrl: './login.html'
+    templateUrl: './login.html',
+    styleUrl: './login.scss'
 })
-export class Login {
+export class Login implements OnInit {
     private router = inject(Router);
     private authService = inject(AuthService);
     private fb = inject(NonNullableFormBuilder);
@@ -35,11 +38,22 @@ export class Login {
     public isLoading = signal<boolean>(false);
     public errorMessage = signal<string | null>(null);
 
+    private messageService = inject(MessageService);
+
     public loginForm = this.fb.group({
-        username: ['admin', [Validators.required]],
-        password: ['canarinho1234', [Validators.required, Validators.minLength(6)]],
+        username: ['', [Validators.required]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
         remember: [false, [Validators.required]]
     });
+
+    ngOnInit() {
+        if (!environment.production) {
+            this.loginForm.patchValue({
+                username: 'admin',
+                password: 'canarinho1234'
+            });
+        }
+    }
 
     public onSubmit(): void {
         if (this.loginForm.invalid) {
@@ -56,6 +70,11 @@ export class Login {
             next: (response: any) => {
                 console.log(response);
                 void this.router.navigate(['/home']);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Login efetuado com sucesso!'
+                });
             },
             error: (err) => {
                 console.error('Erro tratado no componente:', err);

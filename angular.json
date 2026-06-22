@@ -24,6 +24,7 @@
             "inlineStyleLanguage": "scss",
             "polyfills": [],
             "assets": [
+                "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
