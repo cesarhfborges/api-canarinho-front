@@ -1,0 +1,26 @@
+<div class="flex flex-col gap-4">
+    <p-card header="Meu Perfil">
+        <form [formGroup]="form" (ngSubmit)="salvar()" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="name" class="font-semibold">Nome</label>
+                <input id="name" type="text" pInputText formControlName="name" />
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                    <small class="text-red-500">O nome é obrigatório.</small>
+                }
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="email" class="font-semibold">E-mail</label>
+                <input id="email" type="email" pInputText formControlName="email" />
+                @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                    <small class="text-red-500">Informe um e-mail válido.</small>
+                }
+            </div>
+
+            <div class="flex justify-between items-center mt-4">
+                <p-button label="Alterar Minha Senha" icon="pi pi-key" severity="secondary" [outlined]="true" (onClick)="alterarSenha()" />
+                <p-button label="Salvar Alterações" icon="pi pi-check" type="submit" [loading]="saving()" [disabled]="form.invalid" severity="success" />
+            </div>
+        </form>
+    </p-card>
+</div>

@@ -1,0 +1,42 @@
+@if (form) {
+    <form [formGroup]="form" class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-2">
+            <label for="name" class="font-semibold">Nome</label>
+            <input id="name" type="text" pInputText formControlName="name" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="username" class="font-semibold">Username</label>
+            <input id="username" type="text" pInputText formControlName="username" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="email" class="font-semibold">E-mail</label>
+            <input id="email" type="email" pInputText formControlName="email" />
+        </div>
+
+        @if (!isEdit()) {
+            <div class="flex flex-col gap-2">
+                <label for="password" class="font-semibold">Senha Inicial</label>
+                <input id="password" type="password" pInputText formControlName="password" />
+            </div>
+        }
+
+        <div class="flex items-center gap-4 mt-2">
+            <div class="flex items-center gap-2">
+                <p-toggleswitch inputId="is_admin" formControlName="is_admin" />
+                <label for="is_admin">Administrador?</label>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <p-toggleswitch inputId="is_active" formControlName="is_active" />
+                <label for="is_active">Ativo?</label>
+            </div>
+        </div>
+        
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button label="Cancelar" icon="pi pi-times" (onClick)="fechar()" [outlined]="true" severity="secondary" />
+            <p-button label="Salvar" icon="pi pi-check" (onClick)="salvar()" [disabled]="form.invalid" [loading]="saving()" severity="success" />
+        </div>
+    </form>
+}

@@ -8,6 +8,8 @@ export interface UserProfile {
     name: string;
     username: string;
     email: string;
+    is_admin: boolean;
+    is_active: boolean;
     created_at: Date;
     updated_at: Date;
 }
@@ -23,6 +25,16 @@ export class PerfilService {
         return this.http
             .get<UserProfile>(`${environment.apiUrl}/admin/me`)
             .pipe(tap((profile) => this.userProfile.set(profile)));
+    }
+
+    public updatePerfil(data: { name: string; email: string }): Observable<UserProfile> {
+        return this.http
+            .put<UserProfile>(`${environment.apiUrl}/admin/me`, data)
+            .pipe(tap((profile) => this.userProfile.set(profile)));
+    }
+
+    public updatePassword(data: any): Observable<any> {
+        return this.http.put(`${environment.apiUrl}/admin/me/password`, data);
     }
 
     public clearPerfil(): void {

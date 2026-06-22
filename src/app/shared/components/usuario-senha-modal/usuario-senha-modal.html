@@ -1,0 +1,22 @@
+<form [formGroup]="form" class="flex flex-col gap-4 pt-2">
+    <div class="flex flex-col gap-2">
+        <label for="password" class="font-semibold">Nova Senha</label>
+        <p-password id="password" formControlName="password" [toggleMask]="true" promptLabel="Digite a senha" weakLabel="Fraca" mediumLabel="Média" strongLabel="Forte" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <small class="text-red-500">A senha deve ter no mínimo 6 caracteres.</small>
+        }
+    </div>
+
+    <div class="flex flex-col gap-2">
+        <label for="password_confirmation" class="font-semibold">Confirmar Nova Senha</label>
+        <p-password id="password_confirmation" formControlName="password_confirmation" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        @if (form.hasError('mismatch')) {
+            <small class="text-red-500">As senhas não coincidem.</small>
+        }
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <p-button label="Cancelar" icon="pi pi-times" (onClick)="fechar()" [outlined]="true" severity="secondary" />
+        <p-button label="Salvar" icon="pi pi-check" (onClick)="salvar()" [disabled]="form.invalid" [loading]="saving()" severity="success" />
+    </div>
+</form>

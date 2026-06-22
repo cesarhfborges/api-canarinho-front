@@ -6,6 +6,14 @@ const pageRoutes: Routes = [
     {
         path: 'projetos',
         loadChildren: () => import('./projetos/projetos.routes')
+    },
+    {
+        path: 'perfil',
+        loadChildren: () => import('./perfil/perfil.routes')
+    },
+    {
+        path: 'usuarios',
+        loadChildren: () => import('./usuarios/usuarios.routes')
     }
 ];
 
