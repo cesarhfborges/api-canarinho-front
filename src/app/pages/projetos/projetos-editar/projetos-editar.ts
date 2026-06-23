@@ -111,10 +111,13 @@ export class ProjetosEditar implements OnInit {
                 username: this.username(),
                 projectSlug: this.project()?.slug
             },
+            styleClass: 'customize',
             breakpoints: {
+                '4000px': '75vw',
                 '1920px': '75vw',
                 '960px': '85vw',
-                '640px': '90vw'
+                '640px': '90vw',
+                '10px': '90vw'
             }
         });
         ref?.onClose?.subscribe({

@@ -1,6 +1,7 @@
-<form [formGroup]="form">
+<form [formGroup]="form" class="flex flex-col w-full">
     <p-fluid>
-        <div class="flex flex-col gap-8 w-full">
+        <div class="flex flex-col w-full" style="max-height: calc(100vh - 150px);">
+            <div class="flex-1 overflow-y-auto pb-4 pr-2" style="max-height: 60vh!important;">
 
             <p-tabs value="0">
                 <p-tablist>
@@ -498,8 +499,10 @@
                 </p-tabpanels>
             </p-tabs>
 
+            </div>
+
             <!-- ACTIONS -->
-            <section class="border-t border-surface-200 dark:border-surface-700 pt-6">
+            <section class="shrink-0 border-t border-surface-200 dark:border-surface-700 pt-6 mt-4 pb-2">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 

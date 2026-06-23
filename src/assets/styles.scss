@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+@use './tailwind.css';
 @use 'primeicons/primeicons.css';
 @use 'src/assets/layout/layout.scss';
 @use 'src/assets/demo/demo.scss';
@@ -49,19 +50,14 @@ pre {
                     }
                 }
             }
+        }
+    }
+}
 
-            //table.hljs-ls {
-            //    background: red;
-            //    //tr {
-            //    //    td.hljs-ln-numbers {
-            //    //        div.hljs-ln-n {
-            //    //            &::before {
-            //    //                background: red;
-            //    //            }
-            //    //        }
-            //    //    }
-            //    //}
-            //}
+.p-dialog {
+    &.customize {
+        > .p-dialog-header {
+            border-bottom: 1px solid var(--p-dialog-border-color);
         }
     }
 }
