@@ -12,6 +12,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { Endpoint } from '@/app/core/models/endpoint';
 import { TagModule } from 'primeng/tag';
+import { TabsModule } from 'primeng/tabs';
 import fakerMethods from '@/app/core/utils/faker-methods';
 import { MessageService, SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -33,6 +34,7 @@ import { environment } from '@/environments/environment';
         InputNumberModule,
         ToggleSwitchModule,
         TagModule,
+        TabsModule,
         ButtonModule,
         Highlight,
         TooltipModule,

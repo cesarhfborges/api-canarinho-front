@@ -2,6 +2,15 @@
     <p-fluid>
         <div class="flex flex-col gap-8 w-full">
 
+            <p-tabs value="0">
+                <p-tablist>
+                    <p-tab value="0">Geral</p-tab>
+                    <p-tab value="1">Schema</p-tab>
+                    <p-tab value="2">Endpoints</p-tab>
+                    <p-tab value="3">Exemplos</p-tab>
+                </p-tablist>
+                <p-tabpanels>
+                    <p-tabpanel value="0">
             <!-- ENDPOINT -->
             <section class="flex flex-col gap-4">
 
@@ -31,6 +40,8 @@
                     </div>
                 </div>
             </section>
+                    </p-tabpanel>
+                    <p-tabpanel value="1">
 
             <!-- SCHEMA -->
             <section class="flex flex-col gap-4">
@@ -266,6 +277,8 @@
                 </div>
 
             </section>
+                    </p-tabpanel>
+                    <p-tabpanel value="2">
 
             <!-- ENDPOINTS -->
             <section class="flex flex-col gap-4">
@@ -443,6 +456,8 @@
                 </div>
 
             </section>
+                    </p-tabpanel>
+                    <p-tabpanel value="3">
 
             <!-- Preview -->
             <section class="flex flex-col">
@@ -479,6 +494,9 @@
                     </pre>
                 </div>
             </section>
+                    </p-tabpanel>
+                </p-tabpanels>
+            </p-tabs>
 
             <!-- ACTIONS -->
             <section class="border-t border-surface-200 dark:border-surface-700 pt-6">
