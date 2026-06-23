@@ -6,7 +6,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
-import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.floatingconfigurator';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 import { MessageService } from 'primeng/api';
 import { ConfigService } from '@/app/core/services/config-service';
@@ -21,7 +20,6 @@ import { ConfigService } from '@/app/core/services/config-service';
         FormsModule,
         RouterModule,
         RippleModule,
-        AppFloatingConfigurator,
         ReactiveFormsModule,
         Logotipo
     ],
@@ -29,21 +27,19 @@ import { ConfigService } from '@/app/core/services/config-service';
     styleUrl: './register.scss'
 })
 export class Register {
+    public isLoading = signal<boolean>(false);
+    public configService = inject(ConfigService);
     private router = inject(Router);
     private authService = inject(AuthService);
     private fb = inject(NonNullableFormBuilder);
-
-    public isLoading = signal<boolean>(false);
-
-    private messageService = inject(MessageService);
-    public configService = inject(ConfigService);
-
     public registerForm = this.fb.group({
         name: ['', [Validators.required]],
+        username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
+    private messageService = inject(MessageService);
 
     public onSubmit(): void {
         if (this.registerForm.invalid) {
@@ -52,7 +48,7 @@ export class Register {
         }
 
         const { name, email, password, confirmPassword } = this.registerForm.getRawValue();
-        
+
         if (password !== confirmPassword) {
             this.messageService.add({
                 severity: 'error',

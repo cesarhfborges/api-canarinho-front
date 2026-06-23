@@ -7,7 +7,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
-import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.floatingconfigurator';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 import { environment } from '@/environments/environment';
 import { MessageService } from 'primeng/api';
@@ -24,7 +23,6 @@ import { ConfigService } from '@/app/core/services/config-service';
         FormsModule,
         RouterModule,
         RippleModule,
-        AppFloatingConfigurator,
         ReactiveFormsModule,
         Logotipo
     ],
@@ -32,21 +30,18 @@ import { ConfigService } from '@/app/core/services/config-service';
     styleUrl: './login.scss'
 })
 export class Login implements OnInit {
+    public isLoading = signal<boolean>(false);
+    public errorMessage = signal<string | null>(null);
+    public configService = inject(ConfigService);
     private router = inject(Router);
     private authService = inject(AuthService);
     private fb = inject(NonNullableFormBuilder);
-
-    public isLoading = signal<boolean>(false);
-    public errorMessage = signal<string | null>(null);
-
-    private messageService = inject(MessageService);
-    public configService = inject(ConfigService);
-
     public loginForm = this.fb.group({
         username: ['', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         remember: [false, [Validators.required]]
     });
+    private messageService = inject(MessageService);
 
     ngOnInit() {
         if (!environment.production) {
