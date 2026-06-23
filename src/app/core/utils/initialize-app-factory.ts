@@ -27,7 +27,8 @@ export async function initializeAppFactory(): Promise<any> {
                 preset: conf.theme_preset || 'Aura',
                 primary: conf.theme_primary || 'emerald',
                 surface: conf.theme_surface || undefined,
-                menuMode: conf.theme_menuMode || prev.menuMode
+                menuMode: conf.theme_menuMode || prev.menuMode,
+                colorScheme: (conf.theme_color_scheme as any) || 'auto'
             }));
         }
     } catch (error) {
@@ -36,8 +37,11 @@ export async function initializeAppFactory(): Promise<any> {
 
     await firstValueFrom(
         perfilService.getPerfil().pipe(
-            tap(() => {
+            tap((profile) => {
                 sessionService.createSession();
+                if (profile && profile.theme_color_scheme) {
+                    layoutService.setColorScheme(profile.theme_color_scheme);
+                }
             }),
             catchError(() => {
                 sessionService.destroySession();

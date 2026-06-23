@@ -69,6 +69,23 @@
         </div>
         
         <div class="flex flex-col gap-12">
+
+            <!-- Seção de Esquema de Cores (Novo) -->
+            <div class="flex flex-col gap-4">
+                <div>
+                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Esquema de Cores Padrão</div>
+                    <div class="text-sm text-muted-color">O tema global que será exibido para visitantes e usuários sem preferência definida.</div>
+                </div>
+                
+                <p-selectbutton
+                    formControlName="theme_color_scheme"
+                    [options]="colorSchemeOptions"
+                    [allowEmpty]="false"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-full sm:w-auto"
+                />
+            </div>
             
             <!-- Seção de Tema Base -->
             <div class="flex flex-col gap-4">
@@ -143,7 +160,7 @@
                                 type="button"
                                 (click)="configForm.patchValue({ theme_surface: surface.name })"
                                 class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border-2"
-                                [ngClass]="selectedSurfaceColor() === surface.name || (!selectedSurfaceColor() && (layoutService.layoutConfig().darkTheme ? surface.name === 'zinc' : surface.name === 'slate')) 
+                                [ngClass]="selectedSurfaceColor() === surface.name || (!selectedSurfaceColor() && (layoutService.isDarkTheme() ? surface.name === 'zinc' : surface.name === 'slate')) 
                                     ? 'border-primary bg-primary text-primary-contrast shadow-md' 
                                     : 'border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 hover:bg-surface-100 dark:hover:bg-surface-800'">
                                 <span class="capitalize">{{ surface.name }}</span>

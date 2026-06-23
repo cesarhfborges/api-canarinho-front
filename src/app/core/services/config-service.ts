@@ -11,6 +11,7 @@ export interface SystemConfig {
     theme_primary?: string;
     theme_surface?: string | null;
     theme_menuMode?: string;
+    theme_color_scheme?: string;
     [key: string]: any;
 }
 

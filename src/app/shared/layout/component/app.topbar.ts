@@ -5,16 +5,17 @@ import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/shared/layout/service/layout.service';
-import { TieredMenu } from 'primeng/tieredmenu';
+import { TieredMenu, TieredMenuModule } from 'primeng/tieredmenu';
 import { Ripple } from 'primeng/ripple';
 import { AuthService } from '@/app/core/services/auth-service';
+import { PerfilService } from '@/app/core/services/perfil-service';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 import { environment } from '@/environments/environment';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, TieredMenu, Ripple, Logotipo],
+    imports: [RouterModule, CommonModule, StyleClassModule, TieredMenuModule, Ripple, Logotipo],
     template: `
         <div class="layout-topbar shadow-lg">
             <div class="layout-topbar-logo-container">
@@ -80,15 +81,27 @@ import { environment } from '@/environments/environment';
                 }
 
                 <div class="layout-config-menu">
-                    <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
+                    <button type="button" class="layout-topbar-action" (click)="themeMenu.toggle($event)">
                         <i
                             [ngClass]="{
                                 'pi ': true,
-                                'pi-moon': layoutService.isDarkTheme(),
-                                'pi-sun': !layoutService.isDarkTheme()
+                                'pi-moon': layoutService.layoutConfig().colorScheme === 'dark',
+                                'pi-sun': layoutService.layoutConfig().colorScheme === 'light',
+                                'pi-desktop': layoutService.layoutConfig().colorScheme === 'auto'
                             }"
                         ></i>
                     </button>
+                    <p-tieredMenu #themeMenu [model]="themeItems" [popup]="true">
+                        <ng-template #item let-item>
+                            <a pRipple class="flex items-center px-4 py-3 cursor-pointer" [class]="item.linkClass" (click)="item.command()">
+                                <span [ngClass]="item.icon" class="mr-2"></span>
+                                <span class="ms-2 font-medium">{{ item.label }}</span>
+                                @if (layoutService.layoutConfig().colorScheme === item.id) {
+                                    <span class="ms-auto text-primary pi pi-check"></span>
+                                }
+                            </a>
+                        </ng-template>
+                    </p-tieredMenu>
 <!--                    <div class="relative">-->
 <!--                        <button-->
 <!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
@@ -168,6 +181,7 @@ export class AppTopbar {
 
     layoutService = inject(LayoutService);
     authService = inject(AuthService);
+    perfilService = inject(PerfilService);
 
     protected production = environment.production;
 
@@ -175,12 +189,33 @@ export class AppTopbar {
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
 
-    toggleDarkMode(): void {
-        this.layoutService.layoutConfig.update((state) => ({
-            ...state,
-            darkTheme: !state.darkTheme
-        }));
+    themeItems: MenuItem[] = [
+        {
+            id: 'light',
+            label: 'Claro',
+            icon: 'pi pi-sun',
+            command: () => this.changeColorScheme('light')
+        },
+        {
+            id: 'dark',
+            label: 'Escuro',
+            icon: 'pi pi-moon',
+            command: () => this.changeColorScheme('dark')
+        },
+        {
+            id: 'auto',
+            label: 'Sistema (Auto)',
+            icon: 'pi pi-desktop',
+            command: () => this.changeColorScheme('auto')
+        }
+    ];
+
+    changeColorScheme(scheme: 'light' | 'dark' | 'auto') {
+        this.layoutService.setColorScheme(scheme);
+        this.perfilService.updatePerfil({ theme_color_scheme: scheme }).subscribe();
     }
+
+
 
     logout(): void {
         this.confirmationService.confirm({

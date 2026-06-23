@@ -4,7 +4,7 @@ export interface LayoutConfig {
     preset: string;
     primary: string;
     surface: string | undefined | null;
-    darkTheme: boolean;
+    colorScheme: 'light' | 'dark' | 'auto';
     menuMode: string;
 }
 
@@ -25,9 +25,11 @@ export class LayoutService {
         preset: 'Aura',
         primary: 'emerald',
         surface: null,
-        darkTheme: false,
+        colorScheme: 'auto',
         menuMode: 'static'
     });
+
+    systemDarkTheme = signal<boolean>(false);
 
     layoutState = signal<LayoutState>({
         staticMenuDesktopInactive: false,
@@ -38,11 +40,16 @@ export class LayoutService {
         activePath: null
     });
 
-    theme = computed(() => (this.layoutConfig().darkTheme ? 'light' : 'dark'));
+    theme = computed(() => (this.isDarkTheme() ? 'dark' : 'light'));
 
     isSidebarActive = computed(() => this.layoutState().overlayMenuActive || this.layoutState().mobileMenuActive);
 
-    isDarkTheme = computed(() => this.layoutConfig().darkTheme);
+    isDarkTheme = computed(() => {
+        const scheme = this.layoutConfig().colorScheme;
+        if (scheme === 'dark') return true;
+        if (scheme === 'light') return false;
+        return this.systemDarkTheme();
+    });
 
     getPrimary = computed(() => this.layoutConfig().primary);
 
@@ -55,6 +62,15 @@ export class LayoutService {
     private initialized = false;
 
     constructor() {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        this.systemDarkTheme.set(mediaQuery.matches);
+        mediaQuery.addEventListener('change', (e) => {
+            this.systemDarkTheme.set(e.matches);
+            if (this.layoutConfig().colorScheme === 'auto') {
+                this.handleDarkModeTransition(this.layoutConfig());
+            }
+        });
+
         effect(() => {
             const config = this.layoutConfig();
 
@@ -83,9 +99,14 @@ export class LayoutService {
         });
     }
 
-    toggleDarkMode(config?: LayoutConfig): void {
+    setColorScheme(scheme: 'light' | 'dark' | 'auto'): void {
+        this.layoutConfig.update((state) => ({ ...state, colorScheme: scheme }));
+    }
+
+    private toggleDarkMode(config?: LayoutConfig): void {
         const _config = config || this.layoutConfig();
-        if (_config.darkTheme) {
+        const isDark = _config.colorScheme === 'dark' || (_config.colorScheme === 'auto' && this.systemDarkTheme());
+        if (isDark) {
             document.documentElement.classList.add('app-dark');
         } else {
             document.documentElement.classList.remove('app-dark');

@@ -34,13 +34,10 @@ export class CallsChartWidget implements OnInit {
 
     constructor() {
         effect(() => {
-            // Re-render chart on theme change
-            this.layoutService.layoutConfig().darkTheme;
-            setTimeout(() => {
-                if (this.chartData()) {
-                    this.initChart(this.chartData()); // re-apply theme options
-                }
-            }, 150);
+            this.layoutService.isDarkTheme();
+            if (this.chartData()) {
+                this.initChart(this.chartData()); // re-apply theme options
+            }
         });
     }
 

@@ -42,8 +42,14 @@ export class Configuracoes implements OnInit {
 
     public presets = ['Aura', 'Lara', 'Nora'];
     public menuModeOptions = [
-        { label: 'Static', value: 'static' },
-        { label: 'Overlay', value: 'overlay' }
+        { label: 'Estático', value: 'static' },
+        { label: 'Sobreposto', value: 'overlay' }
+    ];
+
+    public colorSchemeOptions = [
+        { label: 'Sistema (Auto)', value: 'auto' },
+        { label: 'Claro', value: 'light' },
+        { label: 'Escuro', value: 'dark' }
     ];
 
     public configForm = this.fb.group({
@@ -53,7 +59,8 @@ export class Configuracoes implements OnInit {
         theme_preset: ['Aura'],
         theme_primary: ['emerald'],
         theme_surface: [''],
-        theme_menuMode: ['static']
+        theme_menuMode: ['static'],
+        theme_color_scheme: ['auto']
     });
 
     public selectedPrimaryColor = signal<string>('emerald');
@@ -83,7 +90,8 @@ export class Configuracoes implements OnInit {
             theme_preset: currentConfig.theme_preset || 'Aura',
             theme_primary: currentConfig.theme_primary || 'emerald',
             theme_surface: currentConfig.theme_surface || '',
-            theme_menuMode: currentConfig.theme_menuMode || 'static'
+            theme_menuMode: currentConfig.theme_menuMode || 'static',
+            theme_color_scheme: currentConfig.theme_color_scheme || 'auto'
         });
 
         this.selectedPreset.set(currentConfig.theme_preset || 'Aura');

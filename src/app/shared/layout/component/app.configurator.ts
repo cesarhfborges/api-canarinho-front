@@ -74,9 +74,9 @@ declare interface SurfacesType {
                             [ngClass]="{
                                 'outline outline-primary': selectedSurfaceColor()
                                     ? selectedSurfaceColor() === surface.name
-                                    : layoutService.layoutConfig().darkTheme
-                                      ? surface.name === 'zinc'
-                                      : surface.name === 'slate'
+                                    : layoutService.isDarkTheme()
+                                        ? surface.name === 'zinc'
+                                        : surface.name === 'slate'
                             }"
                             [style]="{
                                 'background-color': surface?.palette?.['500']
