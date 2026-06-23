@@ -23,7 +23,10 @@ import { environment } from '@/environments/environment';
                 </button>
                 <a class="layout-topbar-logo" routerLink="/">
                     <app-logotipo class="block h-12 shrink-0 mx-auto" />
-                    <span>SVO</span>
+                    <div class="flex text-3xl font-bold mb-1 justify-center gap-2">
+                        <span class="text-green-800">API</span>
+                        <span class="text-yellow-400">Canarinho</span>
+                    </div>
                 </a>
             </div>
 
