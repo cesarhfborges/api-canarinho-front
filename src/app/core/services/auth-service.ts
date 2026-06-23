@@ -34,6 +34,10 @@ export class AuthService {
         );
     }
 
+    public register(userData: any): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/admin/register`, userData);
+    }
+
     public logout(): Observable<any> {
         return this.http.post<any>(`${environment.apiUrl}/admin/logout`, {}).pipe(
             tap((response) => {
