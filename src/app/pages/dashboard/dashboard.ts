@@ -3,14 +3,18 @@ import { CommonModule } from '@angular/common';
 import { DashboardStatsWidget } from './widgets/dashboard-stats-widget';
 import { TopEndpointsWidget } from './widgets/top-endpoints-widget';
 import { CallsChartWidget } from './widgets/calls-chart-widget';
-import { DashboardService, DashboardMetrics } from '@/app/core/services/dashboard-service';
+import { RateLimitWidget } from './widgets/rate-limit-widget';
+import { DashboardService, DashboardMetrics, RateLimitData } from '@/app/core/services/dashboard-service';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [CommonModule, DashboardStatsWidget, TopEndpointsWidget, CallsChartWidget],
+    imports: [CommonModule, DashboardStatsWidget, TopEndpointsWidget, CallsChartWidget, RateLimitWidget],
     template: `
         <div class="grid grid-cols-12 gap-8">
             <app-dashboard-stats-widget class="contents" [metrics]="metrics()" />
+            <div class="col-span-12">
+                <app-rate-limit-widget [rateLimit]="rateLimit()" />
+            </div>
             <div class="col-span-12 xl:col-span-6">
                 <app-top-endpoints-widget [metrics]="metrics()" />
             </div>
@@ -24,6 +28,7 @@ export class Dashboard implements OnInit {
     private dashboardService = inject(DashboardService);
 
     metrics = signal<DashboardMetrics | null>(null);
+    rateLimit = signal<RateLimitData | null>(null);
 
     ngOnInit(): void {
         this.dashboardService.getMetrics().subscribe({
@@ -32,6 +37,15 @@ export class Dashboard implements OnInit {
             },
             error: (err) => {
                 console.error('Erro ao carregar métricas', err);
+            }
+        });
+
+        this.dashboardService.getRateLimit().subscribe({
+            next: (data) => {
+                this.rateLimit.set(data);
+            },
+            error: (err) => {
+                console.error('Erro ao carregar rate limit', err);
             }
         });
     }

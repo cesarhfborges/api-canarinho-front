@@ -23,6 +23,13 @@ export interface DashboardMetrics {
     top_endpoints: TopEndpoint[];
 }
 
+export interface RateLimitData {
+    limit: number;
+    current_usage: number;
+    time_window_minutes: number;
+    remaining: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -37,5 +44,9 @@ export class DashboardService {
         return this.http.get<ChartDailyHit[]>(`${environment.apiUrl}/admin/dashboard/chart`, {
             params: { start, end, groupby }
         });
+    }
+
+    public getRateLimit(): Observable<RateLimitData> {
+        return this.http.get<RateLimitData>(`${environment.apiUrl}/admin/dashboard/rate-limit`);
     }
 }
