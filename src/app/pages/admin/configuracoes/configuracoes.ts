@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RippleModule } from 'primeng/ripple';
+import { TabsModule } from 'primeng/tabs';
 import { ConfigService } from '@/app/core/services/config-service';
 import { MessageService } from 'primeng/api';
 
@@ -16,7 +17,8 @@ import { MessageService } from 'primeng/api';
         CheckboxModule,
         FormsModule,
         ReactiveFormsModule,
-        RippleModule
+        RippleModule,
+        TabsModule
     ],
     templateUrl: './configuracoes.html'
 })
