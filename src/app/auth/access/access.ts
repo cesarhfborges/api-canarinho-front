@@ -8,7 +8,7 @@ import { RippleModule } from 'primeng/ripple';
     standalone: true,
     imports: [ButtonModule, RouterModule, RippleModule, ButtonModule],
     template: `<div
-        class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden"
+        class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen overflow-hidden"
     >
         <div class="flex flex-col items-center justify-center">
             <div
