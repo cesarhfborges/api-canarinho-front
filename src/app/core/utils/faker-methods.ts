@@ -7,10 +7,10 @@ export default [
             { label: 'Nome', value: '[person.firstName]' },
             { label: 'Sobrenome', value: '[person.lastName]' },
             { label: 'Nome Completo', value: '[person.fullName]' },
-            { label: 'Nome do Meio', value: '[person.middleName]' },
             { label: 'Prefixo', value: '[person.prefix]' },
             { label: 'Sufixo', value: '[person.suffix]' },
-            { label: 'Gênero', value: '[person.gender]' }
+            { label: 'Gênero', value: '[person.gender]' },
+            { label: 'Data Nascimento', value: '[person.birthdate_date]' }
         ]
     },
     {
@@ -41,12 +41,14 @@ export default [
         items: [
             { label: 'Empresa', value: '[company.name]' },
             { label: 'Departamento', value: '[company.department]' },
-            { label: 'Buzz Phrase', value: '[company.buzzPhrase]' }
+            { label: 'Email - Empresa', value: '[company.companyEmail]' }
         ]
     },
     {
         label: 'Financeiro',
         items: [
+            { label: 'Banco', value: '[finance.bank]' },
+            { label: 'Numero da agencia', value: '[finance.agency]' },
             { label: 'Número da Conta', value: '[finance.accountNumber]' },
             { label: 'Valor', value: '[finance.amount]' },
             { label: 'Código da Moeda', value: '[finance.currencyCode]' }
@@ -62,12 +64,22 @@ export default [
         ]
     },
     {
-        label: 'Datas',
+        label: 'Data e Hora',
         items: [
-            { label: 'Data Passada', value: '[date.past]' },
-            { label: 'Data Futura', value: '[date.future]' },
-            { label: 'Data Recente', value: '[date.recent]' },
-            { label: 'Nascimento', value: '[date.birthdate]' }
+            // Apenas Data
+            { label: 'Data Anterior a hoje [yyyy-MM-dd]', value: '[date.date_before]' },
+            { label: 'Data Atual (Hoje) [yyyy-MM-dd]', value: '[date.date_now]' },
+            { label: 'Data Posterior a hoje [yyyy-MM-dd]', value: '[date.date_after]' },
+
+            // Apenas Hora
+            { label: 'Hora Anterior a agora [HH:mm:ss]', value: '[date.time_before]' },
+            { label: 'Hora Atual (Agora) [HH:mm:ss]', value: '[date.time_now]' },
+            { label: 'Hora Posterior a agora [HH:mm:ss]', value: '[date.time_after]' },
+
+            // Data e Hora
+            { label: 'Data e Hora Anterior a agora [yyyy-MM-ddTHH:mm:ss]', value: '[date.datetime_before]' },
+            { label: 'Data e Hora Atual (Agora) [yyyy-MM-ddTHH:mm:ss]', value: '[date.datetime_now]' },
+            { label: 'Data e Hora Posterior a agora [yyyy-MM-ddTHH:mm:ss]', value: '[date.datetime_after]' }
         ]
     },
     {
@@ -103,9 +115,32 @@ export default [
     {
         label: 'Veículos',
         items: [
-            { label: 'Veículo', value: '[vehicle.vehicle]' },
             { label: 'Modelo', value: '[vehicle.model]' },
-            { label: 'Fabricante', value: '[vehicle.manufacturer]' }
+            { label: 'Fabricante', value: '[vehicle.manufacturer]' },
+            { label: 'Placa', value: '[vehicle.plate]' }
+        ]
+    },
+    {
+        label: 'Brasil',
+        items: [
+            { label: 'Celular', value: '[brasil.celular]' },
+            { label: 'Telefone', value: '[brasil.telefone]' },
+            { label: 'Insc. Estadual', value: '[brasil.ie]' },
+            { label: 'PIS', value: '[brasil.pis]' },
+            { label: 'RG', value: '[brasil.rg]' },
+            { label: 'CNH', value: '[brasil.cnh]' },
+            { label: 'CPF', value: '[brasil.cpf]' },
+            { label: 'CNPJ', value: '[brasil.cnpj]' }
+        ]
+    },
+    {
+        label: 'Cartão de credito',
+        items: [
+            { label: 'Master Card', value: '[credit_card.master_card]' },
+            { label: 'Visa', value: '[credit_card.visa]' },
+            { label: 'American express', value: '[credit_card.amex]' },
+            { label: 'Diners club', value: '[credit_card.diners_club]' },
+            { label: 'Hiper card', value: '[credit_card.hiper_card]' }
         ]
     }
 ] as SelectItemGroup[];

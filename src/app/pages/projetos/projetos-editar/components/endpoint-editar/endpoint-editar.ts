@@ -47,7 +47,7 @@ export class EndpointEditar implements OnInit {
     readonly tooltip =
         'Esta configuração apenas ativa a paginação por padrão. Mesmo que desativada, ainda é possível paginar a resposta. No entanto, se estiver ativada, não será possível obter todos os dados da API de uma só vez.';
 
-    readonly objectTypes: any = [
+    readonly _objectTypes: string[] = [
         'Object.ID',
         'Faker.js',
         'String',
@@ -81,6 +81,13 @@ export class EndpointEditar implements OnInit {
             resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
+    }
+
+    objectTypes(index: number): string[] {
+        if (index === 0) {
+            return this._objectTypes;
+        }
+        return this._objectTypes.filter((v) => v !== 'Object.ID');
     }
 
     get resourceSchemaFormArray(): FormArray {

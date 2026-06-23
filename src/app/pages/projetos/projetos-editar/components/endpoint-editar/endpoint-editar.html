@@ -98,7 +98,7 @@
                                     <p-select
                                         (onChange)="change($event, $index)"
                                         [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
-                                        [options]="objectTypes"
+                                        [options]="objectTypes($index)"
                                         [readonly]="schema.get('type')?.value === 'Object.ID'"
                                         appendTo="body"
                                         class="w-full"
