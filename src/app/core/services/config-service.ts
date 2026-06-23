@@ -7,6 +7,10 @@ export interface SystemConfig {
     allow_register?: boolean;
     rate_limit_requests?: number;
     rate_limit_time?: number;
+    theme_preset?: string;
+    theme_primary?: string;
+    theme_surface?: string | null;
+    theme_menuMode?: string;
     [key: string]: any;
 }
 

@@ -3,78 +3,148 @@
     <div class="text-muted-color">Gerencie as configurações globais e ações de manutenção da API Canarinho.</div>
 </div>
 
-<div class="flex flex-col gap-6">
-    
+<form [formGroup]="configForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+
     <!-- Bloco 1: Configurações Gerais -->
     <div class="card">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
             <i class="pi pi-cog"></i> Configurações Gerais
         </h3>
-        
-        <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
-            <div class="flex flex-col gap-6">
-                
-                <!-- Allow Register -->
-                <div class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
-                    <div>
-                        <div class="font-semibold text-lg mb-1 text-surface-900 dark:text-surface-0">Cadastro Aberto</div>
-                        <div class="text-muted-color text-sm">Permitir que usuários criem novas contas livremente pelo formulário de registro.</div>
-                    </div>
-                    <p-checkbox formControlName="allow_register" binary="true" inputId="allow_register"></p-checkbox>
+
+        <div class="flex flex-col gap-6">
+            <!-- Allow Register -->
+            <div class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
+                <div>
+                    <div class="font-semibold text-lg mb-1 text-surface-900 dark:text-surface-0">Cadastro Aberto</div>
+                    <div class="text-muted-color text-sm">Permitir que usuários criem novas contas livremente pelo formulário de registro.</div>
+                </div>
+                <p-checkbox formControlName="allow_register" binary="true" inputId="allow_register"></p-checkbox>
+            </div>
+
+            <!-- Rate Limit Configs -->
+            <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
+                <div class="font-semibold text-lg mb-2 flex items-center gap-2 text-surface-900 dark:text-surface-0">
+                    <i class="pi pi-shield text-primary text-xl"></i>
+                    Segurança (Rate Limiting)
                 </div>
 
-                <!-- Rate Limit Configs -->
-                <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
-                    <div class="font-semibold text-lg mb-2 flex items-center gap-2 text-surface-900 dark:text-surface-0">
-                        <i class="pi pi-shield text-primary text-xl"></i> 
-                        Segurança (Rate Limiting)
-                    </div>
-                    
-                    <div class="flex flex-col gap-2">
-                        <label for="rate_limit_requests" class="font-medium text-surface-900 dark:text-surface-0">Requisições Máximas (Por IP)</label>
-                        <p-inputNumber 
-                            id="rate_limit_requests" 
-                            formControlName="rate_limit_requests" 
-                            [showButtons]="true" 
-                            [min]="1" 
-                            [step]="100" 
-                            styleClass="w-full xl:w-1/2"
-                            class="w-full">
-                        </p-inputNumber>
-                        <small class="text-muted-color">Quantidade máxima de requisições que um mesmo IP pode fazer.</small>
-                    </div>
-
-                    <div class="flex flex-col gap-2 mt-2">
-                        <label for="rate_limit_time" class="font-medium text-surface-900 dark:text-surface-0">Tempo de Bloqueio (Minutos)</label>
-                        <p-inputNumber 
-                            id="rate_limit_time" 
-                            formControlName="rate_limit_time" 
-                            [showButtons]="true" 
-                            [min]="1" 
-                            [step]="1" 
-                            styleClass="w-full xl:w-1/2"
-                            class="w-full">
-                        </p-inputNumber>
-                        <small class="text-muted-color">Tempo em que o contador de requisições será resetado para o IP.</small>
-                    </div>
+                <div class="flex flex-col gap-2">
+                    <label for="rate_limit_requests" class="font-medium text-surface-900 dark:text-surface-0">Requisições Máximas (Por IP)</label>
+                    <p-inputNumber
+                        id="rate_limit_requests"
+                        formControlName="rate_limit_requests"
+                        [showButtons]="true"
+                        [min]="1"
+                        [step]="100"
+                        styleClass="w-full xl:w-1/2"
+                        class="w-full">
+                    </p-inputNumber>
+                    <small class="text-muted-color">Quantidade máxima de requisições que um mesmo IP pode fazer.</small>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="flex justify-end mt-2">
-                    <p-button type="submit" label="Salvar Alterações" icon="pi pi-save" [loading]="isLoading()"></p-button>
+                <div class="flex flex-col gap-2 mt-2">
+                    <label for="rate_limit_time" class="font-medium text-surface-900 dark:text-surface-0">Tempo de Bloqueio (Minutos)</label>
+                    <p-inputNumber
+                        id="rate_limit_time"
+                        formControlName="rate_limit_time"
+                        [showButtons]="true"
+                        [min]="1"
+                        [step]="1"
+                        styleClass="w-full xl:w-1/2"
+                        class="w-full">
+                    </p-inputNumber>
+                    <small class="text-muted-color">Tempo em que o contador de requisições será resetado para o IP.</small>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- Bloco 2: Ações de Manutenção -->
+    <!-- Bloco 2: Aparência e Layout Global -->
+    <div class="card">
+        <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
+            <i class="pi pi-palette"></i> Aparência e Layout Global
+        </h3>
+
+        <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
+
+            <div>
+                <span class="text-sm text-muted-color font-semibold block mb-2">Cor Primária</span>
+                <div class="flex gap-2 flex-wrap justify-start">
+                    @for (primaryColor of themeService.getPrimaryColors(configForm.value.theme_preset || 'Aura'); track primaryColor.name) {
+                        <button
+                            type="button"
+                            [title]="primaryColor.name"
+                            (click)="updatePrimaryColor($event, primaryColor)"
+                            [ngClass]="{
+                                'outline outline-primary': primaryColor.name === selectedPrimaryColor()
+                            }"
+                            class="cursor-pointer w-6 h-6 rounded-full flex shrink-0 items-center justify-center outline-offset-2 shadow transition-all hover:scale-110"
+                            [style]="{
+                                'background-color':
+                                    primaryColor?.name === 'noir' ? 'var(--text-color)' : primaryColor?.palette?.['500']
+                            }"
+                        ></button>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <span class="text-sm text-muted-color font-semibold block mb-2">Surface (Superfície)</span>
+                <div class="flex gap-2 flex-wrap justify-start">
+                    @for (surface of themeService.surfaces; track surface.name) {
+                        <button
+                            type="button"
+                            [title]="surface.name"
+                            (click)="updateSurfaceColor($event, surface)"
+                            class="cursor-pointer w-6 h-6 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-2 transition-all hover:scale-110"
+                            [ngClass]="{
+                                'outline outline-primary': selectedSurfaceColor()
+                                    ? selectedSurfaceColor() === surface.name
+                                    : layoutService.layoutConfig().darkTheme
+                                        ? surface.name === 'zinc'
+                                        : surface.name === 'slate'
+                            }"
+                            [style]="{
+                                'background-color': surface?.palette?.['500']
+                            }"
+                        ></button>
+                    }
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <span class="text-sm text-muted-color font-semibold block">Presets (Temas)</span>
+                <p-select-button
+                    [options]="presets"
+                    formControlName="theme_preset"
+                    [allowEmpty]="false"
+                    size="small"
+                />
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <span class="text-sm text-muted-color font-semibold block">Menu Mode</span>
+                <p-select-button
+                    formControlName="theme_menuMode"
+                    [options]="menuModeOptions"
+                    [allowEmpty]="false"
+                    optionLabel="label"
+                    optionValue="value"
+                    size="small"
+                />
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bloco 3: Ações de Manutenção -->
     <div class="card">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
             <i class="pi pi-wrench"></i> Ações de Manutenção
         </h3>
-        
+
         <div class="flex flex-col gap-6">
-            
+
             <div class="rounded-xl p-4 flex gap-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 items-start">
                 <i class="pi pi-exclamation-triangle text-xl mt-1"></i>
                 <div>
@@ -92,18 +162,22 @@
                         <div class="text-muted-color text-sm">Invalida e remove todos os caches da API no backend. Isso força o banco de dados a ler tudo novamente.</div>
                     </div>
                     <div class="shrink-0">
-                        <p-button 
-                            icon="pi pi-refresh" 
-                            label="Limpar Cache" 
-                            severity="danger" 
+                        <p-button
+                            icon="pi pi-refresh"
+                            label="Limpar Cache"
+                            severity="danger"
                             [loading]="isClearingCache()"
                             (onClick)="clearCache()">
                         </p-button>
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
-    
-</div>
+
+    <!-- Botão Salvar Global -->
+    <div class="flex justify-end mt-2 mb-8">
+        <p-button type="submit" label="Salvar Configurações e Layout" icon="pi pi-save" [loading]="isLoading()" size="large"></p-button>
+    </div>
+</form>
