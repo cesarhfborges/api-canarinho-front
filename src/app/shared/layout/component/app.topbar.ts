@@ -89,20 +89,20 @@ import { environment } from '@/environments/environment';
                             }"
                         ></i>
                     </button>
-                    <div class="relative">
-                        <button
-                            class="layout-topbar-action layout-topbar-action-highlight"
-                            pStyleClass="@next"
-                            enterFromClass="hidden"
-                            enterActiveClass="animate-scalein"
-                            leaveToClass="hidden"
-                            leaveActiveClass="animate-fadeout"
-                            [hideOnOutsideClick]="true"
-                        >
-                            <i class="pi pi-palette"></i>
-                        </button>
-                        <app-configurator />
-                    </div>
+<!--                    <div class="relative">-->
+<!--                        <button-->
+<!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
+<!--                            pStyleClass="@next"-->
+<!--                            enterFromClass="hidden"-->
+<!--                            enterActiveClass="animate-scalein"-->
+<!--                            leaveToClass="hidden"-->
+<!--                            leaveActiveClass="animate-fadeout"-->
+<!--                            [hideOnOutsideClick]="true"-->
+<!--                        >-->
+<!--                            <i class="pi pi-palette"></i>-->
+<!--                        </button>-->
+<!--                        <app-configurator />-->
+<!--                    </div>-->
                 </div>
 
                 <!--            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">-->

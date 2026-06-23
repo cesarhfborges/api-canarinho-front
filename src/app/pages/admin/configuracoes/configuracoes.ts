@@ -6,6 +6,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RippleModule } from 'primeng/ripple';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 import { ConfigService } from '@/app/core/services/config-service';
 import { ThemeService } from '@/app/core/services/theme-service';
 import { LayoutService } from '@/app/shared/layout/service/layout.service';
@@ -22,7 +24,9 @@ import { MessageService } from 'primeng/api';
         FormsModule,
         ReactiveFormsModule,
         RippleModule,
-        SelectButtonModule
+        SelectButtonModule,
+        SelectModule,
+        TooltipModule
     ],
     templateUrl: './configuracoes.html'
 })
@@ -52,9 +56,17 @@ export class Configuracoes implements OnInit {
         theme_menuMode: ['static']
     });
 
-    selectedPrimaryColor = computed(() => this.configForm.value.theme_primary);
-    selectedSurfaceColor = computed(() => this.configForm.value.theme_surface);
-    selectedPreset = computed(() => this.configForm.value.theme_preset);
+    public selectedPrimaryColor = signal<string>('emerald');
+    public selectedSurfaceColor = signal<string | null>('');
+    public selectedPreset = signal<string>('Aura');
+
+    public get primaryColorsList() {
+        return this.themeService.getPrimaryColors(this.configForm.value.theme_preset || 'Aura');
+    }
+
+    public get surfacesList() {
+        return this.themeService.surfaces;
+    }
 
     ngOnInit() {
         const currentConfig = this.configService.config();
@@ -74,7 +86,15 @@ export class Configuracoes implements OnInit {
             theme_menuMode: currentConfig.theme_menuMode || 'static'
         });
 
+        this.selectedPreset.set(currentConfig.theme_preset || 'Aura');
+        this.selectedPrimaryColor.set(currentConfig.theme_primary || 'emerald');
+        this.selectedSurfaceColor.set(currentConfig.theme_surface || '');
+
         this.configForm.valueChanges.subscribe(val => {
+            this.selectedPreset.set(val.theme_preset || 'Aura');
+            this.selectedPrimaryColor.set(val.theme_primary || 'emerald');
+            this.selectedSurfaceColor.set(val.theme_surface || '');
+
             if (val.theme_preset && val.theme_primary) {
                 this.themeService.applyThemeConfig({
                     preset: val.theme_preset,
@@ -86,16 +106,6 @@ export class Configuracoes implements OnInit {
                 }
             }
         });
-    }
-
-    public updatePrimaryColor(event: Event, color: any) {
-        this.configForm.patchValue({ theme_primary: color.name });
-        event.stopPropagation();
-    }
-
-    public updateSurfaceColor(event: Event, surface: any) {
-        this.configForm.patchValue({ theme_surface: surface.name });
-        event.stopPropagation();
     }
 
     public onSubmit() {

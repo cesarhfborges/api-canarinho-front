@@ -59,79 +59,128 @@
         </div>
     </div>
 
-    <!-- Bloco 2: Aparência e Layout Global -->
+    <!-- Bloco 2: Aparência e Layout Global (Premium Design) -->
     <div class="card">
-        <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
-            <i class="pi pi-palette"></i> Aparência e Layout Global
-        </h3>
-
-        <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
-
-            <div>
-                <span class="text-sm text-muted-color font-semibold block mb-2">Cor Primária</span>
-                <div class="flex gap-2 flex-wrap justify-start">
-                    @for (primaryColor of themeService.getPrimaryColors(configForm.value.theme_preset || 'Aura'); track primaryColor.name) {
-                        <button
-                            type="button"
-                            [title]="primaryColor.name"
-                            (click)="updatePrimaryColor($event, primaryColor)"
-                            [ngClass]="{
-                                'outline outline-primary': primaryColor.name === selectedPrimaryColor()
-                            }"
-                            class="cursor-pointer w-6 h-6 rounded-full flex shrink-0 items-center justify-center outline-offset-2 shadow transition-all hover:scale-110"
-                            [style]="{
-                                'background-color':
-                                    primaryColor?.name === 'noir' ? 'var(--text-color)' : primaryColor?.palette?.['500']
-                            }"
-                        ></button>
+        <div class="mb-8">
+            <h3 class="font-bold text-2xl flex items-center gap-3 text-surface-900 dark:text-surface-0">
+                <i class="pi pi-palette text-primary text-2xl"></i> Branding e Identidade Visual
+            </h3>
+            <p class="text-muted-color mt-2">Personalize a aparência do sistema para todos os usuários através de estilos modernos e paletas vibrantes.</p>
+        </div>
+        
+        <div class="flex flex-col gap-12">
+            
+            <!-- Seção de Tema Base -->
+            <div class="flex flex-col gap-4">
+                <div>
+                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Estilo Base do Tema</div>
+                    <div class="text-sm text-muted-color">Escolha a linguagem visual que melhor se adapta à marca.</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @for(preset of presets; track preset) {
+                        <div 
+                            class="relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md"
+                            [ngClass]="selectedPreset() === preset ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
+                            (click)="configForm.patchValue({ theme_preset: preset })">
+                            
+                            <div class="font-bold text-xl mb-2 text-surface-900 dark:text-surface-0">{{ preset }}</div>
+                            <div class="text-sm text-muted-color leading-relaxed">
+                                {{ preset === 'Aura' ? 'Design moderno e arredondado, focado em suavidade.' : 
+                                   preset === 'Lara' ? 'Estilo clássico e corporativo, excelente para dashboards.' : 
+                                   'Aparência clean e minimalista, com bordas acentuadas.' }}
+                            </div>
+                            
+                            @if(selectedPreset() === preset) {
+                                <div class="absolute top-4 right-4 text-primary">
+                                    <i class="pi pi-check-circle text-2xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
+                                </div>
+                            }
+                        </div>
                     }
                 </div>
             </div>
 
-            <div>
-                <span class="text-sm text-muted-color font-semibold block mb-2">Surface (Superfície)</span>
-                <div class="flex gap-2 flex-wrap justify-start">
-                    @for (surface of themeService.surfaces; track surface.name) {
-                        <button
+            <!-- Seção de Cores Primárias -->
+            <div class="flex flex-col gap-4">
+                <div>
+                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Cor de Destaque</div>
+                    <div class="text-sm text-muted-color">A cor principal que será usada em botões, links e elementos interativos.</div>
+                </div>
+                
+                <div class="flex flex-wrap gap-5 p-8 bg-surface-50/50 dark:bg-surface-900/50 rounded-3xl border border-surface-200 dark:border-surface-800 shadow-inner">
+                    @for(color of primaryColorsList; track color.name) {
+                        <button 
                             type="button"
-                            [title]="surface.name"
-                            (click)="updateSurfaceColor($event, surface)"
-                            class="cursor-pointer w-6 h-6 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-2 transition-all hover:scale-110"
-                            [ngClass]="{
-                                'outline outline-primary': selectedSurfaceColor()
-                                    ? selectedSurfaceColor() === surface.name
-                                    : layoutService.layoutConfig().darkTheme
-                                        ? surface.name === 'zinc'
-                                        : surface.name === 'slate'
-                            }"
-                            [style]="{
-                                'background-color': surface?.palette?.['500']
-                            }"
-                        ></button>
+                            (click)="configForm.patchValue({ theme_primary: color.name })"
+                            pTooltip="{{ color.name }}"
+                            tooltipPosition="top"
+                            class="relative w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110 hover:-translate-y-1 flex items-center justify-center outline-none shadow-md"
+                            [style.background-color]="color.name === 'noir' ? 'var(--text-color)' : color.palette?.['500']"
+                            [ngClass]="{'ring-4 ring-offset-4 ring-primary dark:ring-offset-surface-900': selectedPrimaryColor() === color.name}">
+                            
+                            @if(selectedPrimaryColor() === color.name) {
+                                <i class="pi pi-check text-xl drop-shadow-md" [style.color]="color.name === 'noir' ? 'var(--surface-0)' : '#ffffff'"></i>
+                            }
+                        </button>
                     }
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold block">Presets (Temas)</span>
-                <p-select-button
-                    [options]="presets"
-                    formControlName="theme_preset"
-                    [allowEmpty]="false"
-                    size="small"
-                />
-            </div>
+            <!-- Superficie e Menu em duas colunas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                
+                <!-- Surface -->
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Tom de Superfície</div>
+                        <div class="text-sm text-muted-color">A paleta de tons de cinza usada para fundos e painéis.</div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        @for(surface of surfacesList; track surface.name) {
+                            <button 
+                                type="button"
+                                (click)="configForm.patchValue({ theme_surface: surface.name })"
+                                class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border-2"
+                                [ngClass]="selectedSurfaceColor() === surface.name || (!selectedSurfaceColor() && (layoutService.layoutConfig().darkTheme ? surface.name === 'zinc' : surface.name === 'slate')) 
+                                    ? 'border-primary bg-primary text-primary-contrast shadow-md' 
+                                    : 'border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 hover:bg-surface-100 dark:hover:bg-surface-800'">
+                                <span class="capitalize">{{ surface.name }}</span>
+                            </button>
+                        }
+                    </div>
+                </div>
 
-            <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold block">Menu Mode</span>
-                <p-select-button
-                    formControlName="theme_menuMode"
-                    [options]="menuModeOptions"
-                    [allowEmpty]="false"
-                    optionLabel="label"
-                    optionValue="value"
-                    size="small"
-                />
+                <!-- Menu Mode -->
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Layout do Menu</div>
+                        <div class="text-sm text-muted-color">Como a barra lateral de navegação deve se comportar.</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 h-full">
+                        @for(mode of menuModeOptions; track mode.value) {
+                            <div 
+                                class="relative flex flex-col p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-sm"
+                                [ngClass]="configForm.value.theme_menuMode === mode.value ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
+                                (click)="configForm.patchValue({ theme_menuMode: mode.value })">
+                                
+                                <div class="font-bold text-lg mb-1 text-surface-900 dark:text-surface-0">{{ mode.label }}</div>
+                                <div class="text-sm text-muted-color">
+                                    {{ mode.value === 'static' ? 'Sidebar fixa na tela.' : 'Sidebar sobrepõe o conteúdo.' }}
+                                </div>
+
+                                @if(configForm.value.theme_menuMode === mode.value) {
+                                    <div class="absolute top-4 right-4 text-primary">
+                                        <i class="pi pi-check-circle text-xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
             </div>
 
         </div>
