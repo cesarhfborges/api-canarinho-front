@@ -1,0 +1,67 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'primeicons/primeicons.css';
+@use 'src/assets/layout/layout.scss';
+@use 'src/assets/demo/demo.scss';
+@use 'highlight.js/styles/nord.css';
+
+pre {
+    code {
+        &.hljs {
+            border-radius: 4px;
+        }
+
+        &.hljs-line-numbers {
+            border: 1px solid var(--p-surface-300);
+            padding: 0;
+
+            table {
+                width: 100%;
+                tbody {
+                    tr {
+                        line-height: 1.35rem;
+                        td {
+                            display: inline-block!important;
+                            padding-left: 8px;
+
+                            &:first-child {
+                                display: contents;
+                                padding-right: 4px;
+                                border-right: 1px solid var(--p-surface-300);
+                            }
+
+                            div.hljs-ln-n {
+                                padding-right: 4px;
+                            }
+                        }
+
+                        &:first-of-type {
+                            td {
+                                padding-top: 10px;
+                                display: block;
+                            }
+                        }
+                        &:last-of-type {
+                            td {
+                                padding-bottom: 10px;
+                                display: block;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //table.hljs-ls {
+            //    background: red;
+            //    //tr {
+            //    //    td.hljs-ln-numbers {
+            //    //        div.hljs-ln-n {
+            //    //            &::before {
+            //    //                background: red;
+            //    //            }
+            //    //        }
+            //    //    }
+            //    //}
+            //}
+        }
+    }
+}
