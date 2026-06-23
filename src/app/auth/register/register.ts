@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +26,7 @@ import { ConfigService } from '@/app/core/services/config-service';
     templateUrl: './register.html',
     styleUrl: './register.scss'
 })
-export class Register {
+export class Register implements OnInit {
     public isLoading = signal<boolean>(false);
     public configService = inject(ConfigService);
     private router = inject(Router);
@@ -37,9 +37,19 @@ export class Register {
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required, Validators.minLength(6)]]
+        password_confirmation: ['', [Validators.required, Validators.minLength(6)]]
     });
     private messageService = inject(MessageService);
+
+    ngOnInit() {
+        this.registerForm.patchValue({
+            name: 'Cesar',
+            username: 'cesarhenriq',
+            email: 'cesar_silk321@hotmail.com',
+            password: '91344356',
+            password_confirmation: '91344356'
+        });
+    }
 
     public onSubmit(): void {
         if (this.registerForm.invalid) {
@@ -47,9 +57,9 @@ export class Register {
             return;
         }
 
-        const { name, email, password, confirmPassword } = this.registerForm.getRawValue();
+        const { name, email, username, password, password_confirmation } = this.registerForm.getRawValue();
 
-        if (password !== confirmPassword) {
+        if (password !== password_confirmation) {
             this.messageService.add({
                 severity: 'error',
                 summary: 'Erro',
@@ -61,7 +71,7 @@ export class Register {
         this.isLoading.set(true);
         this.registerForm.disable();
 
-        const userData = { name, email, password };
+        const userData = { name, username, email, password, password_confirmation };
 
         this.authService.register(userData).subscribe({
             next: (response: any) => {
@@ -73,13 +83,26 @@ export class Register {
                     detail: 'Cadastro efetuado com sucesso! Faça login para continuar.'
                 });
             },
-            error: (err) => {
+            error: (ex) => {
+                console.log(ex);
                 this.registerForm.enable();
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao realizar cadastro. Tente novamente.'
-                });
+                const fields = Object.keys(ex.error.messages);
+                if (fields.length > 0) {
+                    for (const field of fields) {
+                        const error = ex.error.messages[field];
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: ex.error.error ?? 'Erro',
+                            detail: error
+                        });
+                    }
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao realizar cadastro. Tente novamente.'
+                    });
+                }
                 this.isLoading.set(false);
             }
         });
