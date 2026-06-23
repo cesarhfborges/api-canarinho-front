@@ -8,7 +8,6 @@ import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.float
     standalone: true,
     imports: [RouterModule, ButtonModule, AppFloatingConfigurator],
     template: `
-        <app-floating-configurator />
         <div class="flex items-center justify-center min-h-screen overflow-hidden">
             <div class="flex flex-col items-center justify-center">
                 <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, color-mix(in srgb, var(--primary-color), transparent 60%) 10%, var(--surface-ground) 30%)">
