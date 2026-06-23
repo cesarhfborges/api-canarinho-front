@@ -14,6 +14,10 @@ const pageRoutes: Routes = [
     {
         path: 'usuarios',
         loadChildren: () => import('./usuarios/usuarios.routes')
+    },
+    {
+        path: 'configuracoes',
+        loadChildren: () => import('./admin/configuracoes/configuracoes.routes')
     }
 ];
 

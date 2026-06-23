@@ -9,6 +9,7 @@ import { AuthService } from '@/app/core/services/auth-service';
 import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.floatingconfigurator';
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 import { MessageService } from 'primeng/api';
+import { ConfigService } from '@/app/core/services/config-service';
 
 @Component({
     selector: 'app-register',
@@ -35,6 +36,7 @@ export class Register {
     public isLoading = signal<boolean>(false);
 
     private messageService = inject(MessageService);
+    public configService = inject(ConfigService);
 
     public registerForm = this.fb.group({
         name: ['', [Validators.required]],

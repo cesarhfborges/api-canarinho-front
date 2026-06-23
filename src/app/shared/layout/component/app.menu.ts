@@ -39,7 +39,8 @@ export class AppMenu {
             baseMenu.push({
                 label: 'Administração',
                 items: [
-                    { label: 'Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/usuarios'] }
+                    { label: 'Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/usuarios'] },
+                    { label: 'Configurações', icon: 'pi pi-fw pi-cog', routerLink: ['/configuracoes'] }
                 ]
             });
         }

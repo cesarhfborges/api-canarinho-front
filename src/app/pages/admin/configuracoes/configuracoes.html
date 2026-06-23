@@ -1,0 +1,74 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Configurações Principais -->
+    <div class="col-span-1">
+        <div class="card">
+            <div class="font-semibold text-xl mb-4">Configurações do Sistema</div>
+
+            <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+                <div class="flex flex-col gap-6">
+                    <div class="flex items-center">
+                        <p-checkbox formControlName="allow_register" binary="true" inputId="allow_register"></p-checkbox>
+                        <label for="allow_register" class="ml-2 font-medium">Permitir Cadastro de Usuários Público</label>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="rate_limit_requests" class="font-medium">Rate Limit: Requisições</label>
+                        <p-inputNumber
+                            id="rate_limit_requests"
+                            formControlName="rate_limit_requests"
+                            [showButtons]="true"
+                            [min]="1"
+                            [step]="100"
+                            class="w-full">
+                        </p-inputNumber>
+                        <small class="text-muted-color">Número máximo de requisições permitidas por IP dentro do intervalo de tempo.</small>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="rate_limit_time" class="font-medium">Rate Limit: Tempo (Minutos)</label>
+                        <p-inputNumber
+                            id="rate_limit_time"
+                            formControlName="rate_limit_time"
+                            [showButtons]="true"
+                            [min]="1"
+                            [step]="1"
+                            class="w-full">
+                        </p-inputNumber>
+                        <small class="text-muted-color">Tempo em minutos até o bloqueio do IP ser resetado.</small>
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <p-button type="submit" label="Salvar Configurações" icon="pi pi-check" [loading]="isLoading()"></p-button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ações de Manutenção -->
+    <div class="col-span-1">
+        <div class="card">
+            <div class="font-semibold text-xl mb-4 text-orange-500">Ações de Manutenção</div>
+
+            <div class="flex flex-col gap-4">
+                <div class="p-message p-message-warn">
+                    Utilize estas ações apenas quando houver problemas de sincronização ou para resetar estados travados do sistema.
+                </div>
+
+                <div class="flex items-center justify-between border-b border-surface-200 dark:border-surface-700 pb-4">
+                    <div>
+                        <span class="block font-medium mb-1">Limpar Cache</span>
+                        <span class="text-muted-color text-sm">Reseta todo o cache de aplicações do backend.</span>
+                    </div>
+                    <p-button
+                        icon="pi pi-refresh"
+                        label="Limpar Cache"
+                        severity="warn"
+                        [loading]="isClearingCache()"
+                        (onClick)="clearCache()">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

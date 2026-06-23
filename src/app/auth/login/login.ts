@@ -11,6 +11,7 @@ import { AppFloatingConfigurator } from '@/app/shared/layout/component/app.float
 import { Logotipo } from '@/app/shared/components/logotipo/logotipo';
 import { environment } from '@/environments/environment';
 import { MessageService } from 'primeng/api';
+import { ConfigService } from '@/app/core/services/config-service';
 
 @Component({
     selector: 'app-login',
@@ -39,6 +40,7 @@ export class Login implements OnInit {
     public errorMessage = signal<string | null>(null);
 
     private messageService = inject(MessageService);
+    public configService = inject(ConfigService);
 
     public loginForm = this.fb.group({
         username: ['', [Validators.required]],

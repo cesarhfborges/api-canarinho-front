@@ -57,11 +57,13 @@
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-orange-500">Esqueci a senha</span>
                         </div>
                         <p-button type="submit" label="Entrar" styleClass="w-full" [disabled]="isLoading()"></p-button>
-                        
+
+                        @if (configService.config().allow_register === true) {
                         <div class="flex items-center justify-center mt-6">
                             <span class="dark:text-muted-color">Não possui uma conta? </span>
                             <a routerLink="/register" class="font-medium no-underline ml-2 text-primary cursor-pointer hover:underline">Cadastre-se</a>
                         </div>
+                        }
                     </form>
                 </div>
             </div>
