@@ -94,9 +94,13 @@ export class LayoutService {
     }
 
     private startViewTransition(config: LayoutConfig): void {
-        document.startViewTransition(() => {
+        const transition = document.startViewTransition(() => {
             this.toggleDarkMode(config);
         });
+
+        // Previne o "Uncaught (in promise) AbortError" caso a transição seja pulada
+        transition.ready.catch(() => {});
+        transition.finished.catch(() => {});
     }
 
     setColorScheme(scheme: 'light' | 'dark' | 'auto'): void {

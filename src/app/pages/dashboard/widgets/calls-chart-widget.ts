@@ -23,6 +23,7 @@ export class CallsChartWidget implements OnInit {
     dashboardService = inject(DashboardService);
     layoutService = inject(LayoutService);
 
+    rawData = signal<any[] | null>(null);
     chartData = signal<any>(null);
     chartOptions = signal<any>(null);
 
@@ -35,8 +36,8 @@ export class CallsChartWidget implements OnInit {
     constructor() {
         effect(() => {
             this.layoutService.isDarkTheme();
-            if (this.chartData()) {
-                this.initChart(this.chartData()); // re-apply theme options
+            if (this.rawData()) {
+                this.initChart(this.rawData()!); // re-apply theme options using raw data
             }
         });
     }
@@ -63,6 +64,7 @@ export class CallsChartWidget implements OnInit {
 
         this.dashboardService.getChartData(start, end, this.selectedFilter).subscribe({
             next: (data) => {
+                this.rawData.set(data);
                 this.initChart(data);
             },
             error: (err) => console.error('Erro ao carregar dados do gráfico', err)

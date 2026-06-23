@@ -17,7 +17,7 @@ import { environment } from '@/environments/environment';
     standalone: true,
     imports: [RouterModule, CommonModule, StyleClassModule, TieredMenuModule, Ripple, Logotipo],
     template: `
-        <div class="layout-topbar shadow-lg">
+        <div class="layout-topbar shadow-lg" id="main-top-bar">
             <div class="layout-topbar-logo-container">
                 <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                     <i class="pi pi-bars"></i>
@@ -91,9 +91,14 @@ import { environment } from '@/environments/environment';
                             }"
                         ></i>
                     </button>
-                    <p-tieredMenu #themeMenu [model]="themeItems" [popup]="true">
+                    <p-tieredMenu #themeMenu [model]="themeItems" [popup]="true" appendTo="main-top-bar">
                         <ng-template #item let-item>
-                            <a pRipple class="flex items-center px-4 py-3 cursor-pointer" [class]="item.linkClass" (click)="item.command()">
+                            <a
+                                pRipple
+                                class="flex items-center px-4 py-3 cursor-pointer"
+                                [class]="item.linkClass"
+                                (click)="item.command()"
+                            >
                                 <span [ngClass]="item.icon" class="mr-2"></span>
                                 <span class="ms-2 font-medium">{{ item.label }}</span>
                                 @if (layoutService.layoutConfig().colorScheme === item.id) {
@@ -102,20 +107,20 @@ import { environment } from '@/environments/environment';
                             </a>
                         </ng-template>
                     </p-tieredMenu>
-<!--                    <div class="relative">-->
-<!--                        <button-->
-<!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
-<!--                            pStyleClass="@next"-->
-<!--                            enterFromClass="hidden"-->
-<!--                            enterActiveClass="animate-scalein"-->
-<!--                            leaveToClass="hidden"-->
-<!--                            leaveActiveClass="animate-fadeout"-->
-<!--                            [hideOnOutsideClick]="true"-->
-<!--                        >-->
-<!--                            <i class="pi pi-palette"></i>-->
-<!--                        </button>-->
-<!--                        <app-configurator />-->
-<!--                    </div>-->
+                    <!--                    <div class="relative">-->
+                    <!--                        <button-->
+                    <!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
+                    <!--                            pStyleClass="@next"-->
+                    <!--                            enterFromClass="hidden"-->
+                    <!--                            enterActiveClass="animate-scalein"-->
+                    <!--                            leaveToClass="hidden"-->
+                    <!--                            leaveActiveClass="animate-fadeout"-->
+                    <!--                            [hideOnOutsideClick]="true"-->
+                    <!--                        >-->
+                    <!--                            <i class="pi pi-palette"></i>-->
+                    <!--                        </button>-->
+                    <!--                        <app-configurator />-->
+                    <!--                    </div>-->
                 </div>
 
                 <!--            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">-->
@@ -138,7 +143,7 @@ import { environment } from '@/environments/environment';
                     <i class="pi pi-user"></i>
                     <span>Profile</span>
                 </button>
-                <p-tieredMenu #menu [model]="items" [popup]="true">
+                <p-tieredMenu #menu [model]="items" [popup]="true" appendTo="body">
                     <ng-template #item let-item>
                         <a
                             pRipple
@@ -214,8 +219,6 @@ export class AppTopbar {
         this.layoutService.setColorScheme(scheme);
         this.perfilService.updatePerfil({ theme_color_scheme: scheme }).subscribe();
     }
-
-
 
     logout(): void {
         this.confirmationService.confirm({
