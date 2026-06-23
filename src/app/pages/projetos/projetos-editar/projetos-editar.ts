@@ -104,6 +104,7 @@ export class ProjetosEditar implements OnInit {
             header: value ? `Edit resource - ${value.name}` : 'New resource',
             modal: true,
             closable: true,
+            draggable: false,
             data: {
                 resource: value,
                 projectId: this.id,
@@ -138,6 +139,7 @@ export class ProjetosEditar implements OnInit {
             header: `Preview - ${value.name}`,
             modal: true,
             closable: true,
+            draggable: false,
             data: {
                 endpoint: value,
                 projectSlug: this.project()?.slug,
@@ -159,6 +161,7 @@ export class ProjetosEditar implements OnInit {
             header: 'Excluir Endpoint',
             icon: 'pi pi-info-circle',
             rejectLabel: 'Cancelar',
+            blockScroll: true,
             rejectButtonProps: {
                 label: 'Cancelar',
                 severity: 'secondary',

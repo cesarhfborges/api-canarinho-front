@@ -74,6 +74,7 @@ export class UsuariosList {
             header: 'Novo Usuário',
             modal: true,
             closable: true,
+            draggable: false,
             width: '500px'
         });
 
@@ -89,6 +90,7 @@ export class UsuariosList {
             header: 'Editar Usuário',
             modal: true,
             closable: true,
+            draggable: false,
             width: '500px',
             data: { user }
         });
@@ -105,6 +107,7 @@ export class UsuariosList {
             header: 'Alterar Senha',
             modal: true,
             closable: true,
+            draggable: false,
             width: '400px',
             data: { userId: user.id, isProfile: false }
         });

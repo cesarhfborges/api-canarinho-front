@@ -49,6 +49,7 @@ export class ProjetosListar implements OnInit {
             width: '450px',
             modal: true,
             closable: true,
+            draggable: false,
             data: { projeto }
         });
 

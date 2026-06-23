@@ -48,6 +48,7 @@ export class PerfilComponent {
             header: 'Alterar Senha',
             modal: true,
             closable: true,
+            draggable: false,
             width: '400px',
             data: { isProfile: true }
         });
