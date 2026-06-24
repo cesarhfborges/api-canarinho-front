@@ -370,6 +370,6 @@ export class ProjetosEditar implements OnInit {
     getEndpointURL(value: string): string {
         const username = this.username() || ':username';
         const projectSlug = this.project()?.slug || ':project';
-        return `${environment.apiUrl}/${username}/${projectSlug}`;
+        return `${environment.apiUrl}/mock/${username}/${projectSlug}`;
     }
 }

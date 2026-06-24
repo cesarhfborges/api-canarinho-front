@@ -373,7 +373,7 @@ export class EndpointEditar implements OnInit {
     getEndpointURL(value: string): string {
         const username = this.dialogConfig.data?.username || ':username';
         const projectSlug = this.dialogConfig.data?.projectSlug || ':project';
-        const base = `${environment.apiUrl}/${username}/${projectSlug}`;
+        const base = `${environment.apiUrl}/mock/${username}/${projectSlug}`;
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
     }
 

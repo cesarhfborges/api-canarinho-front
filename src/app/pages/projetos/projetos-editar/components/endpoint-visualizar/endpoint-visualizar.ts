@@ -51,7 +51,7 @@ export class EndpointVisualizar implements OnInit {
         const page = event ? event.first / event.rows + 1 : 1;
         const perPage = event ? event.rows : 10;
 
-        let url = `${environment.apiUrl}/${username}/${projectSlug}/${endpointName}?page=${page}&per_page=${perPage}`;
+        let url = `${environment.apiUrl}/mock/${username}/${projectSlug}/${endpointName}?page=${page}&per_page=${perPage}`;
 
         // Sorting
         if (event?.sortField) {
