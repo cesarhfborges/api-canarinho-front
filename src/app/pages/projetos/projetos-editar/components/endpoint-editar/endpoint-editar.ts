@@ -1,10 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { Schema } from '@/app/core/models/schema';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { Resource } from '@/app/core/models/resource';
@@ -16,17 +18,21 @@ import { TabsModule } from 'primeng/tabs';
 import fakerMethods from '@/app/core/utils/faker-methods';
 import { MessageService, SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { NgClass } from '@angular/common';
-import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
+import { InputGroupModule } from 'primeng/inputgroup';
 import { Highlight } from 'ngx-highlightjs';
 import { TooltipModule } from 'primeng/tooltip';
+import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
 import { environment } from '@/environments/environment';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 @Component({
     selector: 'app-endpoint-editar',
     imports: [
+        ClipboardModule,
         FluidModule,
         InputTextModule,
+        InputGroupModule,
+        InputGroupAddonModule,
         SelectModule,
         TextareaModule,
         FormsModule,
@@ -55,10 +61,10 @@ export class EndpointEditar implements OnInit {
         'String',
         'Number',
         'Boolean',
-        'Object',
-        'Array',
-        'Date',
-        'Child Resource'
+        'Array'
+        // 'Object',
+        // 'Date',
+        // 'Child Resource'
     ];
 
     readonly fakerMethods: SelectItemGroup[] = fakerMethods;
@@ -265,8 +271,22 @@ export class EndpointEditar implements OnInit {
                     g.get('value')?.setValidators([Validators.required]);
                 }
 
-                if (type === 'Boolean') {
-                    g.get('value')?.patchValue(false);
+                switch (type) {
+                    case 'Boolean':
+                        g.get('value')?.patchValue(false);
+                        break;
+                    case 'Number':
+                        g.get('value')?.patchValue(0);
+                        break;
+                    case 'String':
+                        g.get('value')?.patchValue('');
+                        break;
+                    case 'Array':
+                        g.get('value')?.patchValue('');
+                        break;
+                    case 'Object':
+                        g.get('value')?.patchValue('');
+                        break;
                 }
 
                 g.get('value')?.updateValueAndValidity();
@@ -393,5 +413,19 @@ export class EndpointEditar implements OnInit {
         const projectSlug = this.dialogConfig.data?.projectSlug || ':project';
         const base = `${environment.apiUrl}/mock/${username}/${projectSlug}`;
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
+    }
+
+    protected onCopySuccess(value: string): void {
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: `${value} copiado com sucesso.`,
+            life: 3000
+        });
+    }
+
+    protected selectAll(element: any): void {
+        console.log(element);
+        element.select();
     }
 }
