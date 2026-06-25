@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { JsonPipe, NgClass } from '@angular/common';
 import { fakerPT_BR as faker } from '@faker-js/faker';
 import { CardModule } from 'primeng/card';
 import { ClipboardModule } from '@angular/cdk/clipboard';
@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { Schema } from '@/app/core/models/schema';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjetosService } from '@/app/core/services/projetos-service';
@@ -45,11 +46,13 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         InputNumberModule,
         ToggleSwitchModule,
         TagModule,
+        FloatLabelModule,
         TabsModule,
         ButtonModule,
         Highlight,
         TooltipModule,
-        NgClass
+        NgClass,
+        JsonPipe
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss'
@@ -371,7 +374,7 @@ export class EndpointEditar implements OnInit {
                         life: 3000
                     });
                     this.saving.set(false);
-                    this.router.navigate(['/projetos', this.projectId]);
+                    // this.router.navigate(['/projetos', this.projectId]);
                 },
                 error: (err) => {
                     this.messageService.add({
