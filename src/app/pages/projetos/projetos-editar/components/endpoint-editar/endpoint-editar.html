@@ -2,502 +2,448 @@
     <p-fluid>
         <div class="flex flex-col w-full" style="max-height: calc(100vh - 150px);">
             <div class="flex-1 overflow-y-auto pb-4 pr-2" style="max-height: 60vh!important;">
-
-            <p-tabs value="0">
-                <p-tablist>
-                    <p-tab value="0">Geral</p-tab>
-                    <p-tab value="1">Schema</p-tab>
-                    <p-tab value="2">Endpoints</p-tab>
-                    <p-tab value="3">Exemplos</p-tab>
-                </p-tablist>
-                <p-tabpanels>
-                    <p-tabpanel value="0">
-            <!-- ENDPOINT -->
-            <section class="flex flex-col gap-4">
-
-                <div>
-                    <h2 class="text-xl font-semibold">
-                        Endpoint
-                    </h2>
-                    <p class="text-sm text-surface-500">
-                        Estrutura do objeto retornado pela API.
-                    </p>
-                </div>
-
-                <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-                    <label for="endpoint-name">Nome</label>
-                    <input
-                        formControlName="name"
-                        id="endpoint-name"
-                        pInputText
-                        type="text"
-                    />
-                </div>
-
-                <div class="col-span-full lg:col-span-3 flex flex-col gap-2 mt-2">
-                    <label for="lets">Endpoint Base</label>
-                    <div id="lets" class="font-mono text-sm p-3 rounded-lg bg-surface-100 dark:bg-surface-800">
-                        {{ getEndpointURL('') }}
-                    </div>
-                </div>
-            </section>
-                    </p-tabpanel>
-                    <p-tabpanel value="1">
-
-            <!-- SCHEMA -->
-            <section class="flex flex-col gap-4">
-
-                <div>
-                    <h2 class="text-xl font-semibold">
-                        Schema
-                    </h2>
-                    <p class="text-sm text-surface-500">
-                        Estrutura do objeto retornado pela API.
-                    </p>
-                </div>
-
-                <div class="flex flex-col gap-4" formArrayName="resourceSchema">
-
-                    @for (schema of resourceSchemaFormArray.controls; track $index) {
-
-                        <div
-                            [formGroupName]="$index"
-                            class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 shadow-sm"
-                        >
-
-                            <div class="flex items-center justify-between mb-4">
-
-                                <div class="font-medium">
-                                    Campo {{ $index + 1 }}
+                <p-tabs value="0">
+                    <p-tablist>
+                        <p-tab value="0">Geral</p-tab>
+                        <p-tab value="1">Schema</p-tab>
+                        <p-tab value="2">Endpoints</p-tab>
+                        <p-tab value="3">Exemplos</p-tab>
+                    </p-tablist>
+                    <p-tabpanels>
+                        <p-tabpanel value="0">
+                            <!-- ENDPOINT -->
+                            <section class="flex flex-col gap-4">
+                                <div>
+                                    <h2 class="text-xl font-semibold">
+                                        Endpoint
+                                    </h2>
+                                    <p class="text-sm text-surface-500">
+                                        Estrutura do objeto retornado pela API.
+                                    </p>
                                 </div>
-
-                                <p-tag
-                                    [value]="schema.get('type')?.value || 'Sem Tipo'"
-                                    severity="info"
-                                />
-
-                            </div>
-
-                            <div class="grid lg:grid-cols-10 gap-4">
-
-                                <!-- KEY -->
                                 <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                    <label [for]="`schema-${$index}-id`">
-                                        Key
-                                    </label>
-
+                                    <label for="endpoint-name">Nome</label>
                                     <input
-                                        [id]="`schema-${$index}-id`"
-                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
-                                        [readOnly]="schema.get('type')?.value === 'Object.ID'"
                                         formControlName="name"
+                                        id="endpoint-name"
                                         pInputText
                                         type="text"
                                     />
-
-                                    @if (schema.get('name')?.invalid && schema.get('name')?.touched) {
-                                        <small class="text-red-500">Key é obrigatória.</small>
-                                    }
-
                                 </div>
+                                <div class="col-span-full lg:col-span-3 flex flex-col gap-2 mt-2">
+                                    <label for="basePath">Endpoint Base</label>
+                                    <p-input-group>
+                                        <input
+                                            #basePath
+                                            (focus)="selectAll(basePath)"
+                                            [value]="getEndpointURL('')"
+                                            id="basePath"
+                                            pInputText
+                                            readonly
+                                        />
+                                        <p-inputgroup-addon>
+                                            <p-button
+                                                (cdkCopyToClipboardCopied)="onCopySuccess('base path')"
+                                                [cdkCopyToClipboard]="getEndpointURL('')"
+                                                icon="pi pi-clipboard"
+                                                pTooltip="Copiar"
+                                                severity="secondary"
+                                                tooltipPosition="top"
+                                                variant="text"
+                                            />
+                                        </p-inputgroup-addon>
+                                    </p-input-group>
+                                </div>
+                            </section>
+                        </p-tabpanel>
+                        <p-tabpanel value="1">
+                            <!-- SCHEMA -->
+                            <section class="flex flex-col gap-4">
+                                <div>
+                                    <h2 class="text-xl font-semibold">
+                                        Schema
+                                    </h2>
+                                    <p class="text-sm text-surface-500">
+                                        Estrutura do objeto retornado pela API.
+                                    </p>
+                                </div>
+                                <div class="flex flex-col gap-4" formArrayName="resourceSchema">
+                                    @for (schema of resourceSchemaFormArray.controls; track $index) {
+                                        <div
+                                            [formGroupName]="$index"
+                                            class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 shadow-sm"
+                                        >
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div class="font-medium">
+                                                    Campo {{ $index + 1 }}
+                                                </div>
+                                                <p-tag
+                                                    [value]="schema.get('type')?.value || 'Sem Tipo'"
+                                                    severity="info"
+                                                />
+                                            </div>
+                                            <div class="grid lg:grid-cols-10 gap-4">
+                                                <!-- KEY -->
+                                                <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                    <label [for]="`schema-${$index}-id`">
+                                                        Key
+                                                    </label>
+                                                    <input
+                                                        [id]="`schema-${$index}-id`"
+                                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
+                                                        [readOnly]="schema.get('type')?.value === 'Object.ID'"
+                                                        formControlName="name"
+                                                        pInputText
+                                                        type="text"
+                                                    />
+                                                    @if (schema.get('name')?.invalid && schema.get('name')?.touched) {
+                                                        <small class="text-red-500">Key é obrigatória.</small>
+                                                    }
+                                                </div>
+                                                <!-- TYPE -->
+                                                <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                    <span>Type</span>
+                                                    <p-select
+                                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
+                                                        [options]="objectTypes($index)"
+                                                        [readonly]="schema.get('type')?.value === 'Object.ID'"
+                                                        appendTo="body"
+                                                        class="w-full"
+                                                        formControlName="type"
+                                                        placeholder="Selecione"
+                                                    />
+                                                    @if (schema.get('type')?.invalid && schema.get('type')?.touched) {
+                                                        <small class="text-red-500">Type é obrigatório.</small>
+                                                    }
+                                                </div>
+                                                <!-- VALUE -->
+                                                @switch (schema.get('type')?.value) {
+                                                    @case ('Faker.js') {
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                            <span>Faker Method</span>
+                                                            <p-select
+                                                                [filter]="true"
+                                                                [group]="true"
+                                                                [options]="fakerMethods"
+                                                                appendTo="body"
+                                                                filterBy="label"
+                                                                formControlName="value"
+                                                                optionGroupChildren="items"
+                                                                optionGroupLabel="label"
+                                                                optionLabel="label"
+                                                                optionValue="value"
+                                                                placeholder="Selecione um método Faker"
+                                                            >
+                                                                <ng-template #group let-group>
+                                                                    <div class="flex items-center">
+                                                                        <span class="font-medium text-primary">
+                                                                            {{ group.label }}
+                                                                        </span>
+                                                                    </div>
+                                                                </ng-template>
+                                                                <ng-template #item let-item>
+                                                                    <div class="pl-4">
+                                                                        {{ item.label }}
+                                                                    </div>
+                                                                </ng-template>
+                                                            </p-select>
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @case ('String') {
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                            <label [for]="`schema-${$index}-value-string`">
+                                                                Value
+                                                            </label>
+                                                            <input
+                                                                [id]="`schema-${$index}-value-string`"
+                                                                formControlName="value"
+                                                                pInputText
+                                                                type="text"
+                                                            />
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @case ('Number') {
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                            <label [for]="`schema-${$index}-value-number`">
+                                                                Value
+                                                            </label>
+                                                            <p-input-number
+                                                                [inputId]="`schema-${$index}-value-number`"
+                                                                [showButtons]="true"
+                                                                formControlName="value"
+                                                                mode="decimal"
+                                                            />
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @case ('Boolean') {
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-3">
+                                                            <span>Value</span>
+                                                            <p-toggle-switch
+                                                                [inputId]="`schema-${$index}-value-boolean`"
+                                                                formControlName="value"
+                                                            />
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @case ('Date') {
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                            <span>Generated Value</span>
+                                                            <input
+                                                                disabled
+                                                                pInputText
+                                                                value="Current Date"
+                                                            />
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @case ('Array') {
 
-                                <!-- TYPE -->
-                                <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                    <span>Type</span>
-
-                                    <p-select
-                                        (onChange)="change($event, $index)"
-                                        [ngClass]="{'ng-invalid ng-dirty': schema.get('type')?.invalid && schema.get('type')?.touched}"
-                                        [options]="objectTypes($index)"
-                                        [readonly]="schema.get('type')?.value === 'Object.ID'"
-                                        appendTo="body"
-                                        class="w-full"
-                                        formControlName="type"
-                                        placeholder="Selecione"
+                                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
+                                                            <span>Generated Value</span>
+                                                            <input
+                                                                formControlName="value"
+                                                                pInputText
+                                                            />
+                                                            @if (schema.get('value')?.invalid && schema.get('value')?.touched) {
+                                                                <small class="text-red-500">Value é obrigatório.</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    @default {
+                                                        <div
+                                                            class="col-span-full lg:col-span-3 flex flex-col justify-end gap-2">
+                                                            <span class="text-surface-500 mb-2 pb-1">
+                                                                Configuração indisponível
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                }
+                                                @if (schema.get('type')?.value !== 'Object.ID') {
+                                                    <div class="col-span-full lg:col-span-1 flex justify-end items-end">
+                                                        <p-button
+                                                            (click)="removeSchema($index)"
+                                                            [rounded]="true"
+                                                            [text]="true"
+                                                            icon="pi pi-trash"
+                                                            severity="danger"
+                                                        />
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    <p-button
+                                        (click)="addSchema()"
+                                        fluid
+                                        icon="pi pi-plus"
+                                        label="Adicionar Campo"
+                                        severity="info"
                                     />
-
-                                    @if (schema.get('type')?.invalid && schema.get('type')?.touched) {
-                                        <small class="text-red-500">Type é obrigatório.</small>
-                                    }
-
                                 </div>
-
-                                <!-- VALUE -->
-                                @switch (schema.get('type')?.value) {
-
-                                    @case ('Faker.js') {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                            <span>Faker Method</span>
-
-                                            <p-select
-                                                [filter]="true"
-                                                [group]="true"
-                                                [options]="fakerMethods"
-                                                appendTo="body"
-                                                filterBy="label"
-                                                formControlName="value"
-                                                optionGroupChildren="items"
-                                                optionGroupLabel="label"
-                                                optionLabel="label"
-                                                optionValue="value"
-                                                placeholder="Selecione um método Faker"
-                                            >
-
-                                                <ng-template #group let-group>
-                                                    <div class="flex items-center">
-                                                        <span class="font-medium text-primary">
-                                                            {{ group.label }}
+                            </section>
+                        </p-tabpanel>
+                        <p-tabpanel value="2">
+                            <!-- ENDPOINTS -->
+                            <section class="flex flex-col gap-4">
+                                <div>
+                                    <h2 class="text-xl font-semibold">
+                                        Endpoints
+                                    </h2>
+                                    <p class="text-sm text-surface-500">
+                                        Configurações dos endpoints gerados para o recurso.
+                                    </p>
+                                </div>
+                                <div class="flex flex-col gap-4" formArrayName="endpoints">
+                                    @for (endpoint of endpointsFormArray.controls; track $index) {
+                                        <div
+                                            [formGroupName]="$index"
+                                            class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 shadow-sm"
+                                        >
+                                            <!-- HEADER -->
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4">
+                                                    <p-toggle-switch
+                                                        [inputId]="`endpoint-${$index}-enabled`"
+                                                        formControlName="enabled"
+                                                    />
+                                                    <div class="flex items-center gap-2">
+                                                        <p-tag
+                                                            [severity]="getMethodSeverity(endpoint.get('method')?.value)"
+                                                            [value]="endpoint.get('method')?.value"
+                                                        />
+                                                        <span class="font-medium">
+                                                            {{ endpoint.get('url')?.value }}
                                                         </span>
                                                     </div>
-                                                </ng-template>
-
-                                                <ng-template #item let-item>
-                                                    <div class="pl-4">
-                                                        {{ item.label }}
-                                                    </div>
-                                                </ng-template>
-
-                                            </p-select>
-
-                                        </div>
-
-                                    }
-                                    @case ('String') {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                            <label [for]="`schema-${$index}-value-string`">
-                                                Value
-                                            </label>
-
-                                            <input
-                                                [id]="`schema-${$index}-value-string`"
-                                                formControlName="value"
-                                                pInputText
-                                                type="text"
-                                            />
-
-                                        </div>
-
-                                    }
-                                    @case ('Number') {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                            <label [for]="`schema-${$index}-value-number`">
-                                                Value
-                                            </label>
-
-                                            <p-input-number
-                                                [inputId]="`schema-${$index}-value-number`"
-                                                [showButtons]="true"
-                                                formControlName="value"
-                                                mode="decimal"
-                                            />
-
-                                        </div>
-
-                                    }
-                                    @case ('Boolean') {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-3">
-
-                                            <span>Value</span>
-
-                                            <p-toggle-switch
-                                                [inputId]="`schema-${$index}-value-boolean`"
-                                                formControlName="value"
-                                            />
-
-                                        </div>
-
-                                    }
-                                    @case ('Date') {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col gap-2">
-
-                                            <span>Generated Value</span>
-
-                                            <input
-                                                disabled
-                                                pInputText
-                                                value="Current Date"
-                                            />
-
-                                        </div>
-
-                                    }
-                                    @default {
-
-                                        <div class="col-span-full lg:col-span-3 flex flex-col justify-end gap-2">
-
-                                            <span class="text-surface-500 mb-2 pb-1">
-                                                Configuração indisponível
-                                            </span>
-
-                                        </div>
-
-                                    }
-
-                                }
-
-                                @if (schema.get('type')?.value !== 'Object.ID') {
-
-                                    <div class="col-span-full lg:col-span-1 flex justify-end items-end">
-
-                                        <p-button
-                                            (click)="removeSchema($index)"
-                                            [rounded]="true"
-                                            [text]="true"
-                                            icon="pi pi-trash"
-                                            severity="danger"
-                                        />
-
-                                    </div>
-
-                                }
-
-                            </div>
-
-                        </div>
-
-                    }
-
-                    <p-button
-                        (click)="addSchema()"
-                        fluid
-                        icon="pi pi-plus"
-                        label="Adicionar Campo"
-                        severity="info"
-                    />
-
-                </div>
-
-            </section>
-                    </p-tabpanel>
-                    <p-tabpanel value="2">
-
-            <!-- ENDPOINTS -->
-            <section class="flex flex-col gap-4">
-
-                <div>
-                    <h2 class="text-xl font-semibold">
-                        Endpoints
-                    </h2>
-                    <p class="text-sm text-surface-500">
-                        Configurações dos endpoints gerados para o recurso.
-                    </p>
-                </div>
-
-                <div class="flex flex-col gap-4" formArrayName="endpoints">
-
-                    @for (endpoint of endpointsFormArray.controls; track $index) {
-
-                        <div
-                            [formGroupName]="$index"
-                            class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 shadow-sm"
-                        >
-
-                            <!-- HEADER -->
-                            <div class="flex items-center justify-between">
-
-                                <div class="flex items-center gap-4">
-
-                                    <p-toggle-switch
-                                        [inputId]="`endpoint-${$index}-enabled`"
-                                        formControlName="enabled"
-                                    />
-
-                                    <div class="flex items-center gap-2">
-
-                                        <p-tag
-                                            [severity]="getMethodSeverity(endpoint.get('method')?.value)"
-                                            [value]="endpoint.get('method')?.value"
-                                        />
-
-                                        <span class="font-medium">
-                                            {{ endpoint.get('url')?.value }}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="flex items-center gap-2">
-
-                                    @if (endpoint.get('enabled')?.value) {
-                                        <p-tag
-                                            severity="success"
-                                            value="Ativo"
-                                        />
-                                    } @else {
-                                        <p-tag
-                                            severity="danger"
-                                            value="Inativo"
-                                        />
-                                    }
-
-                                </div>
-
-                            </div>
-
-                            <!-- DETAILS -->
-                            @if (endpoint.get('enabled')?.value) {
-
-                                <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-
-                                    <div class="flex flex-col gap-6">
-
-                                        <div class="flex flex-col gap-2">
-
-                                            <label [for]="`endpoint-${$index}-url`">
-                                                URL
-                                            </label>
-
-                                            <input
-                                                [id]="`endpoint-${$index}-url`"
-                                                [value]="getEndpointURL(endpoint.get('url')?.value)"
-                                                pInputText
-                                                readonly
-                                                type="text"
-                                            />
-
-                                        </div>
-
-                                        @if (endpoint.get('paginate')) {
-
-                                            <div
-                                                class="rounded-lg border border-surface-200 dark:border-surface-700 p-4"
-                                            >
-
-                                                <div class="font-medium mb-4">
-                                                    Configurações
                                                 </div>
-
-                                                <div class="grid grid-cols-12 gap-6 items-center">
-
-                                                    <!-- PAGINAÇÃO -->
-
-                                                    <div class="col-span-12 md:col-span-4">
-
-                                                        <div
-                                                            class="flex items-center gap-3 min-h-[34px]"
-                                                        >
-                                                            <label
-                                                                [for]="`endpoint-${$index}-paginate`"
-                                                                class="font-medium"
-                                                                pTooltip="Esta configuração apenas ativa a paginação por padrão. Mesmo que desativada, ainda é possível paginar a resposta. No entanto, se estiver ativada, não será possível obter todos os dados da API de uma só vez."
-                                                                tooltipPosition="top"
-                                                            >
-                                                                Paginação:
-                                                                <span class="text-orange-400">*</span>
-                                                            </label>
-
-                                                            <p-toggle-switch
-                                                                [inputId]="`endpoint-${$index}-paginate`"
-                                                                formControlName="paginate"
-                                                            />
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <!-- ITENS POR PÁGINA -->
-
-                                                    @if (endpoint.get('paginate')?.value &&
-                                                    endpoint.get('per_page_default')) {
-
-                                                        <div class="col-span-12 md:col-span-8">
-
-                                                            <div class="flex items-center gap-3">
-
-                                                                <label
-                                                                    [for]="`endpoint-${$index}-per-page`"
-                                                                    class="font-medium whitespace-nowrap"
-                                                                    pTooltip="Esta configuração define o pdrão de quantos itens serão retornados por página"
-                                                                    tooltipPosition="top"
-                                                                >
-                                                                    Itens por página:
-                                                                    <span class="text-orange-400">*</span>
-                                                                </label>
-
-                                                                <p-input-number
-                                                                    [inputId]="`endpoint-${$index}-per-page`"
-                                                                    [max]="1000"
-                                                                    [min]="1"
-                                                                    [showButtons]="true"
-                                                                    formControlName="per_page_default"
-                                                                />
-
-                                                            </div>
-
-                                                        </div>
-
+                                                <div class="flex items-center gap-2">
+                                                    @if (endpoint.get('enabled')?.value) {
+                                                        <p-tag
+                                                            severity="success"
+                                                            value="Ativo"
+                                                        />
+                                                    } @else {
+                                                        <p-tag
+                                                            severity="danger"
+                                                            value="Inativo"
+                                                        />
                                                     }
-
                                                 </div>
-
                                             </div>
-                                        }
 
-                                    </div>
+                                            <!-- DETAILS -->
+                                            @if (endpoint.get('enabled')?.value) {
+                                                <div
+                                                    class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+                                                    <div class="flex flex-col gap-6">
+                                                        <div class="flex flex-col gap-2">
+                                                            <label [for]="`endpoint-${$index}-url`">
+                                                                URL
+                                                            </label>
+                                                            <p-input-group>
+                                                                <input
+                                                                    #urlPath
+                                                                    (focus)="selectAll(urlPath)"
+                                                                    [id]="`endpoint-${$index}-url`"
+                                                                    [value]="getEndpointURL(endpoint.get('url')?.value)"
+                                                                    pInputText
+                                                                    readonly
+                                                                />
+                                                                <p-inputgroup-addon>
+                                                                    <p-button
+                                                                        (cdkCopyToClipboardCopied)="onCopySuccess('endpoint path ' + (endpoint.get('method')?.value ?? ''))"
+                                                                        [cdkCopyToClipboard]="getEndpointURL(endpoint.get('url')?.value)"
+                                                                        icon="pi pi-clipboard"
+                                                                        pTooltip="Copiar"
+                                                                        severity="secondary"
+                                                                        tooltipPosition="top"
+                                                                        variant="text"
+                                                                    />
+                                                                </p-inputgroup-addon>
+                                                            </p-input-group>
+                                                        </div>
+                                                        @if (endpoint.get('paginate')) {
+                                                            <div
+                                                                class="rounded-lg border border-surface-200 dark:border-surface-700 p-4"
+                                                            >
+                                                                <div class="font-medium mb-4">
+                                                                    Configurações
+                                                                </div>
+                                                                <div class="grid grid-cols-12 gap-6 items-center">
+                                                                    <!-- PAGINAÇÃO -->
+                                                                    <div class="col-span-12 md:col-span-4">
+                                                                        <div
+                                                                            class="flex items-center gap-3 min-h-[34px]"
+                                                                        >
+                                                                            <label
+                                                                                [for]="`endpoint-${$index}-paginate`"
+                                                                                class="font-medium"
+                                                                                pTooltip="Esta configuração apenas ativa a paginação por padrão. Mesmo que desativada, ainda é possível paginar a resposta. No entanto, se estiver ativada, não será possível obter todos os dados da API de uma só vez."
+                                                                                tooltipPosition="top"
+                                                                            >
+                                                                                Paginação:
+                                                                                <span class="text-orange-400">*</span>
+                                                                            </label>
+
+                                                                            <p-toggle-switch
+                                                                                [inputId]="`endpoint-${$index}-paginate`"
+                                                                                formControlName="paginate"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- ITENS POR PÁGINA -->
+
+                                                                    @if (endpoint.get('paginate')?.value && endpoint.get('per_page_default')) {
+                                                                        <div class="col-span-12 md:col-span-8">
+                                                                            <div class="flex items-center gap-3">
+                                                                                <label
+                                                                                    [for]="`endpoint-${$index}-per-page`"
+                                                                                    class="font-medium whitespace-nowrap"
+                                                                                    pTooltip="Esta configuração define o pdrão de quantos itens serão retornados por página"
+                                                                                    tooltipPosition="top"
+                                                                                >
+                                                                                    Itens por página:
+                                                                                    <span
+                                                                                        class="text-orange-400">*</span>
+                                                                                </label>
+                                                                                <p-input-number
+                                                                                    [inputId]="`endpoint-${$index}-per-page`"
+                                                                                    [max]="1000"
+                                                                                    [min]="1"
+                                                                                    [showButtons]="true"
+                                                                                    formControlName="per_page_default"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
 
                                 </div>
 
-                            }
+                            </section>
+                        </p-tabpanel>
+                        <p-tabpanel value="3">
 
-                        </div>
+                            <!-- Preview -->
+                            <section class="flex flex-col">
 
-                    }
+                                <div>
+                                    <h2 class="text-xl font-semibold">
+                                        Exemplos
+                                    </h2>
+                                </div>
 
-                </div>
+                                <div class="flex flex-col gap-4">
+                                    <span class="text-md">
+                                        Resposta simples
+                                    </span>
+                                    <span class="bg-mist-600 rounded py-2 px-2">{{ getEndpointURL('/example') }}</span>
+                                    <pre>
+                                        <code
+                                            [highlight]="respostaSimples"
+                                            language="typescript"
+                                        ></code>
+                                    </pre>
+                                </div>
 
-            </section>
-                    </p-tabpanel>
-                    <p-tabpanel value="3">
-
-            <!-- Preview -->
-            <section class="flex flex-col">
-
-                <div>
-                    <h2 class="text-xl font-semibold">
-                        Exemplos
-                    </h2>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <span class="text-md">
-                        Resposta simples
-                    </span>
-                    <span>{{ getEndpointURL('/example') }}</span>
-                    <pre>
-                        <code
-                            [highlight]="respostaSimples"
-                            language="typescript"
-                        ></code>
-                    </pre>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <span class="text-md">
-                        Resposta páginada
-                    </span>
-                    <span>{{ getEndpointURL('/example?page=1&per_page=10') }}</span>
-                    <pre>
-                        <code
-                            [highlight]="respostaPaginada"
-                            language="typescript"
-                        ></code>
-                    </pre>
-                </div>
-            </section>
-                    </p-tabpanel>
-                </p-tabpanels>
-            </p-tabs>
+                                <div class="flex flex-col gap-4">
+                                    <span class="text-md">
+                                        Resposta páginada
+                                    </span>
+                                    <span
+                                        class="bg-mist-600 rounded py-2 px-2">{{ getEndpointURL('/example?page=1&per_page=10') }}</span>
+                                    <pre>
+                                        <code
+                                            [highlight]="respostaPaginada"
+                                            language="typescript"
+                                        ></code>
+                                    </pre>
+                                </div>
+                            </section>
+                        </p-tabpanel>
+                    </p-tabpanels>
+                </p-tabs>
 
             </div>
 
@@ -534,9 +480,3 @@
 
     </p-fluid>
 </form>
-
-<!--<pre>-->
-<!--    <code>-->
-<!--        {{ form.value|json }}-->
-<!--    </code>-->
-<!--</pre>-->

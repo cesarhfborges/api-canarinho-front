@@ -1,10 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
-import { SelectChangeEvent, SelectModule } from 'primeng/select';
+import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { Schema } from '@/app/core/models/schema';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { Resource } from '@/app/core/models/resource';
@@ -16,17 +18,21 @@ import { TabsModule } from 'primeng/tabs';
 import fakerMethods from '@/app/core/utils/faker-methods';
 import { MessageService, SelectItemGroup } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { NgClass } from '@angular/common';
-import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
+import { InputGroupModule } from 'primeng/inputgroup';
 import { Highlight } from 'ngx-highlightjs';
 import { TooltipModule } from 'primeng/tooltip';
+import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
 import { environment } from '@/environments/environment';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 @Component({
     selector: 'app-endpoint-editar',
     imports: [
+        ClipboardModule,
         FluidModule,
         InputTextModule,
+        InputGroupModule,
+        InputGroupAddonModule,
         SelectModule,
         TextareaModule,
         FormsModule,
@@ -55,10 +61,10 @@ export class EndpointEditar implements OnInit {
         'String',
         'Number',
         'Boolean',
-        'Object',
-        'Array',
-        'Date',
-        'Child Resource'
+        'Array'
+        // 'Object',
+        // 'Date',
+        // 'Child Resource'
     ];
 
     readonly fakerMethods: SelectItemGroup[] = fakerMethods;
@@ -83,13 +89,6 @@ export class EndpointEditar implements OnInit {
             resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
-    }
-
-    objectTypes(index: number): string[] {
-        if (index === 0) {
-            return this._objectTypes;
-        }
-        return this._objectTypes.filter((v) => v !== 'Object.ID');
     }
 
     get resourceSchemaFormArray(): FormArray {
@@ -158,6 +157,13 @@ export class EndpointEditar implements OnInit {
             }
         ];
         return JSON.stringify(data, null, 2);
+    }
+
+    objectTypes(index: number): string[] {
+        if (index === 0) {
+            return this._objectTypes;
+        }
+        return this._objectTypes.filter((v) => v !== 'Object.ID');
     }
 
     ngOnInit(): void {
@@ -250,11 +256,43 @@ export class EndpointEditar implements OnInit {
     }
 
     createGroupSchema(value?: Schema): FormGroup {
-        return this.fb.group({
-            name: [value?.name ?? '', Validators.required],
-            type: [value?.type ?? '', Validators.required],
-            value: [value?.value ?? '']
+        const g = this.fb.group<any>({
+            name: [value?.name ?? '', [Validators.required]],
+            type: [value?.type ?? '', [Validators.required]],
+            value: [value?.value ?? '', value?.type === 'Object.ID' ? [] : [Validators.required]]
         });
+        g.get('type')?.valueChanges.subscribe({
+            next: (type) => {
+                g.get('value')?.reset();
+
+                if (type === 'Object.ID') {
+                    g.get('value')?.clearValidators();
+                } else {
+                    g.get('value')?.setValidators([Validators.required]);
+                }
+
+                switch (type) {
+                    case 'Boolean':
+                        g.get('value')?.patchValue(false);
+                        break;
+                    case 'Number':
+                        g.get('value')?.patchValue(0);
+                        break;
+                    case 'String':
+                        g.get('value')?.patchValue('');
+                        break;
+                    case 'Array':
+                        g.get('value')?.patchValue('');
+                        break;
+                    case 'Object':
+                        g.get('value')?.patchValue('');
+                        break;
+                }
+
+                g.get('value')?.updateValueAndValidity();
+            }
+        });
+        return g;
     }
 
     createGroupEndpoint(value?: Endpoint, first?: boolean): FormGroup {
@@ -377,7 +415,17 @@ export class EndpointEditar implements OnInit {
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
     }
 
-    protected change($event: SelectChangeEvent, index: number): void {
-        this.resourceSchemaFormArray.at(index)?.get('value')?.reset();
+    protected onCopySuccess(value: string): void {
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: `${value} copiado com sucesso.`,
+            life: 3000
+        });
+    }
+
+    protected selectAll(element: any): void {
+        console.log(element);
+        element.select();
     }
 }
