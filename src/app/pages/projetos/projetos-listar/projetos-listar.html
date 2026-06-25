@@ -1,49 +1,68 @@
-<p-card>
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold m-0">Meus Projetos</h2>
-        <p-button label="Cadastrar Novo" icon="pi pi-plus" (onClick)="abrirModal()" />
-    </div>
-    <p-data-view [value]="listaProjetos()" emptyMessage=" ">
-        <ng-template #list let-items>
-            @if (loading()) {
-            <div class="p-6 text-center text-surface-500">
-                <i class="pi pi-spin pi-spinner text-2xl mb-2"></i>
-                <p>Carregando projetos...</p>
+<div class="flex flex-col gap-4">
+
+    <div
+        class="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary-600 to-indigo-700 text-white shadow-lg flex-none p-8 mb-6 mx-4 xl:mx-0">
+        <!-- Background decoration -->
+        <div class="absolute -right-10 -top-10 opacity-10 rotate-12">
+            <i class="pi pi-server" style="font-size: 15rem"></i>
+        </div>
+        <div class="relative z-10 flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-bold m-0 tracking-tight text-white!">Projetos</h1>
             </div>
-            } @else {
-            <div class="grid grid-cols-12 gap-4 grid-nogutter">
-                @for (item of items; track item.id; let first = $first) {
-                <div [class]="{
+            <p class="text-primary-100 text-lg ml-14 max-w-2xl">
+                Modele seus dados, defina rotas e visualize simulações realistas na hora.
+            </p>
+        </div>
+    </div>
+    <p-card>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold m-0">Meus Projetos</h2>
+            <p-button (onClick)="abrirModal()" icon="pi pi-plus" label="Cadastrar Novo" />
+        </div>
+        <p-data-view [value]="listaProjetos()" emptyMessage=" ">
+            <ng-template #list let-items>
+                @if (loading()) {
+                    <div class="p-6 text-center text-surface-500">
+                        <i class="pi pi-spin pi-spinner text-2xl mb-2"></i>
+                        <p>Carregando projetos...</p>
+                    </div>
+                } @else {
+                    <div class="grid grid-cols-12 gap-4 grid-nogutter">
+                        @for (item of items; track item.id; let first = $first) {
+                            <div [class]="{
                                 'col-span-12': item,
                                 'border-t': !first,
                                 'border-surface-200': !first,
                                 'dark:border-surface-700': !first
                             }">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 p-6 gap-6">
-                        <div class="flex flex-row flex-auto items-center gap-2">
-                            <div
-                                class="h-[50px] w-[50px] flex items-center gap-2 justify-center rounded-full bg-surface-500 dark:bg-surface-500">
+                                <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 p-6 gap-6">
+                                    <div class="flex flex-row flex-auto items-center gap-2">
+                                        <div
+                                            class="h-[50px] w-[50px] flex items-center gap-2 justify-center rounded-full bg-surface-500 dark:bg-surface-500">
                                 <span class="text-surface-0 dark:text-surface-0 font-medium text-sm">
                                     {{ item.name.charAt(0) }}
                                 </span>
+                                        </div>
+                                        <div class="flex-auto text-lg font-medium text-surface-900 dark:text-surface-0">
+                                            <p class="m-0! p-0!">{{ item.name }}</p>
+                                            <p class="m-0! p-0!">{{ item.slug }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-8">
+                                        <div class="flex justify-between md:justify-end md:flex-row gap-2">
+                                            <p-button (onClick)="abrirModal(item)" [outlined]="true"
+                                                      icon="pi pi-pencil" />
+                                            <p-button [routerLink]="['/projetos', item.id]" class="whitespace-nowrap" icon="pi pi-folder-open"
+                                                      label="Abrir" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex-auto text-lg font-medium text-surface-900 dark:text-surface-0">
-                                <p class="m-0! p-0!">{{ item.name }}</p>
-                                <p class="m-0! p-0!">{{ item.slug }}</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-end gap-8">
-                            <div class="flex justify-between md:justify-end md:flex-row gap-2">
-                                <p-button [outlined]="true" icon="pi pi-pencil" (onClick)="abrirModal(item)" />
-                                <p-button class="whitespace-nowrap" icon="pi pi-folder-open" label="Abrir"
-                                    [routerLink]="['/projetos', item.id]" />
-                            </div>
-                        </div>
+                        }
                     </div>
-                </div>
                 }
-            </div>
-            }
-        </ng-template>
-    </p-data-view>
-</p-card>
+            </ng-template>
+        </p-data-view>
+    </p-card>
+</div>

@@ -12,7 +12,7 @@ import { TreeModule } from 'primeng/tree';
 import { TooltipModule } from 'primeng/tooltip';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { TokensService } from '@/app/core/services/tokens.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { EndpointEditar } from '@/app/pages/projetos/projetos-editar/components/endpoint-editar/endpoint-editar';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -61,6 +61,7 @@ export class ProjetosEditar implements OnInit {
     public readonly id: number | null = null;
 
     private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
     private readonly _endpointsService = inject(EndpointsService);
     private readonly _tokensService = inject(TokensService);
     private readonly _projetosService = inject(ProjetosService);
@@ -100,33 +101,11 @@ export class ProjetosEditar implements OnInit {
     }
 
     editar(value: any) {
-        const ref = this._dialogService.open(EndpointEditar, {
-            header: value ? `Edit resource - ${value.name}` : 'New resource',
-            modal: true,
-            closable: true,
-            draggable: false,
-            data: {
-                resource: value,
-                projectId: this.id,
-                username: this.username(),
-                projectSlug: this.project()?.slug
-            },
-            styleClass: 'customize',
-            breakpoints: {
-                '4000px': '75vw',
-                '1920px': '75vw',
-                '960px': '85vw',
-                '640px': '90vw',
-                '10px': '90vw'
-            }
-        });
-        ref?.onClose?.subscribe({
-            next: (res) => {
-                if (res) {
-                    void this.carregar();
-                }
-            }
-        });
+        if (value) {
+            this.router.navigate(['/projetos', this.id, 'endpoint', value.id]);
+        } else {
+            this.router.navigate(['/projetos', this.id, 'endpoint', 'add']);
+        }
     }
 
     visualizarDados(value: any) {
