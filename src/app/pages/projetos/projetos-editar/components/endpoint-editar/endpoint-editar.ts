@@ -1,5 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { fakerPT_BR as faker } from '@faker-js/faker';
+import { CardModule } from 'primeng/card';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -7,9 +9,11 @@ import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { Schema } from '@/app/core/models/schema';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProjetosService } from '@/app/core/services/projetos-service';
+import { PerfilService } from '@/app/core/services/perfil-service';
+import { lastValueFrom } from 'rxjs';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
-import { Resource } from '@/app/core/models/resource';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { Endpoint } from '@/app/core/models/endpoint';
@@ -28,6 +32,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 @Component({
     selector: 'app-endpoint-editar',
     imports: [
+        CardModule,
         ClipboardModule,
         FluidModule,
         InputTextModule,
@@ -69,9 +74,105 @@ export class EndpointEditar implements OnInit {
 
     readonly fakerMethods: SelectItemGroup[] = fakerMethods;
     saving = signal<boolean>(false);
+    projectId: number | null = null;
+    endpointId: number | string | null = null;
+    username: string = ':username';
+    projectSlug: string = ':project';
+    formValue = signal<any>({});
+    mockResponses = computed(() => {
+        const value = this.formValue();
+        const schemas = value.resourceSchema || [];
+        const endpoints = value.endpoints || [];
+
+        const item: any = {};
+        for (const schema of schemas) {
+            if (!schema.name) continue;
+
+            const type = schema.type;
+            const schemaValue = schema.value;
+
+            switch (type) {
+                case 'String':
+                    item[schema.name] = schemaValue || 'exemplo';
+                    break;
+                case 'Number':
+                    item[schema.name] = schemaValue ?? 0;
+                    break;
+                case 'Boolean':
+                    item[schema.name] = schemaValue === 'true' || schemaValue === true;
+                    break;
+                case 'Object.ID':
+                    item[schema.name] = 1;
+                    break;
+                case 'Array':
+                    if (schemaValue && typeof schemaValue === 'string') {
+                        const arr = schemaValue
+                            .split(',')
+                            .map((v: string) => v.trim())
+                            .filter((v: string) => v !== '');
+                        item[schema.name] = arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
+                    } else {
+                        item[schema.name] = [];
+                    }
+                    break;
+                case 'Faker.js':
+                    item[schema.name] = this.parseFakerTag(schemaValue);
+                    break;
+                default:
+                    item[schema.name] = schemaValue || null;
+            }
+        }
+
+        const responses: any = {};
+        for (let i = 0; i < endpoints.length; i++) {
+            const endpoint = endpoints[i];
+            if (!endpoint.enabled) continue;
+
+            let responseData: any;
+
+            if (endpoint.method === 'GET') {
+                if (endpoint.url?.includes('/:id')) {
+                    responseData = { ...item, id: 1 };
+                } else {
+                    const list = [
+                        { ...item, id: 1 },
+                        { ...item, id: 2 },
+                        { ...item, id: 3 }
+                    ];
+
+                    if (endpoint.paginate) {
+                        const perPage = endpoint.per_page_default || 10;
+                        responseData = {
+                            data: list,
+                            current_page: 1,
+                            last_page: 5,
+                            per_page: perPage,
+                            total: perPage * 5
+                        };
+                    } else {
+                        responseData = list;
+                    }
+                }
+            } else if (endpoint.method === 'POST') {
+                responseData = { ...item, id: 99 };
+            } else if (endpoint.method === 'PUT') {
+                responseData = { ...item, id: 1 };
+            } else if (endpoint.method === 'DELETE') {
+                responseData = { message: 'Resource deleted successfully.' };
+            } else {
+                responseData = { ...item };
+            }
+
+            responses[i] = JSON.stringify(responseData, null, 2);
+        }
+
+        return responses;
+    });
     private readonly fb = inject(FormBuilder);
-    private dialogRef = inject(DynamicDialogRef);
-    private dialogConfig = inject(DynamicDialogConfig);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    private readonly _projetosService = inject(ProjetosService);
+    private readonly _perfilService = inject(PerfilService);
     private readonly _endpointsService = inject(EndpointsService);
     private readonly messageService = inject(MessageService);
 
@@ -99,66 +200,6 @@ export class EndpointEditar implements OnInit {
         return this.form.get('endpoints') as FormArray;
     }
 
-    get respostaPaginada(): string {
-        const data = {
-            data: [
-                {
-                    nome: 'Hernani Rocha Sobrinho',
-                    ativo: false,
-                    email: 'serna.marcos@example.com',
-                    cidade: 'Guerra do Norte',
-                    id: 1
-                },
-                {
-                    nome: 'Rafael Kléber Leon Jr.',
-                    ativo: true,
-                    email: 'dtoledo@example.com',
-                    cidade: 'das Neves do Leste',
-                    id: 2
-                },
-                {
-                    nome: 'Dr. Marcelo Cervantes Jr.',
-                    ativo: false,
-                    email: 'gustavo.martines@example.org',
-                    cidade: "Assunção d'Oeste",
-                    id: 3
-                }
-            ],
-            current_page: 1,
-            last_page: 2,
-            per_page: 10,
-            total: 15
-        };
-        return JSON.stringify(data, null, 2);
-    }
-
-    get respostaSimples(): string {
-        const data = [
-            {
-                nome: 'Hernani Rocha Sobrinho',
-                ativo: false,
-                email: 'serna.marcos@example.com',
-                cidade: 'Guerra do Norte',
-                id: 1
-            },
-            {
-                nome: 'Rafael Kléber Leon Jr.',
-                ativo: true,
-                email: 'dtoledo@example.com',
-                cidade: 'das Neves do Leste',
-                id: 2
-            },
-            {
-                nome: 'Dr. Marcelo Cervantes Jr.',
-                ativo: false,
-                email: 'gustavo.martines@example.org',
-                cidade: "Assunção d'Oeste",
-                id: 3
-            }
-        ];
-        return JSON.stringify(data, null, 2);
-    }
-
     objectTypes(index: number): string[] {
         if (index === 0) {
             return this._objectTypes;
@@ -166,93 +207,71 @@ export class EndpointEditar implements OnInit {
         return this._objectTypes.filter((v) => v !== 'Object.ID');
     }
 
-    ngOnInit(): void {
-        console.log(this.dialogConfig.data);
-        if (this.dialogConfig.data?.resource) {
-            const resource = this.dialogConfig.data.resource as Resource;
+    async ngOnInit(): Promise<void> {
+        this.projectId = Number(this.route.snapshot.paramMap.get('id'));
+        const rawEndpointId = this.route.snapshot.paramMap.get('endpointId');
+        this.endpointId = rawEndpointId === 'add' ? 'add' : Number(rawEndpointId);
 
-            this.form.patchValue(resource);
+        try {
+            // Load user profile if missing
+            if (!this._perfilService.userProfile()) {
+                await lastValueFrom(this._perfilService.getPerfil());
+            }
+            this.username = this._perfilService.userProfile()?.username ?? ':username';
 
-            resource?.resourceSchema?.forEach((schema) => {
-                this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
+            // Load Project Details
+            if (this.projectId) {
+                const projectData = await lastValueFrom(this._projetosService.obter(this.projectId));
+                this.projectSlug = projectData.slug ?? ':project';
+            }
+
+            if (this.endpointId !== 'add' && this.projectId) {
+                // Fetch resource
+                const resource = await lastValueFrom(
+                    this._endpointsService.obter(this.projectId, this.endpointId as number)
+                );
+                this.form.patchValue(resource);
+
+                resource?.resourceSchema?.forEach((schema) => {
+                    this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
+                });
+
+                resource?.endpoints?.forEach((endpoint, index) => {
+                    this.endpointsFormArray.push(this.createGroupEndpoint(endpoint, index === 0));
+                });
+            } else {
+                this.initializeDefaultForm();
+            }
+        } catch (err) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'Erro ao carregar dados do endpoint.',
+                life: 3000
             });
-
-            resource?.endpoints?.forEach((endpoint, index) => {
-                this.endpointsFormArray.push(this.createGroupEndpoint(endpoint, index === 0));
-            });
-        } else {
-            // Create mode: Add default ID schema
-            this.resourceSchemaFormArray.push(
-                this.createGroupSchema({
-                    name: 'id',
-                    type: 'Object.ID',
-                    value: ''
-                })
-            );
-
-            // Create mode: Add 5 default endpoints
-            this.endpointsFormArray.push(
-                this.createGroupEndpoint(
-                    {
-                        method: 'GET',
-                        url: '/',
-                        enabled: true,
-                        paginate: false,
-                        per_page_default: 10,
-                        response: '$mockData'
-                    },
-                    true
-                )
-            );
-            this.endpointsFormArray.push(
-                this.createGroupEndpoint({
-                    method: 'GET',
-                    url: '/:id',
-                    enabled: true,
-                    response: '$mockData'
-                })
-            );
-            this.endpointsFormArray.push(
-                this.createGroupEndpoint({
-                    method: 'POST',
-                    url: '/',
-                    enabled: true,
-                    response: '$mockData'
-                })
-            );
-            this.endpointsFormArray.push(
-                this.createGroupEndpoint({
-                    method: 'PUT',
-                    url: '/:id',
-                    enabled: true,
-                    response: '$mockData'
-                })
-            );
-            this.endpointsFormArray.push(
-                this.createGroupEndpoint({
-                    method: 'DELETE',
-                    url: '/:id',
-                    enabled: true,
-                    response: '$mockData'
-                })
-            );
+            console.error(err);
         }
 
         // Reactivity: Auto-update URLs when name changes
-        this.form.get('name')?.valueChanges.subscribe((val) => {
-            const safeName = val ? val : '';
+        this.form.valueChanges.subscribe((val) => {
+            this.formValue.set(val);
+
+            const safeName = val.name ? val.name : '';
             this.endpointsFormArray.controls.forEach((ctrl) => {
                 const method = ctrl.get('method')?.value;
                 const hasId = ctrl.get('url')?.value?.includes('/:id');
                 if (method === 'GET' && hasId) {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`);
+                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
                 } else if (method === 'GET' || method === 'POST') {
-                    ctrl.get('url')?.setValue(`/${safeName}`);
+                    ctrl.get('url')?.setValue(`/${safeName}`, { emitEvent: false });
                 } else if (method === 'PUT' || method === 'DELETE') {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`);
+                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
                 }
             });
         });
+
+        // Inicializa formValue
+        this.formValue.set(this.form.value);
     }
 
     createGroupSchema(value?: Schema): FormGroup {
@@ -320,7 +339,7 @@ export class EndpointEditar implements OnInit {
     }
 
     close(): void {
-        this.dialogRef.close();
+        this.router.navigate(['/projetos', this.projectId]);
     }
 
     salvar(): void {
@@ -339,8 +358,8 @@ export class EndpointEditar implements OnInit {
         this.saving.set(true);
 
         const data = this.form.value;
-        const resourceId = this.dialogConfig.data?.resource?.id;
-        const projectId = this.dialogConfig.data?.projectId;
+        const resourceId = this.endpointId !== 'add' ? (this.endpointId as number) : null;
+        const projectId = this.projectId;
 
         if (resourceId) {
             this._endpointsService.atualizar(resourceId, data).subscribe({
@@ -352,7 +371,7 @@ export class EndpointEditar implements OnInit {
                         life: 3000
                     });
                     this.saving.set(false);
-                    this.dialogRef.close(res);
+                    this.router.navigate(['/projetos', this.projectId]);
                 },
                 error: (err) => {
                     this.messageService.add({
@@ -375,7 +394,7 @@ export class EndpointEditar implements OnInit {
                         life: 3000
                     });
                     this.saving.set(false);
-                    this.dialogRef.close(res);
+                    this.router.navigate(['/projetos', this.projectId]);
                 },
                 error: (err) => {
                     this.messageService.add({
@@ -409,9 +428,7 @@ export class EndpointEditar implements OnInit {
     }
 
     getEndpointURL(value: string): string {
-        const username = this.dialogConfig.data?.username || ':username';
-        const projectSlug = this.dialogConfig.data?.projectSlug || ':project';
-        const base = `${environment.apiUrl}/mock/${username}/${projectSlug}`;
+        const base = `${environment.apiUrl}/mock/${this.username}/${this.projectSlug}`;
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
     }
 
@@ -427,5 +444,220 @@ export class EndpointEditar implements OnInit {
     protected selectAll(element: any): void {
         console.log(element);
         element.select();
+    }
+
+    private parseFakerTag(tag: string): any {
+        if (!tag) return '';
+
+        switch (tag) {
+            case '[person.firstName]':
+                return faker.person.firstName();
+            case '[person.lastName]':
+                return faker.person.lastName();
+            case '[person.fullName]':
+                return faker.person.fullName();
+            case '[person.prefix]':
+                return faker.person.prefix();
+            case '[person.suffix]':
+                return faker.person.suffix();
+            case '[person.gender]':
+                return faker.person.sex();
+            case '[person.birthdate_date]':
+                return faker.date.birthdate().toISOString().split('T')[0];
+
+            case '[internet.email]':
+                return faker.internet.email();
+            case '[internet.username]':
+                return faker.internet.username();
+            case '[internet.password]':
+                return faker.internet.password();
+            case '[internet.url]':
+                return faker.internet.url();
+            case '[internet.domainName]':
+                return faker.internet.domainName();
+            case '[internet.ipv4]':
+                return faker.internet.ipv4();
+            case '[internet.ipv6]':
+                return faker.internet.ipv6();
+
+            case '[location.city]':
+                return faker.location.city();
+            case '[location.state]':
+                return faker.location.state();
+            case '[location.country]':
+                return faker.location.country();
+            case '[location.zipCode]':
+                return faker.location.zipCode();
+            case '[location.latitude]':
+                return faker.location.latitude();
+            case '[location.longitude]':
+                return faker.location.longitude();
+
+            case '[company.name]':
+                return faker.company.name();
+            case '[company.department]':
+                return faker.commerce.department();
+            case '[company.companyEmail]':
+                return faker.internet.email();
+
+            case '[finance.bank]':
+                return 'Banco do Brasil';
+            case '[finance.agency]':
+                return faker.finance.accountNumber(4);
+            case '[finance.accountNumber]':
+                return faker.finance.accountNumber(8);
+            case '[finance.amount]':
+                return faker.finance.amount();
+            case '[finance.currencyCode]':
+                return 'BRL';
+
+            case '[word.word]':
+                return faker.lorem.word();
+            case '[word.words]':
+                return faker.lorem.words(3);
+            case '[word.sentence]':
+                return faker.lorem.sentence();
+            case '[word.paragraph]':
+                return faker.lorem.paragraph();
+
+            case '[date.date_before]':
+                return faker.date.past().toISOString().split('T')[0];
+            case '[date.date_now]':
+                return new Date().toISOString().split('T')[0];
+            case '[date.date_after]':
+                return faker.date.future().toISOString().split('T')[0];
+            case '[date.time_before]':
+                return faker.date.past().toISOString().split('T')[1].split('.')[0];
+            case '[date.time_now]':
+                return new Date().toISOString().split('T')[1].split('.')[0];
+            case '[date.time_after]':
+                return faker.date.future().toISOString().split('T')[1].split('.')[0];
+            case '[date.datetime_before]':
+                return faker.date.past().toISOString().split('.')[0];
+            case '[date.datetime_now]':
+                return new Date().toISOString().split('.')[0];
+            case '[date.datetime_after]':
+                return faker.date.future().toISOString().split('.')[0];
+
+            case '[string.uuid]':
+                return faker.string.uuid();
+            case '[database.mongodbObjectId]':
+                return faker.database.mongodbObjectId();
+
+            case '[color.human]':
+                return faker.color.human();
+            case '[color.hex]':
+                return faker.color.rgb();
+            case '[color.rgb]':
+                return `rgb(${faker.number.int(255)}, ${faker.number.int(255)}, ${faker.number.int(255)})`;
+
+            case '[number.int]':
+                return faker.number.int(100);
+            case '[number.float]':
+                return faker.number.float({ min: 0, max: 100, fractionDigits: 2 });
+            case '[datatype.boolean]':
+                return faker.datatype.boolean();
+
+            case '[image.avatar]':
+                return faker.image.avatar();
+            case '[image.url]':
+                return faker.image.url();
+
+            case '[vehicle.model]':
+                return faker.vehicle.model();
+            case '[vehicle.manufacturer]':
+                return faker.vehicle.manufacturer();
+            case '[vehicle.plate]':
+                return faker.vehicle.vrm();
+
+            case '[brasil.celular]':
+                return faker.helpers.replaceSymbols('(##) 9####-####');
+            case '[brasil.telefone]':
+                return faker.helpers.replaceSymbols('(##) ####-####');
+            case '[brasil.ie]':
+                return faker.helpers.replaceSymbols('###.###.###.###');
+            case '[brasil.pis]':
+                return faker.helpers.replaceSymbols('###.#####.##-#');
+            case '[brasil.rg]':
+                return faker.helpers.replaceSymbols('##.###.###-#');
+            case '[brasil.cnh]':
+                return faker.helpers.replaceSymbols('###########');
+            case '[brasil.cpf]':
+                return faker.helpers.replaceSymbols('###.###.###-##');
+            case '[brasil.cnpj]':
+                return faker.helpers.replaceSymbols('##.###.###/####-##');
+
+            case '[credit_card.master_card]':
+                return faker.finance.creditCardNumber('mastercard');
+            case '[credit_card.visa]':
+                return faker.finance.creditCardNumber('visa');
+            case '[credit_card.amex]':
+                return faker.finance.creditCardNumber('american_express');
+            case '[credit_card.diners_club]':
+                return faker.finance.creditCardNumber('diners_club');
+            case '[credit_card.hiper_card]':
+                return faker.finance.creditCardNumber('discover');
+
+            default:
+                return tag;
+        }
+    }
+
+    private initializeDefaultForm(): void {
+        // Create mode: Add default ID schema
+        this.resourceSchemaFormArray.push(
+            this.createGroupSchema({
+                name: 'id',
+                type: 'Object.ID',
+                value: ''
+            })
+        );
+
+        // Create mode: Add 5 default endpoints
+        this.endpointsFormArray.push(
+            this.createGroupEndpoint(
+                {
+                    method: 'GET',
+                    url: '/',
+                    enabled: true,
+                    paginate: false,
+                    per_page_default: 10,
+                    response: '$mockData'
+                },
+                true
+            )
+        );
+        this.endpointsFormArray.push(
+            this.createGroupEndpoint({
+                method: 'GET',
+                url: '/:id',
+                enabled: true,
+                response: '$mockData'
+            })
+        );
+        this.endpointsFormArray.push(
+            this.createGroupEndpoint({
+                method: 'POST',
+                url: '/',
+                enabled: true,
+                response: '$mockData'
+            })
+        );
+        this.endpointsFormArray.push(
+            this.createGroupEndpoint({
+                method: 'PUT',
+                url: '/:id',
+                enabled: true,
+                response: '$mockData'
+            })
+        );
+        this.endpointsFormArray.push(
+            this.createGroupEndpoint({
+                method: 'DELETE',
+                url: '/:id',
+                enabled: true,
+                response: '$mockData'
+            })
+        );
     }
 }

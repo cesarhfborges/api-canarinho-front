@@ -7,6 +7,10 @@ const projetosRoutes: Routes = [
     {
         path: ':id',
         component: ProjetosEditar
+    },
+    {
+        path: ':id/endpoint/:endpointId',
+        loadComponent: () => import('@/app/pages/projetos/projetos-editar/components/endpoint-editar/endpoint-editar').then(m => m.EndpointEditar)
     }
 ];
 
