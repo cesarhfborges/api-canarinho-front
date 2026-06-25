@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
-import { SelectChangeEvent, SelectModule } from 'primeng/select';
+import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { Schema } from '@/app/core/models/schema';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -85,13 +85,6 @@ export class EndpointEditar implements OnInit {
         });
     }
 
-    objectTypes(index: number): string[] {
-        if (index === 0) {
-            return this._objectTypes;
-        }
-        return this._objectTypes.filter((v) => v !== 'Object.ID');
-    }
-
     get resourceSchemaFormArray(): FormArray {
         return this.form.get('resourceSchema') as FormArray;
     }
@@ -158,6 +151,13 @@ export class EndpointEditar implements OnInit {
             }
         ];
         return JSON.stringify(data, null, 2);
+    }
+
+    objectTypes(index: number): string[] {
+        if (index === 0) {
+            return this._objectTypes;
+        }
+        return this._objectTypes.filter((v) => v !== 'Object.ID');
     }
 
     ngOnInit(): void {
@@ -250,11 +250,29 @@ export class EndpointEditar implements OnInit {
     }
 
     createGroupSchema(value?: Schema): FormGroup {
-        return this.fb.group({
-            name: [value?.name ?? '', Validators.required],
-            type: [value?.type ?? '', Validators.required],
-            value: [value?.value ?? '']
+        const g = this.fb.group<any>({
+            name: [value?.name ?? '', [Validators.required]],
+            type: [value?.type ?? '', [Validators.required]],
+            value: [value?.value ?? '', value?.type === 'Object.ID' ? [] : [Validators.required]]
         });
+        g.get('type')?.valueChanges.subscribe({
+            next: (type) => {
+                g.get('value')?.reset();
+
+                if (type === 'Object.ID') {
+                    g.get('value')?.clearValidators();
+                } else {
+                    g.get('value')?.setValidators([Validators.required]);
+                }
+
+                if (type === 'Boolean') {
+                    g.get('value')?.patchValue(false);
+                }
+
+                g.get('value')?.updateValueAndValidity();
+            }
+        });
+        return g;
     }
 
     createGroupEndpoint(value?: Endpoint, first?: boolean): FormGroup {
@@ -375,9 +393,5 @@ export class EndpointEditar implements OnInit {
         const projectSlug = this.dialogConfig.data?.projectSlug || ':project';
         const base = `${environment.apiUrl}/mock/${username}/${projectSlug}`;
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
-    }
-
-    protected change($event: SelectChangeEvent, index: number): void {
-        this.resourceSchemaFormArray.at(index)?.get('value')?.reset();
     }
 }
