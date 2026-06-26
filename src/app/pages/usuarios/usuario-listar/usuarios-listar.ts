@@ -8,7 +8,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { DialogService } from 'primeng/dynamicdialog';
 import { UsuariosService } from '@/app/core/services/usuarios-service';
 import { PerfilService, UserProfile } from '@/app/core/services/perfil-service';
-import { UsuarioEditar } from './components/usuario-editar/usuario-editar';
+import { UsuarioEditar } from '@/app/pages/usuarios/usuario-editar/usuario-editar';
 import { UsuarioSenhaModal } from '@/app/shared/components/usuario-senha-modal/usuario-senha-modal';
 
 @Component({
@@ -16,9 +16,9 @@ import { UsuarioSenhaModal } from '@/app/shared/components/usuario-senha-modal/u
     standalone: true,
     imports: [CommonModule, CardModule, TableModule, ButtonModule, TooltipModule],
     providers: [DialogService],
-    templateUrl: './usuarios-list.html'
+    templateUrl: './usuarios-listar.html'
 })
-export class UsuariosList {
+export class UsuariosListar {
     private usuariosService = inject(UsuariosService);
     private perfilService = inject(PerfilService);
     private confirmationService = inject(ConfirmationService);

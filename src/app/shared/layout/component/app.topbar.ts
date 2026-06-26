@@ -24,7 +24,7 @@ import { environment } from '@/environments/environment';
                 </button>
                 <a class="layout-topbar-logo" routerLink="/">
                     <app-logotipo class="block h-12 shrink-0 mx-auto" />
-                    <div class="flex text-3xl font-bold mb-1 justify-center gap-2">
+                    <div class="hidden md:flex text-3xl font-bold mb-1 justify-center gap-2">
                         <span class="text-green-800">API</span>
                         <span class="text-yellow-400">Canarinho</span>
                     </div>
@@ -93,7 +93,12 @@ import { environment } from '@/environments/environment';
                     </button>
                     <p-tieredMenu #themeMenu [model]="themeItems" [popup]="true" appendTo="body">
                         <ng-template #item let-item>
-                            <a pRipple class="flex items-center px-4 py-3 cursor-pointer" [class]="item.linkClass" (click)="item.command()">
+                            <a
+                                pRipple
+                                class="flex items-center px-4 py-3 cursor-pointer"
+                                [class]="item.linkClass"
+                                (click)="item.command()"
+                            >
                                 <span [ngClass]="item.icon" class="mr-2"></span>
                                 <span class="ms-2 font-medium">{{ item.label }}</span>
                                 @if (layoutService.layoutConfig().colorScheme === item.id) {
@@ -102,20 +107,20 @@ import { environment } from '@/environments/environment';
                             </a>
                         </ng-template>
                     </p-tieredMenu>
-<!--                    <div class="relative">-->
-<!--                        <button-->
-<!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
-<!--                            pStyleClass="@next"-->
-<!--                            enterFromClass="hidden"-->
-<!--                            enterActiveClass="animate-scalein"-->
-<!--                            leaveToClass="hidden"-->
-<!--                            leaveActiveClass="animate-fadeout"-->
-<!--                            [hideOnOutsideClick]="true"-->
-<!--                        >-->
-<!--                            <i class="pi pi-palette"></i>-->
-<!--                        </button>-->
-<!--                        <app-configurator />-->
-<!--                    </div>-->
+                    <!--                    <div class="relative">-->
+                    <!--                        <button-->
+                    <!--                            class="layout-topbar-action layout-topbar-action-highlight"-->
+                    <!--                            pStyleClass="@next"-->
+                    <!--                            enterFromClass="hidden"-->
+                    <!--                            enterActiveClass="animate-scalein"-->
+                    <!--                            leaveToClass="hidden"-->
+                    <!--                            leaveActiveClass="animate-fadeout"-->
+                    <!--                            [hideOnOutsideClick]="true"-->
+                    <!--                        >-->
+                    <!--                            <i class="pi pi-palette"></i>-->
+                    <!--                        </button>-->
+                    <!--                        <app-configurator />-->
+                    <!--                    </div>-->
                 </div>
 
                 <!--            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">-->
@@ -214,8 +219,6 @@ export class AppTopbar {
         this.layoutService.setColorScheme(scheme);
         this.perfilService.updatePerfil({ theme_color_scheme: scheme }).subscribe();
     }
-
-
 
     logout(): void {
         this.confirmationService.confirm({

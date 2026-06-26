@@ -1,4 +1,18 @@
 <div class="flex flex-col gap-4">
+    <div
+        class="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary-600 to-indigo-700 text-white shadow-lg flex-none p-4 mb-6">
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 rotate-12">
+            <i class="pi pi-user" style="font-size: 8rem"></i>
+        </div>
+        <div class="relative z-10 flex flex-col gap-2">
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-bold tracking-tight text-white! p-0! m-0!">Perfil</h1>
+            </div>
+            <p class="text-primary-100 text-lg ml-14 max-w-2xl">
+                Configure seu perfil
+            </p>
+        </div>
+    </div>
     <p-card header="Meu Perfil">
         <form [formGroup]="form" (ngSubmit)="salvar()" class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">

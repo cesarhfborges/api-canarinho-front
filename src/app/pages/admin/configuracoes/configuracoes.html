@@ -1,196 +1,148 @@
-<div class="mb-6">
-    <div class="font-semibold text-2xl mb-2">Painel de Controle do Sistema</div>
-    <div class="text-muted-color">Gerencie as configurações globais e ações de manutenção da API Canarinho.</div>
-</div>
-
-<form [formGroup]="configForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-
-    <!-- Bloco 1: Configurações Gerais -->
-    <div class="card">
-        <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
-            <i class="pi pi-cog"></i> Configurações Gerais
-        </h3>
-
-        <div class="flex flex-col gap-6">
-            <!-- Allow Register -->
-            <div class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
-                <div>
-                    <div class="font-semibold text-lg mb-1 text-surface-900 dark:text-surface-0">Cadastro Aberto</div>
-                    <div class="text-muted-color text-sm">Permitir que usuários criem novas contas livremente pelo formulário de registro.</div>
-                </div>
-                <p-checkbox formControlName="allow_register" binary="true" inputId="allow_register"></p-checkbox>
+<div class="flex flex-col w-full pb-10">
+    <div
+        class="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary-600 to-indigo-700 text-white shadow-lg flex-none p-4 mb-6">
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 rotate-12">
+            <i class="pi pi-sliders-h" style="font-size: 9rem"></i>
+        </div>
+        <div class="relative z-10 flex flex-col gap-2">
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-bold tracking-tight text-white! p-0! m-0!">Painel de Controle do Sistema</h1>
             </div>
-
-            <!-- Rate Limit Configs -->
-            <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
-                <div class="font-semibold text-lg mb-2 flex items-center gap-2 text-surface-900 dark:text-surface-0">
-                    <i class="pi pi-shield text-primary text-xl"></i>
-                    Segurança (Rate Limiting)
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <label for="rate_limit_requests" class="font-medium text-surface-900 dark:text-surface-0">Requisições Máximas (Por IP)</label>
-                    <p-inputNumber
-                        id="rate_limit_requests"
-                        formControlName="rate_limit_requests"
-                        [showButtons]="true"
-                        [min]="1"
-                        [step]="100"
-                        styleClass="w-full xl:w-1/2"
-                        class="w-full">
-                    </p-inputNumber>
-                    <small class="text-muted-color">Quantidade máxima de requisições que um mesmo IP pode fazer.</small>
-                </div>
-
-                <div class="flex flex-col gap-2 mt-2">
-                    <label for="rate_limit_time" class="font-medium text-surface-900 dark:text-surface-0">Tempo de Bloqueio (Minutos)</label>
-                    <p-inputNumber
-                        id="rate_limit_time"
-                        formControlName="rate_limit_time"
-                        [showButtons]="true"
-                        [min]="1"
-                        [step]="1"
-                        styleClass="w-full xl:w-1/2"
-                        class="w-full">
-                    </p-inputNumber>
-                    <small class="text-muted-color">Tempo em que o contador de requisições será resetado para o IP.</small>
-                </div>
-            </div>
+            <p class="text-primary-100 text-lg ml-14 max-w-2xl">
+                Gerencie as configurações globais e ações de manutenção da API Canarinho.
+            </p>
         </div>
     </div>
 
-    <!-- Bloco 2: Aparência e Layout Global (Premium Design) -->
-    <div class="card">
-        <div class="mb-8">
-            <h3 class="font-bold text-2xl flex items-center gap-3 text-surface-900 dark:text-surface-0">
-                <i class="pi pi-palette text-primary text-2xl"></i> Branding e Identidade Visual
+    <form (ngSubmit)="onSubmit()" [formGroup]="configForm" class="flex flex-col gap-6">
+
+        <!-- Bloco 1: Configurações Gerais -->
+        <div class="card">
+            <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
+                <i class="pi pi-cog"></i> Configurações Gerais
             </h3>
-            <p class="text-muted-color mt-2">Personalize a aparência do sistema para todos os usuários através de estilos modernos e paletas vibrantes.</p>
-        </div>
-        
-        <div class="flex flex-col gap-12">
 
-            <!-- Seção de Esquema de Cores (Novo) -->
-            <div class="flex flex-col gap-4">
-                <div>
-                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Esquema de Cores Padrão</div>
-                    <div class="text-sm text-muted-color">O tema global que será exibido para visitantes e usuários sem preferência definida.</div>
-                </div>
-                
-                <p-selectbutton
-                    formControlName="theme_color_scheme"
-                    [options]="colorSchemeOptions"
-                    [allowEmpty]="false"
-                    optionLabel="label"
-                    optionValue="value"
-                    styleClass="w-full sm:w-auto"
-                />
-            </div>
-            
-            <!-- Seção de Tema Base -->
-            <div class="flex flex-col gap-4">
-                <div>
-                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Estilo Base do Tema</div>
-                    <div class="text-sm text-muted-color">Escolha a linguagem visual que melhor se adapta à marca.</div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @for(preset of presets; track preset) {
-                        <div 
-                            class="relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md"
-                            [ngClass]="selectedPreset() === preset ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
-                            (click)="configForm.patchValue({ theme_preset: preset })">
-                            
-                            <div class="font-bold text-xl mb-2 text-surface-900 dark:text-surface-0">{{ preset }}</div>
-                            <div class="text-sm text-muted-color leading-relaxed">
-                                {{ preset === 'Aura' ? 'Design moderno e arredondado, focado em suavidade.' : 
-                                   preset === 'Lara' ? 'Estilo clássico e corporativo, excelente para dashboards.' : 
-                                   'Aparência clean e minimalista, com bordas acentuadas.' }}
-                            </div>
-                            
-                            @if(selectedPreset() === preset) {
-                                <div class="absolute top-4 right-4 text-primary">
-                                    <i class="pi pi-check-circle text-2xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
-                                </div>
-                            }
+            <div class="flex flex-col gap-6">
+                <!-- Allow Register -->
+                <div
+                    class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
+                    <div>
+                        <div class="font-semibold text-lg mb-1 text-surface-900 dark:text-surface-0">Cadastro Aberto
                         </div>
-                    }
+                        <div class="text-muted-color text-sm">Permitir que usuários criem novas contas livremente pelo
+                            formulário de registro.
+                        </div>
+                    </div>
+                    <p-checkbox binary="true" formControlName="allow_register" inputId="allow_register"></p-checkbox>
+                </div>
+
+                <!-- Rate Limit Configs -->
+                <div
+                    class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col gap-6">
+                    <div
+                        class="font-semibold text-lg mb-2 flex items-center gap-2 text-surface-900 dark:text-surface-0">
+                        <i class="pi pi-shield text-primary text-xl"></i>
+                        Segurança (Rate Limiting)
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-surface-900 dark:text-surface-0" for="rate_limit_requests">Requisições
+                            Máximas (Por IP)</label>
+                        <p-inputNumber
+                            [min]="1"
+                            [showButtons]="true"
+                            [step]="100"
+                            class="w-full"
+                            formControlName="rate_limit_requests"
+                            id="rate_limit_requests"
+                            styleClass="w-full xl:w-1/2">
+                        </p-inputNumber>
+                        <small class="text-muted-color">Quantidade máxima de requisições que um mesmo IP pode
+                            fazer.</small>
+                    </div>
+
+                    <div class="flex flex-col gap-2 mt-2">
+                        <label class="font-medium text-surface-900 dark:text-surface-0" for="rate_limit_time">Tempo de
+                            Bloqueio (Minutos)</label>
+                        <p-inputNumber
+                            [min]="1"
+                            [showButtons]="true"
+                            [step]="1"
+                            class="w-full"
+                            formControlName="rate_limit_time"
+                            id="rate_limit_time"
+                            styleClass="w-full xl:w-1/2">
+                        </p-inputNumber>
+                        <small class="text-muted-color">Tempo em que o contador de requisições será resetado para o
+                            IP.</small>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Seção de Cores Primárias -->
-            <div class="flex flex-col gap-4">
-                <div>
-                    <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Cor de Destaque</div>
-                    <div class="text-sm text-muted-color">A cor principal que será usada em botões, links e elementos interativos.</div>
-                </div>
-                
-                <div class="flex flex-wrap gap-5 p-8 bg-surface-50/50 dark:bg-surface-900/50 rounded-3xl border border-surface-200 dark:border-surface-800 shadow-inner">
-                    @for(color of primaryColorsList; track color.name) {
-                        <button 
-                            type="button"
-                            (click)="configForm.patchValue({ theme_primary: color.name })"
-                            pTooltip="{{ color.name }}"
-                            tooltipPosition="top"
-                            class="relative w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110 hover:-translate-y-1 flex items-center justify-center outline-none shadow-md"
-                            [style.background-color]="color.name === 'noir' ? 'var(--text-color)' : color.palette?.['500']"
-                            [ngClass]="{'ring-4 ring-offset-4 ring-primary dark:ring-offset-surface-900': selectedPrimaryColor() === color.name}">
-                            
-                            @if(selectedPrimaryColor() === color.name) {
-                                <i class="pi pi-check text-xl drop-shadow-md" [style.color]="color.name === 'noir' ? 'var(--surface-0)' : '#ffffff'"></i>
-                            }
-                        </button>
-                    }
-                </div>
+        <!-- Bloco 2: Aparência e Layout Global (Premium Design) -->
+        <div class="card">
+            <div class="mb-8">
+                <h3 class="font-bold text-2xl flex items-center gap-3 text-surface-900 dark:text-surface-0">
+                    <i class="pi pi-palette text-primary text-2xl"></i> Branding e Identidade Visual
+                </h3>
+                <p class="text-muted-color mt-2">Personalize a aparência do sistema para todos os usuários através de
+                    estilos modernos e paletas vibrantes.</p>
             </div>
 
-            <!-- Superficie e Menu em duas colunas -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                
-                <!-- Surface -->
+            <div class="flex flex-col gap-12">
+
+                <!-- Seção de Esquema de Cores (Novo) -->
                 <div class="flex flex-col gap-4">
                     <div>
-                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Tom de Superfície</div>
-                        <div class="text-sm text-muted-color">A paleta de tons de cinza usada para fundos e painéis.</div>
+                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Esquema de Cores
+                            Padrão
+                        </div>
+                        <div class="text-sm text-muted-color">O tema global que será exibido para visitantes e usuários
+                            sem preferência definida.
+                        </div>
                     </div>
-                    
-                    <div class="flex flex-wrap gap-3">
-                        @for(surface of surfacesList; track surface.name) {
-                            <button 
-                                type="button"
-                                (click)="configForm.patchValue({ theme_surface: surface.name })"
-                                class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border-2"
-                                [ngClass]="selectedSurfaceColor() === surface.name || (!selectedSurfaceColor() && (layoutService.isDarkTheme() ? surface.name === 'zinc' : surface.name === 'slate')) 
-                                    ? 'border-primary bg-primary text-primary-contrast shadow-md' 
-                                    : 'border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 hover:bg-surface-100 dark:hover:bg-surface-800'">
-                                <span class="capitalize">{{ surface.name }}</span>
-                            </button>
-                        }
-                    </div>
+
+                    <p-selectbutton
+                        [allowEmpty]="false"
+                        [options]="colorSchemeOptions"
+                        formControlName="theme_color_scheme"
+                        optionLabel="label"
+                        optionValue="value"
+                        styleClass="w-full sm:w-auto"
+                    />
                 </div>
 
-                <!-- Menu Mode -->
+                <!-- Seção de Tema Base -->
                 <div class="flex flex-col gap-4">
                     <div>
-                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Layout do Menu</div>
-                        <div class="text-sm text-muted-color">Como a barra lateral de navegação deve se comportar.</div>
+                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Estilo Base do
+                            Tema
+                        </div>
+                        <div class="text-sm text-muted-color">Escolha a linguagem visual que melhor se adapta à marca.
+                        </div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 h-full">
-                        @for(mode of menuModeOptions; track mode.value) {
-                            <div 
-                                class="relative flex flex-col p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-sm"
-                                [ngClass]="configForm.value.theme_menuMode === mode.value ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
-                                (click)="configForm.patchValue({ theme_menuMode: mode.value })">
-                                
-                                <div class="font-bold text-lg mb-1 text-surface-900 dark:text-surface-0">{{ mode.label }}</div>
-                                <div class="text-sm text-muted-color">
-                                    {{ mode.value === 'static' ? 'Sidebar fixa na tela.' : 'Sidebar sobrepõe o conteúdo.' }}
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @for (preset of presets; track preset) {
+                            <div
+                                (click)="configForm.patchValue({ theme_preset: preset })"
+                                [ngClass]="selectedPreset() === preset ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
+                                class="relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md">
+
+                                <div class="font-bold text-xl mb-2 text-surface-900 dark:text-surface-0">{{ preset }}
+                                </div>
+                                <div class="text-sm text-muted-color leading-relaxed">
+                                    {{
+                                        preset === 'Aura' ? 'Design moderno e arredondado, focado em suavidade.' :
+                                            preset === 'Lara' ? 'Estilo clássico e corporativo, excelente para dashboards.' :
+                                                'Aparência clean e minimalista, com bordas acentuadas.'
+                                    }}
                                 </div>
 
-                                @if(configForm.value.theme_menuMode === mode.value) {
+                                @if (selectedPreset() === preset) {
                                     <div class="absolute top-4 right-4 text-primary">
-                                        <i class="pi pi-check-circle text-xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
+                                        <i class="pi pi-check-circle text-2xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
                                     </div>
                                 }
                             </div>
@@ -198,52 +150,155 @@
                     </div>
                 </div>
 
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Bloco 3: Ações de Manutenção -->
-    <div class="card">
-        <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
-            <i class="pi pi-wrench"></i> Ações de Manutenção
-        </h3>
-
-        <div class="flex flex-col gap-6">
-
-            <div class="rounded-xl p-4 flex gap-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 items-start">
-                <i class="pi pi-exclamation-triangle text-xl mt-1"></i>
-                <div>
-                    <div class="font-bold mb-1">Área de Risco</div>
-                    <div class="text-sm leading-relaxed">As ações abaixo têm impacto direto no funcionamento em tempo real do sistema. Utilize apenas se houver problemas de sincronização.</div>
-                </div>
-            </div>
-
-            <div class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <!-- Seção de Cores Primárias -->
+                <div class="flex flex-col gap-4">
                     <div>
-                        <div class="font-semibold text-lg mb-1 flex items-center gap-2 text-surface-900 dark:text-surface-0">
-                            <i class="pi pi-eraser text-red-500 text-xl"></i> Limpeza de Cache Global
+                        <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Cor de Destaque
                         </div>
-                        <div class="text-muted-color text-sm">Invalida e remove todos os caches da API no backend. Isso força o banco de dados a ler tudo novamente.</div>
+                        <div class="text-sm text-muted-color">A cor principal que será usada em botões, links e
+                            elementos interativos.
+                        </div>
                     </div>
-                    <div class="shrink-0">
-                        <p-button
-                            icon="pi pi-refresh"
-                            label="Limpar Cache"
-                            severity="danger"
-                            [loading]="isClearingCache()"
-                            (onClick)="clearCache()">
-                        </p-button>
+
+                    <div
+                        class="flex flex-wrap gap-5 p-8 bg-surface-50/50 dark:bg-surface-900/50 rounded-3xl border border-surface-200 dark:border-surface-800 shadow-inner">
+                        @for (color of primaryColorsList; track color.name) {
+                            <button
+                                (click)="configForm.patchValue({ theme_primary: color.name })"
+                                [ngClass]="{'ring-4 ring-offset-4 ring-primary dark:ring-offset-surface-900': selectedPrimaryColor() === color.name}"
+                                [style.background-color]="color.name === 'noir' ? 'var(--text-color)' : color.palette?.['500']"
+                                class="relative w-12 h-12 rounded-full cursor-pointer transition-transform hover:scale-110 hover:-translate-y-1 flex items-center justify-center outline-none shadow-md"
+                                pTooltip="{{ color.name }}"
+                                tooltipPosition="top"
+                                type="button">
+
+                                @if (selectedPrimaryColor() === color.name) {
+                                    <i [style.color]="color.name === 'noir' ? 'var(--surface-0)' : '#ffffff'"
+                                       class="pi pi-check text-xl drop-shadow-md"></i>
+                                }
+                            </button>
+                        }
                     </div>
                 </div>
+
+                <!-- Superficie e Menu em duas colunas -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+                    <!-- Surface -->
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Tom de
+                                Superfície
+                            </div>
+                            <div class="text-sm text-muted-color">A paleta de tons de cinza usada para fundos e
+                                painéis.
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            @for (surface of surfacesList; track surface.name) {
+                                <button
+                                    (click)="configForm.patchValue({ theme_surface: surface.name })"
+                                    [ngClass]="selectedSurfaceColor() === surface.name || (!selectedSurfaceColor() && (layoutService.isDarkTheme() ? surface.name === 'zinc' : surface.name === 'slate'))
+                                    ? 'border-primary bg-primary text-primary-contrast shadow-md'
+                                    : 'border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                                    class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all border-2"
+                                    type="button">
+                                    <span class="capitalize">{{ surface.name }}</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Menu Mode -->
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <div class="text-lg font-semibold text-surface-900 dark:text-surface-0 mb-1">Layout do
+                                Menu
+                            </div>
+                            <div class="text-sm text-muted-color">Como a barra lateral de navegação deve se comportar.
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 h-full">
+                            @for (mode of menuModeOptions; track mode.value) {
+                                <div
+                                    (click)="configForm.patchValue({ theme_menuMode: mode.value })"
+                                    [ngClass]="configForm.value.theme_menuMode === mode.value ? 'border-primary bg-primary-50/20 dark:bg-primary-900/10' : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700'"
+                                    class="relative flex flex-col p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-sm">
+
+                                    <div
+                                        class="font-bold text-lg mb-1 text-surface-900 dark:text-surface-0">{{ mode.label }}
+                                    </div>
+                                    <div class="text-sm text-muted-color">
+                                        {{ mode.value === 'static' ? 'Sidebar fixa na tela.' : 'Sidebar sobrepõe o conteúdo.' }}
+                                    </div>
+
+                                    @if (configForm.value.theme_menuMode === mode.value) {
+                                        <div class="absolute top-4 right-4 text-primary">
+                                            <i class="pi pi-check-circle text-xl shadow-sm rounded-full bg-surface-0 dark:bg-surface-900"></i>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
-
         </div>
-    </div>
 
-    <!-- Botão Salvar Global -->
-    <div class="flex justify-end mt-2 mb-8">
-        <p-button type="submit" label="Salvar Configurações e Layout" icon="pi pi-save" [loading]="isLoading()" size="large"></p-button>
-    </div>
-</form>
+        <!-- Bloco 3: Ações de Manutenção -->
+        <div class="card">
+            <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
+                <i class="pi pi-wrench"></i> Ações de Manutenção
+            </h3>
+
+            <div class="flex flex-col gap-6">
+
+                <div
+                    class="rounded-xl p-4 flex gap-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 items-start">
+                    <i class="pi pi-exclamation-triangle text-xl mt-1"></i>
+                    <div>
+                        <div class="font-bold mb-1">Área de Risco</div>
+                        <div class="text-sm leading-relaxed">As ações abaixo têm impacto direto no funcionamento em
+                            tempo real do sistema. Utilize apenas se houver problemas de sincronização.
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="p-6 bg-surface-50 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <div>
+                            <div
+                                class="font-semibold text-lg mb-1 flex items-center gap-2 text-surface-900 dark:text-surface-0">
+                                <i class="pi pi-eraser text-red-500 text-xl"></i> Limpeza de Cache Global
+                            </div>
+                            <div class="text-muted-color text-sm">Invalida e remove todos os caches da API no backend.
+                                Isso força o banco de dados a ler tudo novamente.
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <p-button
+                                (onClick)="clearCache()"
+                                [loading]="isClearingCache()"
+                                icon="pi pi-refresh"
+                                label="Limpar Cache"
+                                severity="danger">
+                            </p-button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Botão Salvar Global -->
+        <div class="flex justify-end mt-2 mb-8">
+            <p-button [loading]="isLoading()" icon="pi pi-save" label="Salvar Configurações e Layout" size="large"
+                      type="submit"></p-button>
+        </div>
+    </form>
+</div>
