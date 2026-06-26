@@ -1,9 +1,11 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { SessionService } from '@/app/core/services/session-service';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+
+export const IGNORE_AUTH_REDIRECT = new HttpContextToken<boolean>(() => false);
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     const sessionService = inject(SessionService);
@@ -14,8 +16,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             // Verifica se o erro é de falta de autorização (Token expirado ou inválido)
             if (error.status === 401) {
                 sessionService.destroySession();
-                // perfilService.clearPerfil();
-                void router.navigate(['/login']);
+                
+                if (!req.context.get(IGNORE_AUTH_REDIRECT)) {
+                    void router.navigate(['/login']);
+                }
             }
 
             // Propaga o erro para ser tratado no componente caso necessário

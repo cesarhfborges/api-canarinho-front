@@ -51,8 +51,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         ButtonModule,
         Highlight,
         TooltipModule,
-        NgClass,
-        JsonPipe
+        NgClass
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss'
