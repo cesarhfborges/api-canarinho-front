@@ -9,14 +9,12 @@ export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
-        canActivate: [authGuard],
-        // canActivateChild: [authGuard],
+        canActivateChild: [authGuard],
         loadChildren: () => import('./app/pages/pages.routes')
     },
     {
         path: '',
-        canActivate: [guestGuard],
-        // canActivateChild: [guestGuard],
+        canActivateChild: [guestGuard],
         loadChildren: () => import('./app/auth/auth.routes')
     },
     { path: 'notfound', component: Notfound },

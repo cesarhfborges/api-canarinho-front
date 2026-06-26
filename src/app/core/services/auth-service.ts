@@ -47,4 +47,12 @@ export class AuthService {
             })
         );
     }
+
+    public requestPasswordReset(username_or_email: string): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/admin/password/reset-request`, { username_or_email });
+    }
+
+    public changePassword(data: any): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/admin/password/change`, data);
+    }
 }

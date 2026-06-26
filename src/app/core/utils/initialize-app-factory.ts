@@ -36,7 +36,7 @@ export async function initializeAppFactory(): Promise<any> {
     }
 
     await firstValueFrom(
-        perfilService.getPerfil().pipe(
+        perfilService.getPerfil(true).pipe(
             tap((profile) => {
                 sessionService.createSession();
                 if (profile && profile.theme_color_scheme) {

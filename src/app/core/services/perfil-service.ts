@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { IGNORE_AUTH_REDIRECT } from '@/app/core/interceptors/error-interceptor';
 import { Observable, tap } from 'rxjs';
 import { environment } from '@/environments/environment';
 
@@ -22,9 +23,11 @@ export class PerfilService {
     public userProfile = signal<UserProfile | null>(null);
     private readonly http = inject(HttpClient);
 
-    public getPerfil(): Observable<UserProfile> {
+    public getPerfil(ignoreRedirect = false): Observable<UserProfile> {
         return this.http
-            .get<UserProfile>(`${environment.apiUrl}/admin/me`)
+            .get<UserProfile>(`${environment.apiUrl}/admin/me`, {
+                context: new HttpContext().set(IGNORE_AUTH_REDIRECT, ignoreRedirect)
+            })
             .pipe(tap((profile) => this.userProfile.set(profile)));
     }
 
