@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -30,6 +30,8 @@ import { ConfigService } from '@/app/core/services/config-service';
     styleUrl: './login.scss'
 })
 export class Login implements OnInit {
+    @ViewChild('inputEmail') inputEmail!: ElementRef<HTMLInputElement>;
+
     public isLoading = signal<boolean>(false);
     public errorMessage = signal<string | null>(null);
     public configService = inject(ConfigService);
@@ -47,7 +49,8 @@ export class Login implements OnInit {
         if (!environment.production) {
             this.loginForm.patchValue({
                 username: 'admin',
-                password: 'canarinho1234'
+                password: 'canarinho1234',
+                remember: false
             });
         }
     }
@@ -78,6 +81,15 @@ export class Login implements OnInit {
                 this.loginForm.enable();
                 this.errorMessage.set('E-mail ou senha incorretos. Tente novamente.');
                 this.isLoading.set(false);
+                this.loginForm.get('password')?.reset('');
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Ops',
+                    detail:
+                        err.error.error ??
+                        'Usuário e/ou senha inválido(s), verifique as credenciais e tente novamente!.'
+                });
+                this.inputEmail.nativeElement.focus();
             }
         });
     }
