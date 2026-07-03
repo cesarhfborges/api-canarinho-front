@@ -61,6 +61,9 @@ export class EndpointVisualizar implements OnInit {
         this.requestUrl.set(url);
 
         const headers = new HttpHeaders({
+            Application: 'web',
+            'X-Origin': window.location.origin,
+            Accept: 'application/json',
             Authorization: `Bearer ${token}`
         });
 

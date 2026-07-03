@@ -1,0 +1,304 @@
+<div [formGroup]="conditionForm" class="flex flex-col gap-6">
+    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-xl border border-surface-200 dark:border-surface-700">
+        <h3 class="font-bold text-lg mb-2"><i class="pi pi-link mr-2 text-primary"></i>1. Campo Base</h3>
+        <p class="text-surface-500 mb-4 text-sm">Selecione o campo que já foi definido acima para basear as
+            condições.</p>
+
+        <p-select
+            [options]="availableBaseFields"
+            appendTo="body"
+            class="w-full"
+            formControlName="dependsOn"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Selecione um campo base"
+        >
+            <ng-template let-selectedOption pTemplate="selectedItem">
+                <i class="pi pi-arrow-right text-primary-500 mr-2"></i>
+                <span>{{ selectedOption.label }}</span>
+            </ng-template>
+            <ng-template #item let-selectOption>
+                <i class="pi pi-arrow-right text-primary-500 mr-2"></i>
+                <span>{{ selectOption.label }}</span>
+            </ng-template>
+        </p-select>
+    </div>
+
+    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-xl border border-surface-200 dark:border-surface-700">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h3 class="font-bold text-lg mb-1"><i class="pi pi-list mr-2 text-primary"></i>2. Regras de Comparação
+                </h3>
+                <p class="text-surface-500 text-sm">A primeira regra verdadeira encontrada de cima para baixo será o
+                    valor retornado.</p>
+            </div>
+            <p-button (onClick)="addCondition()" icon="pi pi-plus" label="Adicionar Condição" size="small"></p-button>
+        </div>
+
+        <div class="flex flex-col gap-3" formArrayName="conditions">
+            @if (conditionsFormArray.controls.length === 0) {
+                <div
+                    class="text-center p-6 text-surface-400 italic border border-dashed border-surface-300 dark:border-surface-600 rounded-lg">
+                    Nenhuma regra adicionada. O valor padrão (Fallback) será sempre retornado.
+                </div>
+            }
+
+            @for (cond of conditionsFormArray.controls; track $index; let i = $index) {
+                <div [formGroupName]="i"
+                     class="grid grid-cols-12 gap-3 items-center p-3 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg shadow-sm">
+
+                    <div class="col-span-3">
+                        <label [for]="'operator-'+i+'select'"
+                               class="text-xs font-semibold text-surface-500 uppercase mb-1 block">Operador</label>
+                        <p-select
+                            [id]="'operator-'+i+'select'"
+                            [options]="[
+                            {label: 'Igual a (==)', value: '=='},
+                            {label: 'Diferente (!=)', value: '!='},
+                            {label: 'Maior que (>)', value: '>'},
+                            {label: 'Menor que (<)', value: '<'},
+                            {label: 'Maior ou Igual (>=)', value: '>='},
+                            {label: 'Menor ou Igual (<=)', value: '<='},
+                            {label: 'Contém', value: 'contains'}
+                            ]"
+                            appendTo="body"
+                            class="w-full"
+                            formControlName="operator"
+                            optionLabel="label"
+                            optionValue="value"
+                        ></p-select>
+                    </div>
+
+                    <div class="col-span-3">
+                        <label [for]="'compareValue-'+i+'input'"
+                               class="text-xs font-semibold text-surface-500 uppercase mb-1 block">Valor
+                            Comparado</label>
+                        <input [id]="'compareValue-'+i+'input'" class="w-full" formControlName="compareValue" pInputText
+                               placeholder="Ex: mip" type="text" />
+                    </div>
+
+                    <div class="col-span-2">
+                        <label [for]="'resultType-'+i+'select'"
+                               class="text-xs font-semibold text-surface-500 uppercase mb-1 block">Tipo do
+                            Retorno</label>
+                        <p-select [id]="'resultType-'+i+'select'" [options]="['String', 'Number', 'Boolean', 'Array', 'Faker.js']"
+                                  appendTo="body" class="w-full"
+                                  formControlName="resultType">
+                            <ng-template let-selectedOption pTemplate="selectedItem">
+                                <div class="flex items-center gap-2 font-medium">
+                                    @if (selectedOption === 'Number') {
+                                        <i class="pi pi-hashtag text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'String') {
+                                        <i class="pi pi-align-left text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'Boolean') {
+                                        <i class="pi pi-check-square text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'Date') {
+                                        <i class="pi pi-calendar text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'Array') {
+                                        <i class="pi pi-list text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'Object.ID') {
+                                        <i class="pi pi-key text-primary-500"></i>
+                                    }
+                                    @if (selectedOption === 'Faker.js') {
+                                        <i class="pi pi-sparkles text-purple-500"></i>
+                                    }
+                                    @if (selectedOption === 'Conditional') {
+                                        <i class="pi pi-code text-orange-500"></i>
+                                    }
+                                    <span>{{ selectedOption }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template #item let-selectOption>
+                                <div class="flex items-center gap-2 font-medium">
+                                    @if (selectOption === 'Number') {
+                                        <i class="pi pi-hashtag text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'String') {
+                                        <i class="pi pi-align-left text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'Boolean') {
+                                        <i class="pi pi-check-square text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'Date') {
+                                        <i class="pi pi-calendar text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'Array') {
+                                        <i class="pi pi-list text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'Object.ID') {
+                                        <i class="pi pi-key text-primary-500"></i>
+                                    }
+                                    @if (selectOption === 'Faker.js') {
+                                        <i class="pi pi-sparkles text-purple-500"></i>
+                                    }
+                                    @if (selectOption === 'Conditional') {
+                                        <i class="pi pi-code text-orange-500"></i>
+                                    }
+                                    <span>{{ selectOption }}</span>
+                                </div>
+                            </ng-template>
+                        </p-select>
+                    </div>
+
+                    <div class="col-span-3">
+                        <label [for]="'resultType-'+i+'el'"
+                               class="text-xs font-semibold text-surface-500 uppercase mb-1 block">Valor Gerado</label>
+
+                        @switch (cond.get('resultType')?.value) {
+                            @case ('String') {
+                                <input [id]="'resultType-'+i+'el'" class="w-full" formControlName="resultValue" pInputText
+                                       placeholder="Ex: Aprovado" type="text" />
+                            }
+                            @case ('Number') {
+                                <p-input-number [id]="'resultType-'+i+'el'" [showButtons]="true" class="w-full"
+                                                formControlName="resultValue"></p-input-number>
+                            }
+                            @case ('Boolean') {
+                                <p-toggle-switch [id]="'resultType-'+i+'el'"
+                                                 formControlName="resultValue"></p-toggle-switch>
+                            }
+                            @case ('Array') {
+                                <input [id]="'resultType-'+i+'el'" class="w-full" formControlName="resultValue" pInputText
+                                       placeholder="Ex: 1, 2, 3" type="text" />
+                            }
+                            @case ('Faker.js') {
+                                <p-select [filter]="true" [group]="true" [id]="'resultType-'+i+'el'"
+                                          [options]="fakerMethods"
+                                          appendTo="body" class="w-full" filterBy="label"
+                                          formControlName="resultValue"
+                                          optionGroupChildren="items" optionGroupLabel="label" optionLabel="label" optionValue="value"></p-select>
+                            }
+                            @default {
+                                <input [id]="'resultType-'+i+'el'" class="w-full" formControlName="resultValue" pInputText
+                                       type="text" />
+                            }
+                        }
+                    </div>
+
+                    <div class="col-span-1 flex justify-end">
+                        <p-button (onClick)="removeCondition(i)" [rounded]="true" [text]="true" icon="pi pi-trash"
+                                  severity="danger"></p-button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-xl border border-surface-200 dark:border-surface-700">
+        <h3 class="font-bold text-lg mb-2"><i class="pi pi-undo mr-2 text-primary"></i>3. Fallback (Else Padrão)</h3>
+        <p class="text-surface-500 mb-4 text-sm">Se o valor do campo não bater com nenhuma regra acima, este será o
+            retorno padrão.</p>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs font-semibold text-surface-500 uppercase mb-1 block"
+                       for="defaultResultType-Select">Tipo do Retorno</label>
+                <p-select [options]="['String', 'Number', 'Boolean', 'Array', 'Faker.js']"
+                          appendTo="body"
+                          class="w-full"
+                          formControlName="defaultResultType"
+                          id="defaultResultType-Select"
+                >
+                    <ng-template let-selectedOption pTemplate="selectedItem">
+                        <div class="flex items-center gap-2 font-medium">
+                            @if (selectedOption === 'Number') {
+                                <i class="pi pi-hashtag text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'String') {
+                                <i class="pi pi-align-left text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'Boolean') {
+                                <i class="pi pi-check-square text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'Date') {
+                                <i class="pi pi-calendar text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'Array') {
+                                <i class="pi pi-list text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'Object.ID') {
+                                <i class="pi pi-key text-primary-500"></i>
+                            }
+                            @if (selectedOption === 'Faker.js') {
+                                <i class="pi pi-sparkles text-purple-500"></i>
+                            }
+                            @if (selectedOption === 'Conditional') {
+                                <i class="pi pi-code text-orange-500"></i>
+                            }
+                            <span>{{ selectedOption }}</span>
+                        </div>
+                    </ng-template>
+                    <ng-template #item let-selectOption>
+                        <div class="flex items-center gap-2 font-medium">
+                            @if (selectOption === 'Number') {
+                                <i class="pi pi-hashtag text-primary-500"></i>
+                            }
+                            @if (selectOption === 'String') {
+                                <i class="pi pi-align-left text-primary-500"></i>
+                            }
+                            @if (selectOption === 'Boolean') {
+                                <i class="pi pi-check-square text-primary-500"></i>
+                            }
+                            @if (selectOption === 'Date') {
+                                <i class="pi pi-calendar text-primary-500"></i>
+                            }
+                            @if (selectOption === 'Array') {
+                                <i class="pi pi-list text-primary-500"></i>
+                            }
+                            @if (selectOption === 'Object.ID') {
+                                <i class="pi pi-key text-primary-500"></i>
+                            }
+                            @if (selectOption === 'Faker.js') {
+                                <i class="pi pi-sparkles text-purple-500"></i>
+                            }
+                            @if (selectOption === 'Conditional') {
+                                <i class="pi pi-code text-orange-500"></i>
+                            }
+                            <span>{{ selectOption }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+            <div>
+                <label for="defaultResultValue-el" class="text-xs font-semibold text-surface-500 uppercase mb-1 block">Valor Padrão Gerado</label>
+                @switch (conditionForm.get('defaultResultType')?.value) {
+                    @case ('String') {
+                        <input id="defaultResultValue-el" class="w-full" formControlName="defaultResultValue" pInputText placeholder="Ex: Não Informado"
+                               type="text" />
+                    }
+                    @case ('Number') {
+                        <p-input-number id="defaultResultValue-el" [showButtons]="true" class="w-full"
+                                        formControlName="defaultResultValue"></p-input-number>
+                    }
+                    @case ('Boolean') {
+                        <p-toggle-switch id="defaultResultValue-el" formControlName="defaultResultValue"></p-toggle-switch>
+                    }
+                    @case ('Array') {
+                        <input id="defaultResultValue-el" class="w-full" formControlName="defaultResultValue" pInputText placeholder="Ex: X, Y"
+                               type="text" />
+                    }
+                    @case ('Faker.js') {
+                        <p-select id="defaultResultValue-el" [filter]="true" [group]="true" [options]="fakerMethods"
+                                  appendTo="body" class="w-full" filterBy="label"
+                                  formControlName="defaultResultValue"
+                                  optionGroupChildren="items" optionGroupLabel="label" optionLabel="label" optionValue="value"></p-select>
+                    }
+                    @default {
+                        <input id="defaultResultValue-el" class="w-full" formControlName="defaultResultValue" pInputText type="text" />
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-4">
+        <p-button (onClick)="close()" [outlined]="true" icon="pi pi-times" label="Cancelar"
+                  severity="secondary"></p-button>
+        <p-button (onClick)="saveConditions()" icon="pi pi-check" label="Aplicar Regras"></p-button>
+    </div>
+</div>

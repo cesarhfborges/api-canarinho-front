@@ -1,9 +1,20 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { JsonPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { fakerPT_BR as faker } from '@faker-js/faker';
 import { CardModule } from 'primeng/card';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+import {
+    AbstractControl,
+    FormArray,
+    FormBuilder,
+    FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
@@ -29,6 +40,23 @@ import { TooltipModule } from 'primeng/tooltip';
 import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
 import { environment } from '@/environments/environment';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
+
+export function conditionalSchemaValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+        const val = control.value;
+        if (val && typeof val === 'object' && val.dependsOn !== undefined) {
+            if (!val.dependsOn || val.dependsOn.trim() === '') {
+                return { conditionalInvalid: true };
+            }
+            if (!val.conditions || !Array.isArray(val.conditions) || val.conditions.length === 0) {
+                return { conditionalInvalid: true };
+            }
+        }
+        return null;
+    };
+}
 
 @Component({
     selector: 'app-endpoint-editar',
@@ -51,10 +79,12 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         ButtonModule,
         Highlight,
         TooltipModule,
+        DialogModule,
         NgClass
     ],
     templateUrl: './endpoint-editar.html',
-    styleUrl: './endpoint-editar.scss'
+    styleUrl: './endpoint-editar.scss',
+    providers: [DialogService]
 })
 export class EndpointEditar implements OnInit {
     form: FormGroup;
@@ -68,7 +98,8 @@ export class EndpointEditar implements OnInit {
         'String',
         'Number',
         'Boolean',
-        'Array'
+        'Array',
+        'Conditional'
         // 'Object',
         // 'Date',
         // 'Child Resource'
@@ -81,6 +112,9 @@ export class EndpointEditar implements OnInit {
     username: string = ':username';
     projectSlug: string = ':project';
     formValue = signal<any>({});
+
+    dialogService = inject(DialogService);
+
     mockResponses = computed(() => {
         const value = this.formValue();
         const schemas = value.resourceSchema || [];
@@ -106,15 +140,52 @@ export class EndpointEditar implements OnInit {
                 case 'Object.ID':
                     item[schema.name] = 1;
                     break;
-                case 'Array':
-                    if (schemaValue && typeof schemaValue === 'string') {
-                        const arr = schemaValue
-                            .split(',')
-                            .map((v: string) => v.trim())
-                            .filter((v: string) => v !== '');
-                        item[schema.name] = arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
+                case 'Conditional':
+                    // Simplify mock evaluation for preview
+                    if (schemaValue && schemaValue.dependsOn) {
+                        const dependsOnVal = item[schemaValue.dependsOn];
+                        let matched = false;
+                        if (schemaValue.conditions) {
+                            for (const cond of schemaValue.conditions) {
+                                let isMatch = false;
+                                switch (cond.operator) {
+                                    case '==':
+                                        isMatch = dependsOnVal == cond.compareValue;
+                                        break;
+                                    case '!=':
+                                        isMatch = dependsOnVal != cond.compareValue;
+                                        break;
+                                    case '>':
+                                        isMatch = dependsOnVal > cond.compareValue;
+                                        break;
+                                    case '<':
+                                        isMatch = dependsOnVal < cond.compareValue;
+                                        break;
+                                    case '>=':
+                                        isMatch = dependsOnVal >= cond.compareValue;
+                                        break;
+                                    case '<=':
+                                        isMatch = dependsOnVal <= cond.compareValue;
+                                        break;
+                                    case 'contains':
+                                        isMatch = dependsOnVal && dependsOnVal.toString().includes(cond.compareValue);
+                                        break;
+                                }
+                                if (isMatch) {
+                                    item[schema.name] = this.mockValueForType(cond.resultType, cond.resultValue);
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!matched) {
+                            item[schema.name] = this.mockValueForType(
+                                schemaValue.defaultResultType,
+                                schemaValue.defaultResultValue
+                            );
+                        }
                     } else {
-                        item[schema.name] = [];
+                        item[schema.name] = null;
                     }
                     break;
                 case 'Faker.js':
@@ -202,6 +273,30 @@ export class EndpointEditar implements OnInit {
         return this.form.get('endpoints') as FormArray;
     }
 
+    mockValueForType(type: string, val: any): any {
+        switch (type) {
+            case 'String':
+                return val || 'exemplo';
+            case 'Number':
+                return val ?? 0;
+            case 'Boolean':
+                return val === 'true' || val === true;
+            case 'Array':
+                if (val && typeof val === 'string') {
+                    const arr = val
+                        .split(',')
+                        .map((v: string) => v.trim())
+                        .filter((v: string) => v !== '');
+                    return arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
+                }
+                return [];
+            case 'Faker.js':
+                return this.parseFakerTag(val);
+            default:
+                return val || null;
+        }
+    }
+
     objectTypes(index: number): string[] {
         if (index === 0) {
             return this._objectTypes;
@@ -277,10 +372,22 @@ export class EndpointEditar implements OnInit {
     }
 
     createGroupSchema(value?: Schema): FormGroup {
+        let val = value?.value ?? '';
+        if (value?.type === 'Conditional') {
+            val = typeof val === 'string' && val ? JSON.parse(val) : val;
+        }
+
         const g = this.fb.group<any>({
             name: [value?.name ?? '', [Validators.required]],
             type: [value?.type ?? '', [Validators.required]],
-            value: [value?.value ?? '', value?.type === 'Object.ID' ? [] : [Validators.required]]
+            value: [
+                val,
+                value?.type === 'Object.ID'
+                    ? []
+                    : value?.type === 'Conditional'
+                      ? [Validators.required, conditionalSchemaValidator()]
+                      : [Validators.required]
+            ]
         });
         g.get('type')?.valueChanges.subscribe({
             next: (type) => {
@@ -288,6 +395,8 @@ export class EndpointEditar implements OnInit {
 
                 if (type === 'Object.ID') {
                     g.get('value')?.clearValidators();
+                } else if (type === 'Conditional') {
+                    g.get('value')?.setValidators([Validators.required, conditionalSchemaValidator()]);
                 } else {
                     g.get('value')?.setValidators([Validators.required]);
                 }
@@ -304,6 +413,14 @@ export class EndpointEditar implements OnInit {
                         break;
                     case 'Array':
                         g.get('value')?.patchValue('');
+                        break;
+                    case 'Conditional':
+                        g.get('value')?.patchValue({
+                            dependsOn: '',
+                            conditions: [],
+                            defaultResultType: 'String',
+                            defaultResultValue: ''
+                        });
                         break;
                     case 'Object':
                         g.get('value')?.patchValue('');
@@ -342,6 +459,43 @@ export class EndpointEditar implements OnInit {
 
     close(): void {
         this.router.navigate(['/projetos', this.projectId]);
+    }
+
+    getAvailableBaseFields(currentIndex: number): any[] {
+        const schemas = this.resourceSchemaFormArray.value;
+        const available = [];
+        for (let i = 0; i < currentIndex; i++) {
+            if (schemas[i].name) {
+                available.push({ label: schemas[i].name, value: schemas[i].name });
+            }
+        }
+        return available;
+    }
+
+    openConditionDialog(index: number): void {
+        const schema = this.resourceSchemaFormArray.at(index);
+        const val = schema.get('value')?.value;
+
+        const ref = this.dialogService.open(ConditionBuilderModalComponent, {
+            header: 'Construtor de Regras Condicionais',
+            modal: true,
+            closable: true,
+            draggable: false,
+            width: '900px',
+            data: {
+                value: val,
+                availableBaseFields: this.getAvailableBaseFields(index),
+                fakerMethods: this.fakerMethods
+            }
+        });
+
+        if (ref?.onClose) {
+            ref.onClose.subscribe((result) => {
+                if (result) {
+                    schema.get('value')?.setValue(result);
+                }
+            });
+        }
     }
 
     salvar(): void {

@@ -114,7 +114,7 @@
 
                                             @for (schema of resourceSchemaFormArray.controls; track $index) {
                                                 <div [formGroupName]="$index"
-                                                     class="group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 lg:px-6 rounded-xl bg-surface-0 dark:bg-surface-900 hover:bg-surface-50 dark:hover:bg-surface-800/50 border border-surface-200 dark:border-surface-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                                                     class="group grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 lg:px-6 rounded-xl bg-surface-0 dark:bg-surface-900 hover:bg-surface-50 dark:hover:bg-surface-800/50 border border-surface-200 dark:border-surface-700 transition-all duration-200 shadow-sm hover:shadow-md">
 
                                                     <!-- KEY -->
                                                     <div class="col-span-1 lg:col-span-3 flex flex-col gap-1">
@@ -130,9 +130,9 @@
                                                             [readOnly]="schema.get('type')?.value === 'Object.ID'"
                                                             formControlName="name"
                                                             pInputText
+                                                            pSize="large"
                                                             placeholder="ex: id, email, nome"
                                                             type="text"
-                                                            pSize="large"
                                                         />
                                                         @if (schema.get('name')?.invalid && schema.get('name')?.touched) {
                                                             <small class="text-red-500 font-medium">Obrigatório.</small>
@@ -177,6 +177,9 @@
                                                                     @if (selectedOption === 'Faker.js') {
                                                                         <i class="pi pi-sparkles text-purple-500"></i>
                                                                     }
+                                                                    @if (selectedOption === 'Conditional') {
+                                                                        <i class="pi pi-code text-orange-500"></i>
+                                                                    }
                                                                     <span>{{ selectedOption }}</span>
                                                                 </div>
                                                             </ng-template>
@@ -203,6 +206,9 @@
                                                                     @if (selectOption === 'Faker.js') {
                                                                         <i class="pi pi-sparkles text-purple-500"></i>
                                                                     }
+                                                                    @if (selectOption === 'Conditional') {
+                                                                        <i class="pi pi-code text-orange-500"></i>
+                                                                    }
                                                                     <span>{{ selectOption }}</span>
                                                                 </div>
                                                             </ng-template>
@@ -210,6 +216,9 @@
                                                         @if (schema.get('type')?.invalid && schema.get('type')?.touched) {
                                                             <small class="text-red-500 font-medium">Obrigatório.</small>
                                                         }
+                                                        <!--                                                        @else if (schema.get('value')?.invalid && schema.get('value')?.touched) {-->
+                                                        <!--                                                            <small class="text-red-500 font-medium">Configuração condicional inválida.</small>-->
+                                                        <!--                                                        }-->
                                                     </div>
 
                                                     <!-- VALUE -->
@@ -251,9 +260,9 @@
                                                                     class="w-full"
                                                                     formControlName="value"
                                                                     pInputText
+                                                                    pSize="large"
                                                                     placeholder="Digite o valor fixo da string"
                                                                     type="text"
-                                                                    pSize="large"
                                                                 />
                                                             }
                                                             @case ('Number') {
@@ -293,9 +302,20 @@
                                                                     class="w-full"
                                                                     formControlName="value"
                                                                     pInputText
+                                                                    pSize="large"
                                                                     pTooltip="Separar os itens por vírgula para sortear"
                                                                     placeholder="ex: ativo, inativo, pendente"
                                                                     tooltipPosition="top"
+                                                                />
+                                                            }
+                                                            @case ('Conditional') {
+                                                                <p-button
+                                                                    (onClick)="openConditionDialog($index)"
+                                                                    icon="pi pi-code"
+                                                                    label="Configurar Regras Condicionais"
+                                                                    severity="info"
+                                                                    size="large"
+                                                                    styleClass="w-full"
                                                                 />
                                                             }
                                                             @default {
@@ -314,17 +334,21 @@
                                                     </div>
 
                                                     <!-- ACTION -->
-                                                    <div class="col-span-1 lg:col-span-1 flex justify-end">
+                                                    <div
+                                                        class="col-span-1 lg:col-span-1 flex justify-end  mt-4 lg:mt-0">
                                                         @if (schema.get('type')?.value !== 'Object.ID') {
                                                             <p-button
-                                                                (click)="removeSchema($index)" [rounded]="true"
-                                                                [text]="true"
-                                                                class="lg:opacity-0 group-hover:opacity-100 transition-opacity !w-10 !h-10"
-                                                                icon="pi pi-trash"
+                                                                (click)="removeSchema($index)"
+                                                                [rounded]="true"
+                                                                class="lg:opacity-0 group-hover:opacity-100 transition-opacity w-full lg:w-[34px] lg:h-[34px]"
                                                                 pTooltip="Remover Campo"
-                                                                tooltipPosition="top"
                                                                 severity="danger"
-                                                            />
+                                                                styleClass="w-full h-full"
+                                                                tooltipPosition="top"
+                                                            >
+                                                                <i class="pi pi-trash" pButtonIcon></i>
+                                                                <span class="md:hidden" pButtonLabel>Excluir</span>
+                                                            </p-button>
                                                         }
                                                     </div>
                                                 </div>
@@ -566,11 +590,11 @@
                             />
                             <p-button
                                 (onClick)="salvar()"
-                                [disabled]="saving() || form.invalid"
+                                [disabled]="saving()"
                                 [loading]="saving()"
                                 [rounded]="true" class="w-full md:w-auto md:min-w-[200px]" icon="pi pi-save"
-                                      label="Salvar Endpoint"
-                                      severity="primary" />
+                                label="Salvar Endpoint"
+                                severity="primary" />
                         </div>
                     </section>
 
@@ -579,3 +603,4 @@
         </form>
     </div>
 </div>
+

@@ -16,16 +16,19 @@
                     <div class="dark:text-muted-color font-medium text-center mb-4">Efetue login para continuar</div>
                     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                         <label
-                            for="email"
+                            for="username"
                             class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2"
                         >
-                            Email
+                            Usuário
                         </label>
                         <input
+                            #inputEmail
                             pInputText
-                            id="email"
+                            id="username"
                             type="text"
-                            placeholder="Email address"
+                            name="username"
+                            placeholder=""
+                            inputmode="email"
                             class="mb-8"
                             formControlName="username"
                             [fluid]="true"
@@ -40,8 +43,10 @@
                         <p-password
                             id="password1"
                             formControlName="password"
-                            placeholder="Password"
+                            placeholder=""
                             [toggleMask]="true"
+                            inputmode="email"
+                            name="password"
                             class="mb-4"
                             [fluid]="true"
                             [feedback]="false"

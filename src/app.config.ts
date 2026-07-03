@@ -1,5 +1,11 @@
-import { ApplicationConfig, DEFAULT_CURRENCY_CODE, LOCALE_ID, provideAppInitializer, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import {
+    ApplicationConfig,
+    DEFAULT_CURRENCY_CODE,
+    LOCALE_ID,
+    provideAppInitializer,
+    provideZonelessChangeDetection
+} from '@angular/core';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { DATE_PIPE_DEFAULT_OPTIONS, registerLocaleData } from '@angular/common';
 import { headersInterceptor } from '@/app/core/interceptors/headers-interceptor';
@@ -26,20 +32,19 @@ export const appConfig: ApplicationConfig = {
         { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
         {
             provide: DATE_PIPE_DEFAULT_OPTIONS,
-            useValue: { dateFormat: 'dd/MM/yyyy HH:mm:ss' },
+            useValue: { dateFormat: 'dd/MM/yyyy HH:mm:ss' }
         },
         provideAppInitializer(initializeAppFactory),
-        provideHttpClient(withInterceptors([headersInterceptor, errorInterceptor])),
+        provideHttpClient(withFetch(), withInterceptors([headersInterceptor, errorInterceptor])),
         provideRouter(
             appRoutes,
             withInMemoryScrolling({
                 anchorScrolling: 'enabled',
                 scrollPositionRestoration: 'enabled'
             }),
-            withComponentInputBinding(),
+            withComponentInputBinding()
             // withEnabledBlockingInitialNavigation()
         ),
-        provideHttpClient(withFetch()),
         provideZonelessChangeDetection(),
         providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
         provideHighlightOptions({
