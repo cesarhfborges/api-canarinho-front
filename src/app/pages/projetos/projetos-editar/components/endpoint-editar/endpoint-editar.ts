@@ -55,7 +55,8 @@ import { ConditionBuilderModalComponent } from '../condition-builder-modal/condi
         Highlight,
         TooltipModule,
         DialogModule,
-        NgClass
+        NgClass,
+        JsonPipe
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss',
@@ -87,9 +88,9 @@ export class EndpointEditar implements OnInit {
     username: string = ':username';
     projectSlug: string = ':project';
     formValue = signal<any>({});
-    
+
     dialogService = inject(DialogService);
-    
+
     mockResponses = computed(() => {
         const value = this.formValue();
         const schemas = value.resourceSchema || [];
@@ -124,14 +125,26 @@ export class EndpointEditar implements OnInit {
                             for (const cond of schemaValue.conditions) {
                                 let isMatch = false;
                                 switch (cond.operator) {
-                                    case '==': isMatch = dependsOnVal == cond.compareValue; break;
-                                    case '!=': isMatch = dependsOnVal != cond.compareValue; break;
-                                    case '>': isMatch = dependsOnVal > cond.compareValue; break;
-                                    case '<': isMatch = dependsOnVal < cond.compareValue; break;
-                                    case '>=': isMatch = dependsOnVal >= cond.compareValue; break;
-                                    case '<=': isMatch = dependsOnVal <= cond.compareValue; break;
-                                    case 'contains': 
-                                        isMatch = dependsOnVal && dependsOnVal.toString().includes(cond.compareValue); 
+                                    case '==':
+                                        isMatch = dependsOnVal == cond.compareValue;
+                                        break;
+                                    case '!=':
+                                        isMatch = dependsOnVal != cond.compareValue;
+                                        break;
+                                    case '>':
+                                        isMatch = dependsOnVal > cond.compareValue;
+                                        break;
+                                    case '<':
+                                        isMatch = dependsOnVal < cond.compareValue;
+                                        break;
+                                    case '>=':
+                                        isMatch = dependsOnVal >= cond.compareValue;
+                                        break;
+                                    case '<=':
+                                        isMatch = dependsOnVal <= cond.compareValue;
+                                        break;
+                                    case 'contains':
+                                        isMatch = dependsOnVal && dependsOnVal.toString().includes(cond.compareValue);
                                         break;
                                 }
                                 if (isMatch) {
@@ -142,7 +155,10 @@ export class EndpointEditar implements OnInit {
                             }
                         }
                         if (!matched) {
-                            item[schema.name] = this.mockValueForType(schemaValue.defaultResultType, schemaValue.defaultResultValue);
+                            item[schema.name] = this.mockValueForType(
+                                schemaValue.defaultResultType,
+                                schemaValue.defaultResultValue
+                            );
                         }
                     } else {
                         item[schema.name] = null;
@@ -227,17 +243,25 @@ export class EndpointEditar implements OnInit {
 
     mockValueForType(type: string, val: any): any {
         switch (type) {
-            case 'String': return val || 'exemplo';
-            case 'Number': return val ?? 0;
-            case 'Boolean': return val === 'true' || val === true;
-            case 'Array': 
+            case 'String':
+                return val || 'exemplo';
+            case 'Number':
+                return val ?? 0;
+            case 'Boolean':
+                return val === 'true' || val === true;
+            case 'Array':
                 if (val && typeof val === 'string') {
-                    const arr = val.split(',').map((v: string) => v.trim()).filter((v: string) => v !== '');
+                    const arr = val
+                        .split(',')
+                        .map((v: string) => v.trim())
+                        .filter((v: string) => v !== '');
                     return arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
                 }
                 return [];
-            case 'Faker.js': return this.parseFakerTag(val);
-            default: return val || null;
+            case 'Faker.js':
+                return this.parseFakerTag(val);
+            default:
+                return val || null;
         }
     }
 
@@ -418,20 +442,20 @@ export class EndpointEditar implements OnInit {
     openConditionDialog(index: number): void {
         const schema = this.resourceSchemaFormArray.at(index);
         const val = schema.get('value')?.value;
-        
+
         const ref = this.dialogService.open(ConditionBuilderModalComponent, {
             header: 'Construtor de Regras Condicionais',
             modal: true,
             closable: true,
             draggable: false,
             width: '900px',
-            data: { 
+            data: {
                 value: val,
                 availableBaseFields: this.getAvailableBaseFields(index),
                 fakerMethods: this.fakerMethods
             }
         });
-        
+
         if (ref?.onClose) {
             ref.onClose.subscribe((result) => {
                 if (result) {
