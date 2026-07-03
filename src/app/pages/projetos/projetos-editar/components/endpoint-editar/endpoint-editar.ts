@@ -1,10 +1,20 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { JsonPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { fakerPT_BR as faker } from '@faker-js/faker';
 import { CardModule } from 'primeng/card';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DialogModule } from 'primeng/dialog';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    FormArray,
+    FormBuilder,
+    FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
@@ -32,7 +42,6 @@ import { environment } from '@/environments/environment';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export function conditionalSchemaValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -71,8 +80,7 @@ export function conditionalSchemaValidator(): ValidatorFn {
         Highlight,
         TooltipModule,
         DialogModule,
-        NgClass,
-        JsonPipe
+        NgClass
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss',
@@ -257,6 +265,14 @@ export class EndpointEditar implements OnInit {
         });
     }
 
+    get resourceSchemaFormArray(): FormArray {
+        return this.form.get('resourceSchema') as FormArray;
+    }
+
+    get endpointsFormArray(): FormArray {
+        return this.form.get('endpoints') as FormArray;
+    }
+
     mockValueForType(type: string, val: any): any {
         switch (type) {
             case 'String':
@@ -279,14 +295,6 @@ export class EndpointEditar implements OnInit {
             default:
                 return val || null;
         }
-    }
-
-    get resourceSchemaFormArray(): FormArray {
-        return this.form.get('resourceSchema') as FormArray;
-    }
-
-    get endpointsFormArray(): FormArray {
-        return this.form.get('endpoints') as FormArray;
     }
 
     objectTypes(index: number): string[] {
@@ -372,7 +380,14 @@ export class EndpointEditar implements OnInit {
         const g = this.fb.group<any>({
             name: [value?.name ?? '', [Validators.required]],
             type: [value?.type ?? '', [Validators.required]],
-            value: [val, value?.type === 'Object.ID' ? [] : (value?.type === 'Conditional' ? [Validators.required, conditionalSchemaValidator()] : [Validators.required])]
+            value: [
+                val,
+                value?.type === 'Object.ID'
+                    ? []
+                    : value?.type === 'Conditional'
+                      ? [Validators.required, conditionalSchemaValidator()]
+                      : [Validators.required]
+            ]
         });
         g.get('type')?.valueChanges.subscribe({
             next: (type) => {
