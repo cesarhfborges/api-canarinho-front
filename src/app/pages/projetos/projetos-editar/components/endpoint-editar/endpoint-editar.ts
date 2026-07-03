@@ -32,6 +32,22 @@ import { environment } from '@/environments/environment';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+
+export function conditionalSchemaValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+        const val = control.value;
+        if (val && typeof val === 'object' && val.dependsOn !== undefined) {
+            if (!val.dependsOn || val.dependsOn.trim() === '') {
+                return { conditionalInvalid: true };
+            }
+            if (!val.conditions || !Array.isArray(val.conditions) || val.conditions.length === 0) {
+                return { conditionalInvalid: true };
+            }
+        }
+        return null;
+    };
+}
 
 @Component({
     selector: 'app-endpoint-editar',
@@ -356,7 +372,7 @@ export class EndpointEditar implements OnInit {
         const g = this.fb.group<any>({
             name: [value?.name ?? '', [Validators.required]],
             type: [value?.type ?? '', [Validators.required]],
-            value: [val, value?.type === 'Object.ID' ? [] : [Validators.required]]
+            value: [val, value?.type === 'Object.ID' ? [] : (value?.type === 'Conditional' ? [Validators.required, conditionalSchemaValidator()] : [Validators.required])]
         });
         g.get('type')?.valueChanges.subscribe({
             next: (type) => {
@@ -364,6 +380,8 @@ export class EndpointEditar implements OnInit {
 
                 if (type === 'Object.ID') {
                     g.get('value')?.clearValidators();
+                } else if (type === 'Conditional') {
+                    g.get('value')?.setValidators([Validators.required, conditionalSchemaValidator()]);
                 } else {
                     g.get('value')?.setValidators([Validators.required]);
                 }
