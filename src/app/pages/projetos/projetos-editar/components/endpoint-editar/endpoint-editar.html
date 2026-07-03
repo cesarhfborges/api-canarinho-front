@@ -31,6 +31,8 @@
                                 <p-tab class="px-6! py-4! text-base" value="1"><i class="pi pi-database mr-2"></i>
                                     Schema
                                 </p-tab>
+                                <p-tab class="px-6! py-4! text-base" value="4"><i class="pi pi-bars mr-2"></i> Headers
+                                </p-tab>
                                 <p-tab class="px-6! py-4! text-base" value="2"><i class="pi pi-wifi mr-2"></i> Rotas
                                     HTTP
                                 </p-tab>
@@ -563,6 +565,168 @@
                                                     </div>
                                                 }
                                             }
+                                        </div>
+                                    </section>
+                                </p-tabpanel>
+
+                                <!-- ABA HEADERS -->
+                                <p-tabpanel class="p-6 md:p-8 min-h-[400px]" value="4">
+                                    <section class="flex flex-col gap-6">
+                                        <div>
+                                            <h2 class="text-2xl font-bold mb-2">Headers Personalizadas</h2>
+                                            <p class="text-surface-500">Defina headers adicionais que serão retornadas
+                                                apenas nas requisições deste endpoint.</p>
+                                        </div>
+
+                                        <!-- Headers do Projeto -->
+                                        @if (projectHeaders().length > 0) {
+                                            <div class="mt-4">
+                                                <h3 class="text-lg font-semibold mb-3">Headers Herdados do Projeto <span
+                                                    class="text-sm font-normal text-surface-500">(Somente leitura)</span>
+                                                </h3>
+                                                <p-table [showGridlines]="true" [value]="projectHeaders()"
+                                                         styleClass="p-datatable-sm">
+                                                    <ng-template pTemplate="header">
+                                                        <tr>
+                                                            <th class="w-[40%] bg-surface-50 dark:bg-surface-800">Chave
+                                                                (Key)
+                                                            </th>
+                                                            <th class="w-[40%] bg-surface-50 dark:bg-surface-800">Valor
+                                                                (Value)
+                                                            </th>
+                                                            <th class="w-[20%] text-center bg-surface-50 dark:bg-surface-800">
+                                                                Status no Projeto
+                                                            </th>
+                                                        </tr>
+                                                    </ng-template>
+                                                    <ng-template let-header pTemplate="body">
+                                                        <tr class="opacity-80">
+                                                            <td>{{ header.key }}</td>
+                                                            <td>{{ header.value }}</td>
+                                                            <td class="text-center">
+                                                                <p-tag
+                                                                    [severity]="header.active ? 'success' : 'secondary'"
+                                                                    [value]="header.active ? 'Ativo' : 'Inativo'"></p-tag>
+                                                            </td>
+                                                        </tr>
+                                                    </ng-template>
+                                                </p-table>
+                                            </div>
+                                        }
+
+                                        <!-- Headers do Endpoint -->
+                                        <div class="mt-6">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <h3 class="text-lg font-semibold">Headers Exclusivas deste Endpoint</h3>
+                                                <p-button (onClick)="adicionarHeader()" icon="pi pi-plus"
+                                                          label="Adicionar Header" severity="info" size="small" />
+                                            </div>
+                                            <p-table [editingRowKeys]="editingRows" [showGridlines]="true"
+                                                     [value]="endpointHeaders()"
+                                                     dataKey="_id" editMode="row"
+                                                     styleClass="p-datatable-sm p-datatable-striped">
+                                                <ng-template pTemplate="header">
+                                                    <tr>
+                                                        <th class="w-[35%]">Chave (Key)</th>
+                                                        <th class="w-[35%]">Valor (Value)</th>
+                                                        <th class="w-[15%] text-center">Ativo</th>
+                                                        <th class="w-[15%] text-center">Ações</th>
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template let-editing="editing" let-header let-ri="rowIndex"
+                                                             pTemplate="body">
+                                                    <tr [pEditableRow]="header">
+                                                        <td>
+                                                            <p-cellEditor>
+                                                                <ng-template pTemplate="input">
+                                                                    <input [(ngModel)]="header.key"
+                                                                           [ngModelOptions]="{standalone: true}"
+                                                                           class="w-full"
+                                                                           pInputText
+                                                                           type="text">
+                                                                </ng-template>
+                                                                <ng-template pTemplate="output">
+                                                                    <span
+                                                                        class="block w-full min-h-[1.5rem]">{{ header.key || 'Nenhum' }}</span>
+                                                                </ng-template>
+                                                            </p-cellEditor>
+                                                        </td>
+                                                        <td>
+                                                            <p-cellEditor>
+                                                                <ng-template pTemplate="input">
+                                                                    <input [(ngModel)]="header.value"
+                                                                           [ngModelOptions]="{standalone: true}"
+                                                                           class="w-full"
+                                                                           pInputText
+                                                                           type="text">
+                                                                </ng-template>
+                                                                <ng-template pTemplate="output">
+                                                                    <span
+                                                                        class="block w-full min-h-[1.5rem]">{{ header.value || 'Nenhum' }}</span>
+                                                                </ng-template>
+                                                            </p-cellEditor>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <p-cellEditor>
+                                                                <ng-template pTemplate="input">
+                                                                    <p-toggleswitch [(ngModel)]="header.active"
+                                                                                    [ngModelOptions]="{standalone: true}"></p-toggleswitch>
+                                                                </ng-template>
+                                                                <ng-template pTemplate="output">
+                                                                    <p-tag
+                                                                        [severity]="header.active ? 'success' : 'secondary'"
+                                                                        [value]="header.active ? 'Ativo' : 'Inativo'"></p-tag>
+                                                                </ng-template>
+                                                            </p-cellEditor>
+                                                        </td>
+                                                        <td>
+                                                            <div class="flex items-center justify-center gap-2">
+                                                                @if (!editing) {
+                                                                    <p-button
+                                                                        (click)="onRowEditInit(header)"
+                                                                        icon="pi pi-pencil"
+                                                                        pInitEditableRow
+                                                                        rounded
+                                                                        severity="secondary"
+                                                                        text
+                                                                        type="button"
+                                                                    />
+                                                                    <p-button
+                                                                        (click)="excluirHeader(ri)"
+                                                                        icon="pi pi-trash"
+                                                                        rounded
+                                                                        severity="danger"
+                                                                        text
+                                                                        type="button" />
+                                                                } @else {
+                                                                    <p-button
+                                                                        (click)="onRowEditSave(header, ri)"
+                                                                        icon="pi pi-check"
+                                                                        rounded
+                                                                        severity="success"
+                                                                        text type="button"
+                                                                    />
+                                                                    <p-button
+                                                                        (click)="onRowEditCancel(header, ri)"
+                                                                        icon="pi pi-times"
+                                                                        rounded
+                                                                        severity="danger"
+                                                                        text
+                                                                        type="button"
+                                                                    />
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="emptymessage">
+                                                    <tr>
+                                                        <td class="text-center p-4" colspan="4">Nenhuma header exclusiva
+                                                            definida para este endpoint.
+                                                        </td>
+                                                    </tr>
+                                                </ng-template>
+                                            </p-table>
                                         </div>
                                     </section>
                                 </p-tabpanel>
