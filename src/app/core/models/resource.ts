@@ -9,6 +9,7 @@ export interface Resource {
     count: number;
     endpoints: Endpoint[];
     resourceSchema: Schema[];
+    custom_headers?: any[];
     created_at: Date;
     updated_at: Date;
 }

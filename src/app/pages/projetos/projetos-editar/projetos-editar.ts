@@ -23,7 +23,9 @@ import { TagModule } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { environment } from '@/environments/environment';
 import { EndpointVisualizar } from '@/app/pages/projetos/projetos-editar/components/endpoint-visualizar/endpoint-visualizar';
-
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { FORBIDDEN_HEADERS } from '@/app/core/utils/forbidden-headers';
+import { Ripple } from 'primeng/ripple';
 @Component({
     selector: 'app-projetos-editar',
     imports: [
@@ -40,7 +42,9 @@ import { EndpointVisualizar } from '@/app/pages/projetos/projetos-editar/compone
         DialogModule,
         InputTextModule,
         DatePipe,
-        NgClass
+        NgClass,
+        ToggleSwitchModule,
+        Ripple
     ],
     templateUrl: './projetos-editar.html',
     styleUrl: './projetos-editar.scss'
@@ -55,6 +59,7 @@ export class ProjetosEditar implements OnInit {
     showTokenDialog = signal<boolean>(false);
     newTokenName = signal<string>('');
     project = signal<any>(null);
+    projectHeaders = signal<any[]>([]);
     username = signal<string>('');
 
     public readonly _dialogService = inject(DialogService);
@@ -188,6 +193,7 @@ export class ProjetosEditar implements OnInit {
                 // Load Project Details
                 const projectData = await lastValueFrom(this._projetosService.obter(this.id));
                 this.project.set(projectData);
+                this.projectHeaders.set((projectData.custom_headers || []).map((h: any) => h._id ? h : { ...h, _id: crypto.randomUUID() }));
 
                 // Load Endpoints
                 const endpoints = await this.getEndpoints(this.id);
@@ -350,5 +356,94 @@ export class ProjetosEditar implements OnInit {
         const username = this.username() || ':username';
         const projectSlug = this.project()?.slug || ':project';
         return `${environment.apiUrl}/mock/${username}/${projectSlug}`;
+    }
+
+    clonedHeaders: { [s: string]: any } = {};
+    editingRows: { [s: string]: boolean } = {};
+
+    adicionarHeader() {
+        const headers = [...this.projectHeaders()];
+        const newId = crypto.randomUUID();
+        const newHeader = { _id: newId, key: '', value: '', active: true };
+        headers.push(newHeader);
+        this.projectHeaders.set(headers);
+
+        this.clonedHeaders[newId] = { ...newHeader };
+        this.editingRows[newId] = true;
+    }
+
+    excluirHeader(index: number) {
+        const headers = [...this.projectHeaders()];
+        headers.splice(index, 1);
+        this.projectHeaders.set(headers);
+        this.salvarHeaders();
+        this.messageService.add({ severity: 'success', summary: 'Excluída', detail: 'Header removida com sucesso.' });
+    }
+
+    onRowEditInit(header: any) {
+        this.clonedHeaders[header._id] = { ...header };
+        this.editingRows[header._id] = true;
+    }
+
+    onRowEditSave(header: any, index: number) {
+        const key = header.key?.trim() || '';
+
+        if (!key) {
+            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave da header não pode ser vazia.' });
+            return;
+        }
+
+        const headerRegex = /^[a-zA-Z0-9-]+$/;
+        if (!headerRegex.test(key)) {
+            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave deve conter apenas letras, números e hifens (sem espaços).' });
+            return;
+        }
+
+        if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header não permitida',
+                detail: 'Esta header é privativa do sistema e não pode ser configurada manualmente.'
+            });
+            return;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+
+        const headers = [...this.projectHeaders()];
+        headers[index] = header;
+        this.projectHeaders.set(headers);
+        this.salvarHeaders();
+        this.messageService.add({ severity: 'success', summary: 'Salva', detail: 'Header configurada com sucesso.' });
+    }
+
+    onRowEditCancel(header: any, index: number) {
+        const headers = [...this.projectHeaders()];
+        const cloned = this.clonedHeaders[header._id];
+
+        if (cloned && cloned.key === '' && cloned.value === '') {
+            // Se era uma nova header (em branco) e cancelou, removemos da lista
+            headers.splice(index, 1);
+        } else {
+            headers[index] = cloned;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+        this.projectHeaders.set(headers);
+    }
+
+    salvarHeaders() {
+        if (!this.id) return;
+        this._projetosService.atualizar(this.id, { custom_headers: this.projectHeaders() }).subscribe({
+            next: (res) => {
+                this.project.set(res);
+                this.projectHeaders.set((res.custom_headers || []).map((h: any) => h._id ? h : { ...h, _id: crypto.randomUUID() }));
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao salvar headers.' });
+            }
+        });
     }
 }
