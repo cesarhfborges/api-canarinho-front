@@ -30,6 +30,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { findInvalidControlsRecursive } from '@/app/core/utils/form-utils';
 import { environment } from '@/environments/environment';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
 
 @Component({
     selector: 'app-endpoint-editar',
@@ -56,7 +58,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         NgClass
     ],
     templateUrl: './endpoint-editar.html',
-    styleUrl: './endpoint-editar.scss'
+    styleUrl: './endpoint-editar.scss',
+    providers: [DialogService]
 })
 export class EndpointEditar implements OnInit {
     form: FormGroup;
@@ -85,10 +88,7 @@ export class EndpointEditar implements OnInit {
     projectSlug: string = ':project';
     formValue = signal<any>({});
     
-    // Condition Dialog state
-    showConditionDialog = signal<boolean>(false);
-    currentConditionSchemaIndex = signal<number | null>(null);
-    conditionForm: FormGroup;
+    dialogService = inject(DialogService);
     
     mockResponses = computed(() => {
         const value = this.formValue();
@@ -223,13 +223,6 @@ export class EndpointEditar implements OnInit {
             resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
-
-        this.conditionForm = this.fb.group({
-            dependsOn: ['', Validators.required],
-            conditions: this.fb.array<FormGroup>([]),
-            defaultResultType: ['String', Validators.required],
-            defaultResultValue: ['']
-        });
     }
 
     mockValueForType(type: string, val: any): any {
@@ -254,10 +247,6 @@ export class EndpointEditar implements OnInit {
 
     get endpointsFormArray(): FormArray {
         return this.form.get('endpoints') as FormArray;
-    }
-
-    get conditionsFormArray(): FormArray {
-        return this.conditionForm.get('conditions') as FormArray;
     }
 
     objectTypes(index: number): string[] {
@@ -427,57 +416,29 @@ export class EndpointEditar implements OnInit {
     }
 
     openConditionDialog(index: number): void {
-        this.currentConditionSchemaIndex.set(index);
         const schema = this.resourceSchemaFormArray.at(index);
         const val = schema.get('value')?.value;
         
-        this.conditionForm.reset({
-            dependsOn: val?.dependsOn ?? '',
-            defaultResultType: val?.defaultResultType ?? 'String',
-            defaultResultValue: val?.defaultResultValue ?? ''
+        const ref = this.dialogService.open(ConditionBuilderModalComponent, {
+            header: 'Construtor de Regras Condicionais',
+            modal: true,
+            closable: true,
+            draggable: false,
+            width: '900px',
+            data: { 
+                value: val,
+                availableBaseFields: this.getAvailableBaseFields(index),
+                fakerMethods: this.fakerMethods
+            }
         });
-
-        this.conditionsFormArray.clear();
-        if (val?.conditions && Array.isArray(val.conditions)) {
-            val.conditions.forEach((c: any) => {
-                this.conditionsFormArray.push(this.fb.group({
-                    operator: [c.operator ?? '==', Validators.required],
-                    compareValue: [c.compareValue ?? '', Validators.required],
-                    resultType: [c.resultType ?? 'String', Validators.required],
-                    resultValue: [c.resultValue ?? '']
-                }));
+        
+        if (ref?.onClose) {
+            ref.onClose.subscribe((result) => {
+                if (result) {
+                    schema.get('value')?.setValue(result);
+                }
             });
         }
-        
-        this.showConditionDialog.set(true);
-    }
-
-    addCondition(): void {
-        this.conditionsFormArray.push(this.fb.group({
-            operator: ['==', Validators.required],
-            compareValue: ['', Validators.required],
-            resultType: ['String', Validators.required],
-            resultValue: ['']
-        }));
-    }
-
-    removeCondition(index: number): void {
-        this.conditionsFormArray.removeAt(index);
-    }
-
-    saveConditions(): void {
-        if (this.conditionForm.invalid) {
-            this.conditionForm.markAllAsTouched();
-            return;
-        }
-
-        const idx = this.currentConditionSchemaIndex();
-        if (idx !== null) {
-            const schema = this.resourceSchemaFormArray.at(idx);
-            schema.get('value')?.setValue(this.conditionForm.value);
-        }
-
-        this.showConditionDialog.set(false);
     }
 
     salvar(): void {

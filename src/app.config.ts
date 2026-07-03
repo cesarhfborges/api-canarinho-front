@@ -29,7 +29,7 @@ export const appConfig: ApplicationConfig = {
             useValue: { dateFormat: 'dd/MM/yyyy HH:mm:ss' },
         },
         provideAppInitializer(initializeAppFactory),
-        provideHttpClient(withInterceptors([headersInterceptor, errorInterceptor])),
+        provideHttpClient(withFetch(), withInterceptors([headersInterceptor, errorInterceptor])),
         provideRouter(
             appRoutes,
             withInMemoryScrolling({
@@ -39,7 +39,6 @@ export const appConfig: ApplicationConfig = {
             withComponentInputBinding(),
             // withEnabledBlockingInitialNavigation()
         ),
-        provideHttpClient(withFetch()),
         provideZonelessChangeDetection(),
         providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
         provideHighlightOptions({
