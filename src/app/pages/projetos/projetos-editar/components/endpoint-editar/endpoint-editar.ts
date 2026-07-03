@@ -3,6 +3,7 @@ import { JsonPipe, NgClass } from '@angular/common';
 import { fakerPT_BR as faker } from '@faker-js/faker';
 import { CardModule } from 'primeng/card';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { DialogModule } from 'primeng/dialog';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { FluidModule } from 'primeng/fluid';
@@ -51,6 +52,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
         ButtonModule,
         Highlight,
         TooltipModule,
+        DialogModule,
         NgClass
     ],
     templateUrl: './endpoint-editar.html',
@@ -68,7 +70,8 @@ export class EndpointEditar implements OnInit {
         'String',
         'Number',
         'Boolean',
-        'Array'
+        'Array',
+        'Conditional'
         // 'Object',
         // 'Date',
         // 'Child Resource'
@@ -81,6 +84,12 @@ export class EndpointEditar implements OnInit {
     username: string = ':username';
     projectSlug: string = ':project';
     formValue = signal<any>({});
+    
+    // Condition Dialog state
+    showConditionDialog = signal<boolean>(false);
+    currentConditionSchemaIndex = signal<number | null>(null);
+    conditionForm: FormGroup;
+    
     mockResponses = computed(() => {
         const value = this.formValue();
         const schemas = value.resourceSchema || [];
@@ -106,15 +115,37 @@ export class EndpointEditar implements OnInit {
                 case 'Object.ID':
                     item[schema.name] = 1;
                     break;
-                case 'Array':
-                    if (schemaValue && typeof schemaValue === 'string') {
-                        const arr = schemaValue
-                            .split(',')
-                            .map((v: string) => v.trim())
-                            .filter((v: string) => v !== '');
-                        item[schema.name] = arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
+                case 'Conditional':
+                    // Simplify mock evaluation for preview
+                    if (schemaValue && schemaValue.dependsOn) {
+                        const dependsOnVal = item[schemaValue.dependsOn];
+                        let matched = false;
+                        if (schemaValue.conditions) {
+                            for (const cond of schemaValue.conditions) {
+                                let isMatch = false;
+                                switch (cond.operator) {
+                                    case '==': isMatch = dependsOnVal == cond.compareValue; break;
+                                    case '!=': isMatch = dependsOnVal != cond.compareValue; break;
+                                    case '>': isMatch = dependsOnVal > cond.compareValue; break;
+                                    case '<': isMatch = dependsOnVal < cond.compareValue; break;
+                                    case '>=': isMatch = dependsOnVal >= cond.compareValue; break;
+                                    case '<=': isMatch = dependsOnVal <= cond.compareValue; break;
+                                    case 'contains': 
+                                        isMatch = dependsOnVal && dependsOnVal.toString().includes(cond.compareValue); 
+                                        break;
+                                }
+                                if (isMatch) {
+                                    item[schema.name] = this.mockValueForType(cond.resultType, cond.resultValue);
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!matched) {
+                            item[schema.name] = this.mockValueForType(schemaValue.defaultResultType, schemaValue.defaultResultValue);
+                        }
                     } else {
-                        item[schema.name] = [];
+                        item[schema.name] = null;
                     }
                     break;
                 case 'Faker.js':
@@ -192,6 +223,29 @@ export class EndpointEditar implements OnInit {
             resourceSchema: this.fb.array<FormGroup>([]),
             endpoints: this.fb.array<FormGroup>([])
         });
+
+        this.conditionForm = this.fb.group({
+            dependsOn: ['', Validators.required],
+            conditions: this.fb.array<FormGroup>([]),
+            defaultResultType: ['String', Validators.required],
+            defaultResultValue: ['']
+        });
+    }
+
+    mockValueForType(type: string, val: any): any {
+        switch (type) {
+            case 'String': return val || 'exemplo';
+            case 'Number': return val ?? 0;
+            case 'Boolean': return val === 'true' || val === true;
+            case 'Array': 
+                if (val && typeof val === 'string') {
+                    const arr = val.split(',').map((v: string) => v.trim()).filter((v: string) => v !== '');
+                    return arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : [];
+                }
+                return [];
+            case 'Faker.js': return this.parseFakerTag(val);
+            default: return val || null;
+        }
     }
 
     get resourceSchemaFormArray(): FormArray {
@@ -200,6 +254,10 @@ export class EndpointEditar implements OnInit {
 
     get endpointsFormArray(): FormArray {
         return this.form.get('endpoints') as FormArray;
+    }
+
+    get conditionsFormArray(): FormArray {
+        return this.conditionForm.get('conditions') as FormArray;
     }
 
     objectTypes(index: number): string[] {
@@ -277,10 +335,15 @@ export class EndpointEditar implements OnInit {
     }
 
     createGroupSchema(value?: Schema): FormGroup {
+        let val = value?.value ?? '';
+        if (value?.type === 'Conditional') {
+            val = typeof val === 'string' && val ? JSON.parse(val) : val;
+        }
+
         const g = this.fb.group<any>({
             name: [value?.name ?? '', [Validators.required]],
             type: [value?.type ?? '', [Validators.required]],
-            value: [value?.value ?? '', value?.type === 'Object.ID' ? [] : [Validators.required]]
+            value: [val, value?.type === 'Object.ID' ? [] : [Validators.required]]
         });
         g.get('type')?.valueChanges.subscribe({
             next: (type) => {
@@ -304,6 +367,14 @@ export class EndpointEditar implements OnInit {
                         break;
                     case 'Array':
                         g.get('value')?.patchValue('');
+                        break;
+                    case 'Conditional':
+                        g.get('value')?.patchValue({
+                            dependsOn: '',
+                            conditions: [],
+                            defaultResultType: 'String',
+                            defaultResultValue: ''
+                        });
                         break;
                     case 'Object':
                         g.get('value')?.patchValue('');
@@ -342,6 +413,71 @@ export class EndpointEditar implements OnInit {
 
     close(): void {
         this.router.navigate(['/projetos', this.projectId]);
+    }
+
+    getAvailableBaseFields(currentIndex: number): any[] {
+        const schemas = this.resourceSchemaFormArray.value;
+        const available = [];
+        for (let i = 0; i < currentIndex; i++) {
+            if (schemas[i].name) {
+                available.push({ label: schemas[i].name, value: schemas[i].name });
+            }
+        }
+        return available;
+    }
+
+    openConditionDialog(index: number): void {
+        this.currentConditionSchemaIndex.set(index);
+        const schema = this.resourceSchemaFormArray.at(index);
+        const val = schema.get('value')?.value;
+        
+        this.conditionForm.reset({
+            dependsOn: val?.dependsOn ?? '',
+            defaultResultType: val?.defaultResultType ?? 'String',
+            defaultResultValue: val?.defaultResultValue ?? ''
+        });
+
+        this.conditionsFormArray.clear();
+        if (val?.conditions && Array.isArray(val.conditions)) {
+            val.conditions.forEach((c: any) => {
+                this.conditionsFormArray.push(this.fb.group({
+                    operator: [c.operator ?? '==', Validators.required],
+                    compareValue: [c.compareValue ?? '', Validators.required],
+                    resultType: [c.resultType ?? 'String', Validators.required],
+                    resultValue: [c.resultValue ?? '']
+                }));
+            });
+        }
+        
+        this.showConditionDialog.set(true);
+    }
+
+    addCondition(): void {
+        this.conditionsFormArray.push(this.fb.group({
+            operator: ['==', Validators.required],
+            compareValue: ['', Validators.required],
+            resultType: ['String', Validators.required],
+            resultValue: ['']
+        }));
+    }
+
+    removeCondition(index: number): void {
+        this.conditionsFormArray.removeAt(index);
+    }
+
+    saveConditions(): void {
+        if (this.conditionForm.invalid) {
+            this.conditionForm.markAllAsTouched();
+            return;
+        }
+
+        const idx = this.currentConditionSchemaIndex();
+        if (idx !== null) {
+            const schema = this.resourceSchemaFormArray.at(idx);
+            schema.get('value')?.setValue(this.conditionForm.value);
+        }
+
+        this.showConditionDialog.set(false);
     }
 
     salvar(): void {
