@@ -561,7 +561,7 @@ export class EndpointEditar implements OnInit {
                         life: 3000
                     });
                     this.saving.set(false);
-                    this.router.navigate(['/projetos', this.projectId]);
+                    void this.router.navigate(['/projetos', this.projectId]);
                 },
                 error: (err) => {
                     this.messageService.add({

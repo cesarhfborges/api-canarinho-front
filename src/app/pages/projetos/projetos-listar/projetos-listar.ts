@@ -7,10 +7,11 @@ import { RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ProjetoEditar } from '../components/projeto-editar/projeto-editar';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
     selector: 'app-projetos-listar',
-    imports: [Button, Card, DataView, RouterLink],
+    imports: [Button, Card, DataView, RouterLink, UpperCasePipe],
     providers: [DialogService],
     templateUrl: './projetos-listar.html',
     styleUrl: './projetos-listar.scss'
@@ -35,7 +36,12 @@ export class ProjetosListar implements OnInit {
                 this.loading.set(false);
             },
             error: (err) => {
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar a lista de projetos.', life: 3000 });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Não foi possível carregar a lista de projetos.',
+                    life: 3000
+                });
                 console.error(err);
                 this.loading.set(false);
             }
