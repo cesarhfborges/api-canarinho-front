@@ -8,7 +8,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { DatePipe, NgClass } from '@angular/common';
 import { TreeNode } from 'primeng/api';
-import { TreeModule } from 'primeng/tree';
+
 import { TooltipModule } from 'primeng/tooltip';
 import { EndpointsService } from '@/app/core/services/endpoints-service';
 import { TokensService } from '@/app/core/services/tokens.service';
@@ -31,7 +31,7 @@ import { Ripple } from 'primeng/ripple';
     imports: [
         CardModule,
         ButtonModule,
-        TreeModule,
+
         TooltipModule,
         DynamicDialogModule,
         SliderModule,
