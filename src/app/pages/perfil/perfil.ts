@@ -6,7 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
-import { PerfilService } from '@/app/core/services/perfil-service';
+import { PerfilService, UserProfile } from '@/app/core/services/perfil-service';
 import { UsuarioSenhaModal } from '@/app/shared/components/usuario-senha-modal/usuario-senha-modal';
 
 @Component({
@@ -22,6 +22,7 @@ export class PerfilComponent {
     private messageService = inject(MessageService);
     private dialogService = inject(DialogService);
 
+    profile: UserProfile | null = null;
     form: FormGroup;
     saving = signal<boolean>(false);
 
@@ -35,10 +36,14 @@ export class PerfilComponent {
         effect(() => {
             const profile = this.perfilService.userProfile();
             if (profile) {
-                this.form.patchValue({
-                    name: profile.name,
-                    email: profile.email
-                }, { emitEvent: false });
+                this.profile = profile;
+                this.form.patchValue(
+                    {
+                        name: profile.name,
+                        email: profile.email
+                    },
+                    { emitEvent: false }
+                );
             }
         });
     }

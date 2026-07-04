@@ -14,6 +14,7 @@ export interface UserProfile {
     is_active: boolean;
     created_at: Date;
     updated_at: Date;
+    last_login: Date;
 }
 
 @Injectable({
