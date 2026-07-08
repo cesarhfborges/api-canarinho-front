@@ -6,7 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import { TreeNode } from 'primeng/api';
 
 import { TooltipModule } from 'primeng/tooltip';
@@ -44,7 +44,8 @@ import { Ripple } from 'primeng/ripple';
         DatePipe,
         NgClass,
         ToggleSwitchModule,
-        Ripple
+        Ripple,
+        NgTemplateOutlet
     ],
     templateUrl: './projetos-editar.html',
     styleUrl: './projetos-editar.scss'
@@ -197,17 +198,7 @@ export class ProjetosEditar implements OnInit {
 
                 // Load Endpoints
                 const endpoints = await this.getEndpoints(this.id);
-                this.files.set(
-                    endpoints.map((e) => {
-                        return {
-                            key: e.id,
-                            label: e.name,
-                            data: {
-                                endpoint: e
-                            }
-                        };
-                    })
-                );
+                this.files.set(this.buildEndpointTree(endpoints));
 
                 // Load Tokens
                 const loadedTokens = await lastValueFrom(this._tokensService.listar(this.id));
@@ -281,32 +272,90 @@ export class ProjetosEditar implements OnInit {
         return await lastValueFrom(this._endpointsService.listar(id));
     }
 
+    private buildEndpointTree(endpoints: any[]): TreeNode[] {
+        const map = new Map<number, any>();
+        const roots: any[] = [];
+
+        endpoints.forEach(e => {
+            map.set(e.id, { ...e, children: [] });
+        });
+
+        endpoints.forEach(e => {
+            const ep = map.get(e.id);
+            if (ep.parent_id) {
+                const parent = map.get(ep.parent_id);
+                if (parent) {
+                    parent.children.push(ep);
+                    ep.generation_count = parent.count > 0 ? Math.round((ep.count || 0) / parent.count) : (ep.count || 0);
+                } else {
+                    ep.generation_count = ep.count || 0;
+                }
+            } else {
+                ep.generation_count = ep.count || 0;
+                roots.push(ep);
+            }
+        });
+
+        const convertToTreeNode = (ep: any): TreeNode => {
+            return {
+                key: ep.id.toString(),
+                label: ep.name,
+                data: { endpoint: ep },
+                children: ep.children ? ep.children.map(convertToTreeNode) : [],
+                expanded: true
+            };
+        };
+
+        return roots.map(convertToTreeNode);
+    }
+
+    adicionarFilho(parentEndpoint: any) {
+        this.router.navigate(['/projetos', this.id, 'endpoint', 'add'], { queryParams: { parentId: parentEndpoint.id } });
+    }
+
     protected async gerarDadosMock($event: SliderSlideEndEvent, data: any): Promise<void> {
         if ($event.value === undefined) {
             return;
         }
 
-        await this.updateCount(data.endpoint.id, $event.value);
-    }
+        if (this.id === null) return;
 
-    private async updateCount(endpointId: number, count: number) {
-        this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: 'gerando' }));
+        this.loadingEndpoints.update((prev) => ({ ...prev, [data.endpoint.id]: 'gerando' }));
+
         try {
-            await lastValueFrom(this._endpointsService.generateMock(this.id!, endpointId, count));
-            this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Mocks gerados com sucesso.', life: 3000 });
+            await lastValueFrom(
+                this._endpointsService.generateMock(this.id, data.endpoint.id, data.endpoint.generation_count)
+            );
             await this.carregar();
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Dados mockados gerados.',
+                life: 3000
+            });
         } catch (err) {
             this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao gerar os dados mockados.', life: 3000 });
             console.error(err);
         } finally {
-            this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: null }));
+            this.loadingEndpoints.update((prev) => ({ ...prev, [data.endpoint.id]: null }));
         }
+    }
+
+    private getAllNodes(nodes: TreeNode[]): TreeNode[] {
+        let all: TreeNode[] = [];
+        for (const node of nodes) {
+            all.push(node);
+            if (node.children) {
+                all = all.concat(this.getAllNodes(node.children));
+            }
+        }
+        return all;
     }
 
     async gerarTodos() {
         if (this.id === null) return;
 
-        const endpoints = this.files();
+        const endpoints = this.getAllNodes(this.files());
         if (!endpoints || endpoints.length === 0) return;
 
         this.generatingAll.set(true);
@@ -323,10 +372,14 @@ export class ProjetosEditar implements OnInit {
             const endpointId = item.data.endpoint.id;
 
             try {
-                // Creates automatically 10 items for each
-                await lastValueFrom(this._endpointsService.generateMock(this.id, endpointId, 10));
+                // Creates automatically based on generation_count or defaults to 10
+                const genCount = item.data.endpoint.generation_count > 0 ? item.data.endpoint.generation_count : 10;
+                
+                await lastValueFrom(
+                    this._endpointsService.generateMock(this.id, item.data.endpoint.id, genCount)
+                );
                 // Update local model so UI reflects it immediately
-                item.data.endpoint.count = 10;
+                item.data.endpoint.generation_count = genCount;
                 // Set only this endpoint to null as it finished
                 this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: null }));
             } catch (err) {
@@ -345,7 +398,8 @@ export class ProjetosEditar implements OnInit {
             }
             this.loadingEndpoints.set(resetState);
         } else {
-            this.messageService.add({ severity: 'success', summary: 'Concluído', detail: 'Dados mockados gerados para todos os endpoints (10 itens cada).', life: 3000 });
+            this.messageService.add({ severity: 'success', summary: 'Concluído', detail: 'Dados mockados gerados para todos os endpoints de acordo com a quantidade definida (ou 10 por padrão).', life: 3000 });
+            await this.carregar();
         }
 
         await this.carregar();

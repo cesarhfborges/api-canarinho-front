@@ -114,6 +114,8 @@ export class EndpointEditar implements OnInit {
     saving = signal<boolean>(false);
     projectId: number | null = null;
     endpointId: number | string | null = null;
+    parentId: number | null = null;
+    parentPrefix: string = '';
     username: string = ':username';
     projectSlug: string = ':project';
     formValue = signal<any>({});
@@ -316,6 +318,11 @@ export class EndpointEditar implements OnInit {
         this.projectId = Number(this.route.snapshot.paramMap.get('id'));
         const rawEndpointId = this.route.snapshot.paramMap.get('endpointId');
         this.endpointId = rawEndpointId === 'add' ? 'add' : Number(rawEndpointId);
+        
+        const rawParentId = this.route.snapshot.queryParamMap.get('parentId');
+        if (rawParentId) {
+            this.parentId = Number(rawParentId);
+        }
 
         try {
             // Load user profile if missing
@@ -336,18 +343,27 @@ export class EndpointEditar implements OnInit {
                 const resource = await lastValueFrom(
                     this._endpointsService.obter(this.projectId, this.endpointId as number)
                 );
+                this.parentId = resource.parent_id || null;
                 this.form.patchValue(resource);
                 this.endpointHeaders.set((resource?.custom_headers || []).map((h: any) => h._id ? h : { ...h, _id: crypto.randomUUID() }));
 
-                resource?.resourceSchema?.forEach((schema) => {
+                resource?.resourceSchema?.forEach((schema: any) => {
                     this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
                 });
 
-                resource?.endpoints?.forEach((endpoint, index) => {
+                resource?.endpoints?.forEach((endpoint: any, index: number) => {
                     this.endpointsFormArray.push(this.createGroupEndpoint(endpoint, index === 0));
                 });
             } else {
                 this.initializeDefaultForm();
+            }
+
+            if (this.parentId && this.projectId) {
+                const parent = await lastValueFrom(this._endpointsService.obter(this.projectId, this.parentId));
+                if (parent) {
+                    const listEndpoint = parent.endpoints?.find((c: any) => c.method === 'GET' && !c.url?.endsWith('/:id'));
+                    this.parentPrefix = listEndpoint?.url || `/${parent.name}`;
+                }
             }
         } catch (err) {
             this.messageService.add({
@@ -364,15 +380,17 @@ export class EndpointEditar implements OnInit {
             this.formValue.set(val);
 
             const safeName = val.name ? val.name : '';
+            const prefix = this.parentPrefix ? `${this.parentPrefix}/:parentId` : '';
+
             this.endpointsFormArray.controls.forEach((ctrl) => {
                 const method = ctrl.get('method')?.value;
-                const hasId = ctrl.get('url')?.value?.includes('/:id');
+                const hasId = ctrl.get('url')?.value?.endsWith('/:id');
                 if (method === 'GET' && hasId) {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}/:id`, { emitEvent: false });
                 } else if (method === 'GET' || method === 'POST') {
-                    ctrl.get('url')?.setValue(`/${safeName}`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}`, { emitEvent: false });
                 } else if (method === 'PUT' || method === 'DELETE') {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}/:id`, { emitEvent: false });
                 }
             });
         });
@@ -443,7 +461,7 @@ export class EndpointEditar implements OnInit {
         return g;
     }
 
-    createGroupEndpoint(value?: Endpoint, first?: boolean): FormGroup {
+    createGroupEndpoint(value?: Partial<Endpoint>, first?: boolean): FormGroup {
         const group: FormGroup = this.fb.group({
             enabled: [value?.enabled ?? true],
             method: [value?.method ?? 'GET'],
@@ -525,6 +543,9 @@ export class EndpointEditar implements OnInit {
 
         const data = this.form.value;
         data.custom_headers = this.endpointHeaders();
+        if (this.parentId) {
+            data.parent_id = this.parentId;
+        }
         const resourceId = this.endpointId !== 'add' ? (this.endpointId as number) : null;
         const projectId = this.projectId;
 
