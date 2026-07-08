@@ -125,6 +125,8 @@ export class ProjetosEditar implements OnInit {
             return;
         }
 
+        console.log(value);
+
         const firstToken = this.tokens()[0].token;
 
         this._dialogService.open(EndpointVisualizar, {
@@ -539,6 +541,14 @@ export class ProjetosEditar implements OnInit {
                 roots.push(ep);
             }
         });
+
+        const setPath = (ep: any, currentPath: string) => {
+            ep.fullPath = currentPath ? `${currentPath}/:parentId/${ep.name}` : ep.name;
+            if (ep.children) {
+                ep.children.forEach((child: any) => setPath(child, ep.fullPath));
+            }
+        };
+        roots.forEach(root => setPath(root, ''));
 
         const convertToTreeNode = (ep: any): TreeNode => {
             return {
