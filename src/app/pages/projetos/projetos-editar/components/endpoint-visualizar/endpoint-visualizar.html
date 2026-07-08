@@ -1,22 +1,43 @@
 <div class="flex flex-col gap-4">
-    <div class="flex flex-col gap-2 p-3 bg-surface-100 dark:bg-surface-800 rounded-md">
-        <div class="flex items-center gap-2 font-mono text-sm break-all flex-wrap">
-            <span class="text-primary font-semibold mr-2">GET</span>
-            <span class="text-surface-500">{{ apiUrl }}/mock/{{ username() }}/{{ projectSlug() }}/</span>
-            @for (seg of pathSegments(); track $index) {
-                @if (seg.type === 'text') {
-                    <span class="font-semibold">{{ seg.value }}</span>
-                } @else {
-                    <input pInputText type="text" [(ngModel)]="seg.value" class="w-16 p-1 text-center font-mono text-sm border-primary" (keyup.enter)="refreshUrl()" />
+    <!-- Interactive Builder -->
+    <div class="flex flex-col gap-3">
+        <label class="text-sm font-semibold text-surface-700 dark:text-surface-300">Simulador de Rota</label>
+        
+        <div class="flex items-center w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden focus-within:border-primary transition-colors shadow-sm">
+            <div class="px-3 py-2 bg-surface-100 dark:bg-surface-800 border-r border-surface-200 dark:border-surface-700 flex items-center justify-center">
+                <span class="text-primary font-bold tracking-wider text-sm">GET</span>
+            </div>
+            
+            <div class="flex-1 flex items-center flex-wrap px-3 py-1 font-mono text-sm gap-0">
+                <span class="text-surface-500">{{ apiUrl }}/mock/{{ username() }}/{{ projectSlug() }}/</span>
+                
+                @for (seg of pathSegments(); track $index) {
+                    @if (seg.type === 'text') {
+                        <span class="font-semibold text-surface-900 dark:text-surface-0">{{ seg.value }}</span>
+                    } @else {
+                        <input pInputText type="text" [(ngModel)]="seg.value" 
+                               class="w-10 h-6 p-0 text-center font-mono text-sm bg-surface-200 dark:bg-surface-800 border-none focus:ring-1 focus:ring-primary mx-0.5 rounded" 
+                               (keyup.enter)="refreshUrl()" 
+                               pTooltip="ID Pai" tooltipPosition="top" />
+                    }
+                    @if (!$last) {
+                        <span class="text-surface-400 mx-0.5">/</span>
+                    }
                 }
-                @if (!$last) {
-                    <span class="text-surface-500">/</span>
-                }
-            }
-            <p-button icon="pi pi-refresh" (onClick)="refreshUrl()" styleClass="p-button-text p-button-sm ml-2" pTooltip="Buscar dados"></p-button>
+            </div>
+            
+            <button pButton icon="pi pi-refresh" (click)="refreshUrl()" 
+                    class="p-button-text p-button-secondary rounded-none px-3 border-l border-surface-200 dark:border-surface-700 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors h-full" 
+                    pTooltip="Buscar dados"></button>
         </div>
-        <div class="text-xs text-surface-400 font-mono mt-1">
-            Requisitando: {{ requestUrl() || 'Carregando URL...' }}
+    </div>
+
+    <!-- Info Rota Completa -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-3 rounded-lg flex items-start gap-3">
+        <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
+        <div class="flex flex-col min-w-0">
+            <span class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-1">Requisição Completa</span>
+            <span class="text-sm font-mono text-blue-900 dark:text-blue-100 break-all">{{ requestUrl() || 'Carregando URL...' }}</span>
         </div>
     </div>
 
