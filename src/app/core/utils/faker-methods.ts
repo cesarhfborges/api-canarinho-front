@@ -102,8 +102,13 @@ export default [
     {
         label: 'Números',
         items: [
-            { label: 'Inteiro', value: '[number.int]' },
-            { label: 'Decimal', value: '[number.float]' },
+            { label: 'Número Inteiro', value: '[number.int]' },
+            { label: 'Número Decimal', value: '[number.float]' }
+        ]
+    },
+    {
+        label: 'Vars',
+        items: [
             { label: 'Booleano', value: '[datatype.boolean]' }
         ]
     },
