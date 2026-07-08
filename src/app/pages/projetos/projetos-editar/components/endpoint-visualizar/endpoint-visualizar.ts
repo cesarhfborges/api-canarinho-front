@@ -1,15 +1,22 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { TableModule } from 'primeng/table';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { environment } from '@/environments/environment';
 import { JsonPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+
+export interface PathSegment {
+    type: 'text' | 'param';
+    value: string;
+}
 
 @Component({
     selector: 'app-endpoint-visualizar',
-    imports: [TableModule, ButtonModule, JsonPipe],
+    imports: [TableModule, ButtonModule, JsonPipe, FormsModule, InputTextModule],
     templateUrl: './endpoint-visualizar.html',
     styleUrl: './endpoint-visualizar.scss'
 })
@@ -21,23 +28,50 @@ export class EndpointVisualizar implements OnInit {
     columns = signal<{ field: string; header: string }[]>([]);
     totalRecords = signal<number>(0);
     requestUrl = signal<string>('');
+    
+    pathSegments = signal<PathSegment[]>([]);
+    username = signal<string>('');
+    projectSlug = signal<string>('');
+    apiUrl = environment.apiUrl;
+
     private readonly http = inject(HttpClient);
     private readonly messageService = inject(MessageService);
 
     ngOnInit(): void {
-        // Inicialização é feita pelo onLazyLoad da tabela se for lazy, mas caso a tabela dispare logo:
-        // this.carregarDados();
+        this.username.set(this.dialogConfig.data?.username || '');
+        this.projectSlug.set(this.dialogConfig.data?.projectSlug || '');
+
+        const endpointName: string = this.dialogConfig.data?.endpoint?.fullPath || this.dialogConfig.data?.endpoint?.name || '';
+        
+        const segments: PathSegment[] = [];
+        const parts = endpointName.split('/');
+        for (const part of parts) {
+            if (part === '') continue;
+            if (part.startsWith(':')) {
+                segments.push({ type: 'param', value: '1' });
+            } else {
+                segments.push({ type: 'text', value: part });
+            }
+        }
+        this.pathSegments.set(segments);
+    }
+
+    getBuiltPath(): string {
+        return this.pathSegments().map(s => s.value).join('/');
+    }
+
+    refreshUrl() {
+        this.carregarDados();
     }
 
     async carregarDados(event?: any) {
         this.loading.set(true);
 
-        const username = this.dialogConfig.data?.username;
-        const projectSlug = this.dialogConfig.data?.projectSlug;
-        const endpointName = this.dialogConfig.data?.endpoint?.fullPath || this.dialogConfig.data?.endpoint?.name;
+        const username = this.username();
+        const projectSlug = this.projectSlug();
         const token = this.dialogConfig.data?.token;
 
-        if (!username || !projectSlug || !endpointName || !token) {
+        if (!username || !projectSlug || !token) {
             this.messageService.add({
                 severity: 'error',
                 summary: 'Erro',
@@ -51,7 +85,9 @@ export class EndpointVisualizar implements OnInit {
         const page = event ? event.first / event.rows + 1 : 1;
         const perPage = event ? event.rows : 10;
 
-        let url = `${environment.apiUrl}/mock/${username}/${projectSlug}/${endpointName}?page=${page}&per_page=${perPage}`;
+        const path = this.getBuiltPath();
+
+        let url = `${this.apiUrl}/mock/${username}/${projectSlug}/${path}?page=${page}&per_page=${perPage}`;
 
         // Sorting
         if (event?.sortField) {
@@ -98,18 +134,34 @@ export class EndpointVisualizar implements OnInit {
                         return 0;
                     });
                     this.columns.set(cols);
+                } else {
+                    this.columns.set([]);
                 }
 
                 this.loading.set(false);
             },
-            error: (err) => {
+            error: (err: HttpErrorResponse) => {
                 console.error(err);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Falha ao buscar os dados da API.',
-                    life: 3000
-                });
+                
+                this.data.set([]);
+                this.columns.set([]);
+                this.totalRecords.set(0);
+
+                if (err.status === 404 && err.error?.error?.includes('Parent mock record not found')) {
+                    this.messageService.add({
+                        severity: 'warn',
+                        summary: 'Aviso',
+                        detail: 'O registro pai selecionado não existe. Verifique o ID ou gere os dados do endpoint pai primeiro.',
+                        life: 5000
+                    });
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Falha ao buscar os dados da API.',
+                        life: 3000
+                    });
+                }
                 this.loading.set(false);
             }
         });

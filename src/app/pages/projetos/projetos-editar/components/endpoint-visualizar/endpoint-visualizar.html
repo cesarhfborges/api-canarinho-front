@@ -1,7 +1,23 @@
 <div class="flex flex-col gap-4">
-    <div class="p-3 bg-surface-100 dark:bg-surface-800 rounded-md font-mono text-sm break-all">
-        <span class="text-primary font-semibold mr-2">GET</span>
-        <span>{{ requestUrl() || 'Carregando URL...' }}</span>
+    <div class="flex flex-col gap-2 p-3 bg-surface-100 dark:bg-surface-800 rounded-md">
+        <div class="flex items-center gap-2 font-mono text-sm break-all flex-wrap">
+            <span class="text-primary font-semibold mr-2">GET</span>
+            <span class="text-surface-500">{{ apiUrl }}/mock/{{ username() }}/{{ projectSlug() }}/</span>
+            @for (seg of pathSegments(); track $index) {
+                @if (seg.type === 'text') {
+                    <span class="font-semibold">{{ seg.value }}</span>
+                } @else {
+                    <input pInputText type="text" [(ngModel)]="seg.value" class="w-16 p-1 text-center font-mono text-sm border-primary" (keyup.enter)="refreshUrl()" />
+                }
+                @if (!$last) {
+                    <span class="text-surface-500">/</span>
+                }
+            }
+            <p-button icon="pi pi-refresh" (onClick)="refreshUrl()" styleClass="p-button-text p-button-sm ml-2" pTooltip="Buscar dados"></p-button>
+        </div>
+        <div class="text-xs text-surface-400 font-mono mt-1">
+            Requisitando: {{ requestUrl() || 'Carregando URL...' }}
+        </div>
     </div>
 
     <p-table [value]="data()" [columns]="columns()" [paginator]="true" [rows]="10"

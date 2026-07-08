@@ -125,6 +125,8 @@ export class ProjetosEditar implements OnInit {
             return;
         }
 
+        console.log(value);
+
         const firstToken = this.tokens()[0].token;
 
         this._dialogService.open(EndpointVisualizar, {
