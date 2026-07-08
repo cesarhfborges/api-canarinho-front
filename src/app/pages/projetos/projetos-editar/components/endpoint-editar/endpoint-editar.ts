@@ -44,7 +44,6 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
 import { FORBIDDEN_HEADERS } from '@/app/core/utils/forbidden-headers';
 import { TableModule } from 'primeng/table';
-import { Ripple } from 'primeng/ripple';
 
 export function conditionalSchemaValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -84,8 +83,7 @@ export function conditionalSchemaValidator(): ValidatorFn {
         TooltipModule,
         DialogModule,
         NgClass,
-        TableModule,
-        Ripple
+        TableModule
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss',
@@ -251,6 +249,8 @@ export class EndpointEditar implements OnInit {
 
         return responses;
     });
+    clonedHeaders: { [s: string]: any } = {};
+    editingRows: { [s: string]: boolean } = {};
     private readonly fb = inject(FormBuilder);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
@@ -318,7 +318,7 @@ export class EndpointEditar implements OnInit {
         this.projectId = Number(this.route.snapshot.paramMap.get('id'));
         const rawEndpointId = this.route.snapshot.paramMap.get('endpointId');
         this.endpointId = rawEndpointId === 'add' ? 'add' : Number(rawEndpointId);
-        
+
         const rawParentId = this.route.snapshot.queryParamMap.get('parentId');
         if (rawParentId) {
             this.parentId = Number(rawParentId);
@@ -345,7 +345,9 @@ export class EndpointEditar implements OnInit {
                 );
                 this.parentId = resource.parent_id || null;
                 this.form.patchValue(resource);
-                this.endpointHeaders.set((resource?.custom_headers || []).map((h: any) => h._id ? h : { ...h, _id: crypto.randomUUID() }));
+                this.endpointHeaders.set(
+                    (resource?.custom_headers || []).map((h: any) => (h._id ? h : { ...h, _id: crypto.randomUUID() }))
+                );
 
                 resource?.resourceSchema?.forEach((schema: any) => {
                     this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
@@ -361,7 +363,9 @@ export class EndpointEditar implements OnInit {
             if (this.parentId && this.projectId) {
                 const parent = await lastValueFrom(this._endpointsService.obter(this.projectId, this.parentId));
                 if (parent) {
-                    const listEndpoint = parent.endpoints?.find((c: any) => c.method === 'GET' && !c.url?.endsWith('/:id'));
+                    const listEndpoint = parent.endpoints?.find(
+                        (c: any) => c.method === 'GET' && !c.url?.endsWith('/:id')
+                    );
                     this.parentPrefix = listEndpoint?.url || `/${parent.name}`;
                 }
             }
@@ -620,6 +624,84 @@ export class EndpointEditar implements OnInit {
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
     }
 
+    adicionarHeader() {
+        const headers = [...this.endpointHeaders()];
+        const newId = crypto.randomUUID();
+        const newHeader = { _id: newId, key: '', value: '', active: true };
+        headers.push(newHeader);
+        this.endpointHeaders.set(headers);
+
+        this.clonedHeaders[newId] = { ...newHeader };
+        this.editingRows[newId] = true;
+    }
+
+    excluirHeader(index: number) {
+        const headers = [...this.endpointHeaders()];
+        headers.splice(index, 1);
+        this.endpointHeaders.set(headers);
+        this.messageService.add({ severity: 'success', summary: 'Excluída', detail: 'Header removida com sucesso.' });
+    }
+
+    onRowEditInit(header: any) {
+        this.clonedHeaders[header._id] = { ...header };
+        this.editingRows[header._id] = true;
+    }
+
+    onRowEditSave(header: any, index: number) {
+        const key = header.key?.trim() || '';
+
+        if (!key) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header inválida',
+                detail: 'A chave da header não pode ser vazia.'
+            });
+            return;
+        }
+
+        const headerRegex = /^[a-zA-Z0-9-]+$/;
+        if (!headerRegex.test(key)) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header inválida',
+                detail: 'A chave deve conter apenas letras, números e hifens (sem espaços).'
+            });
+            return;
+        }
+
+        if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header não permitida',
+                detail: 'Esta header é privativa do sistema e não pode ser configurada manualmente.'
+            });
+            return;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+
+        const headers = [...this.endpointHeaders()];
+        headers[index] = header;
+        this.endpointHeaders.set(headers);
+        this.messageService.add({ severity: 'success', summary: 'Salva', detail: 'Header configurada com sucesso.' });
+    }
+
+    onRowEditCancel(header: any, index: number) {
+        const headers = [...this.endpointHeaders()];
+        const cloned = this.clonedHeaders[header._id];
+
+        if (cloned && cloned.key === '' && cloned.value === '') {
+            headers.splice(index, 1);
+        } else {
+            headers[index] = cloned;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+        this.endpointHeaders.set(headers);
+    }
+
     protected onCopySuccess(value: string): void {
         this.messageService.add({
             severity: 'success',
@@ -847,78 +929,5 @@ export class EndpointEditar implements OnInit {
                 response: '$mockData'
             })
         );
-    }
-
-    clonedHeaders: { [s: string]: any } = {};
-    editingRows: { [s: string]: boolean } = {};
-
-    adicionarHeader() {
-        const headers = [...this.endpointHeaders()];
-        const newId = crypto.randomUUID();
-        const newHeader = { _id: newId, key: '', value: '', active: true };
-        headers.push(newHeader);
-        this.endpointHeaders.set(headers);
-
-        this.clonedHeaders[newId] = { ...newHeader };
-        this.editingRows[newId] = true;
-    }
-
-    excluirHeader(index: number) {
-        const headers = [...this.endpointHeaders()];
-        headers.splice(index, 1);
-        this.endpointHeaders.set(headers);
-        this.messageService.add({ severity: 'success', summary: 'Excluída', detail: 'Header removida com sucesso.' });
-    }
-
-    onRowEditInit(header: any) {
-        this.clonedHeaders[header._id] = { ...header };
-        this.editingRows[header._id] = true;
-    }
-
-    onRowEditSave(header: any, index: number) {
-        const key = header.key?.trim() || '';
-
-        if (!key) {
-            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave da header não pode ser vazia.' });
-            return;
-        }
-
-        const headerRegex = /^[a-zA-Z0-9-]+$/;
-        if (!headerRegex.test(key)) {
-            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave deve conter apenas letras, números e hifens (sem espaços).' });
-            return;
-        }
-
-        if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Header não permitida',
-                detail: 'Esta header é privativa do sistema e não pode ser configurada manualmente.'
-            });
-            return;
-        }
-
-        delete this.clonedHeaders[header._id];
-        delete this.editingRows[header._id];
-
-        const headers = [...this.endpointHeaders()];
-        headers[index] = header;
-        this.endpointHeaders.set(headers);
-        this.messageService.add({ severity: 'success', summary: 'Salva', detail: 'Header configurada com sucesso.' });
-    }
-
-    onRowEditCancel(header: any, index: number) {
-        const headers = [...this.endpointHeaders()];
-        const cloned = this.clonedHeaders[header._id];
-
-        if (cloned && cloned.key === '' && cloned.value === '') {
-            headers.splice(index, 1);
-        } else {
-            headers[index] = cloned;
-        }
-
-        delete this.clonedHeaders[header._id];
-        delete this.editingRows[header._id];
-        this.endpointHeaders.set(headers);
     }
 }

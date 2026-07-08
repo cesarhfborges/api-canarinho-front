@@ -10,7 +10,7 @@ export interface Endpoint {
     resource_schema: any[];
     custom_headers: any[];
     children?: Endpoint[];
-    
+
     // Virtual attributes added by backend
     count?: number;
     parent?: Endpoint;
@@ -21,4 +21,4 @@ export interface Endpoint {
     paginate?: boolean;
     per_page_default?: number;
     response: '$mockData';
-};
+}
