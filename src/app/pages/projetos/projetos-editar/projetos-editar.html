@@ -82,28 +82,32 @@
             <p-tabpanel value="0">
                 <div class="card flex-auto">
                     @if (files().length > 0) {
-                        <div class="flex flex-col gap-3">
+                        <div class="flex flex-col gap-4 pt-2">
                             <ng-template #nodeTemplate let-nodes="nodes" let-level="level">
                                 <div class="flex flex-col gap-4 w-full">
                                     @for (node of nodes; track node.key; let first = $first; let last = $last) {
-                                        <div class="relative flex flex-col gap-4 ml-8">
+                                        <div class="relative flex flex-col gap-4" [ngClass]="level > 0 ? 'ml-3 sm:ml-8' : ''">
 
                                             <!-- Linhas Conectoras da Árvore -->
-                                            <div class="absolute -left-6 border-l-2 border-surface-300 dark:border-surface-600 z-0"
-                                                 [style.top]="first && level === 0 ? '2rem' : '-1.2rem'"
-                                                 [style.bottom]="last ? 'calc(100% - 2rem)' : '0'"></div>
-                                            <div class="absolute -left-6 w-[1.5rem] border-t-2 border-surface-300 dark:border-surface-600 z-0"
-                                                 style="top: 2rem"></div>
+                                            <!-- Linha Vertical Principal -->
+                                            <div class="absolute -left-[14px] sm:-left-[24px] border-l-2 border-surface-300 dark:border-surface-600 z-0"
+                                                 [style.top]="first && level === 0 ? '2.5rem' : '-1rem'"
+                                                 [style.bottom]="last ? 'calc(100% - 2.5rem)' : '0'"></div>
+                                            
+                                            <!-- Linha Horizontal -->
+                                            <div class="absolute -left-[14px] sm:-left-[24px] w-[14px] sm:w-[24px] border-t-2 border-surface-300 dark:border-surface-600 z-0"
+                                                 style="top: 2.5rem"></div>
 
+                                            <!-- CARD DO ENDPOINT (Dois Andares) -->
                                             <div
                                                 [class.opacity-60]="isLoading(node.data.endpoint.id)"
-                                                class="flex flex-col xl:flex-row xl:items-center gap-3 xl:gap-4 bg-surface-0 dark:bg-surface-800/80 p-3 pl-4 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-xs hover:shadow-md hover:border-primary/40 transition-all z-10 relative group"
+                                                class="flex flex-col bg-surface-0 dark:bg-surface-800/80 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/40 transition-all z-10 relative overflow-hidden"
                                             >
-                                                <!-- NOME -->
-                                                <div class="flex-1 flex items-center min-w-0">
-                                                    <div class="flex flex-wrap items-center gap-3 min-w-0">
-                                                        <span class="font-bold truncate text-[1.15rem] text-surface-800 dark:text-surface-100 group-hover:text-primary transition-colors flex items-center">
-                                                            <i class="pi pi-folder-open text-primary mr-3 text-xl opacity-80"></i>
+                                                <!-- ANDAR 1: Nome e Status (Cabeçalho do Card) -->
+                                                <div class="flex items-center justify-between min-w-0 border-b border-surface-100 dark:border-surface-800/50 p-4">
+                                                    <div class="flex items-center gap-3 min-w-0 w-full">
+                                                        <i class="pi pi-folder text-primary text-xl opacity-80 shrink-0"></i>
+                                                        <span class="font-bold truncate text-[1.1rem] text-surface-800 dark:text-surface-100">
                                                             {{ node.label }}
                                                         </span>
 
@@ -114,7 +118,7 @@
                                                                     'bg-danger-50 text-danger dark:bg-danger-900/30': status === 'excluindo',
                                                                     'bg-orange-50 text-orange-500 dark:bg-orange-900/30': status === 'atualizando'
                                                                 }"
-                                                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase shrink-0 ml-auto"
                                                             >
                                                                 <i class="pi pi-spin pi-spinner text-[10px]"></i>
                                                                 {{ status === 'gerando' ? 'Gerando...' : (status === 'excluindo' ? 'Excluindo...' : 'Atualizando...') }}
@@ -123,106 +127,92 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- QUANTIDADE -->
-                                                <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full border-y xl:border-y-0 xl:border-x border-surface-200 dark:border-surface-700/50 py-3 xl:py-0 px-1 xl:px-6">
+                                                <!-- ANDAR 2: Controle (Slider) e Ações -->
+                                                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full p-4 bg-surface-50/50 dark:bg-surface-900/20">
+                                                    
+                                                    <!-- Bloco de Geração (Slider) -->
+                                                    <div class="flex-1 flex items-center gap-4 w-full lg:max-w-2xl bg-surface-0 dark:bg-surface-900/50 p-3 sm:px-4 rounded-xl border border-surface-200 dark:border-surface-700/50">
+                                                        <!-- Quantidades -->
+                                                        <div class="flex flex-col justify-center shrink-0 min-w-[60px]">
+                                                            <span class="text-[10px] font-bold text-surface-400 uppercase tracking-wider leading-none mb-1">Gerar</span>
+                                                            <div class="flex items-baseline gap-1">
+                                                                <span class="font-black text-primary text-xl leading-none">{{ node.data.endpoint.generation_count }}</span>
+                                                                <span class="text-[11px] font-semibold text-surface-400 leading-none">/ {{ node.data.endpoint.count }}</span>
+                                                            </div>
+                                                        </div>
 
-                                                    <div class="flex items-center justify-between sm:justify-start w-full sm:w-auto">
-                                                        <span class="text-[11px] uppercase tracking-wider font-bold text-surface-400 shrink-0">
-                                                            Quantidade
-                                                        </span>
-                                                        <!-- Mobile Numbers -->
-                                                        <div class="flex sm:hidden flex-col items-end justify-center shrink-0">
-                                                            <span class="font-black text-xl text-primary leading-none">
-                                                                {{ node.data.endpoint.generation_count }}
-                                                            </span>
-                                                            <span class="text-[10px] font-semibold text-surface-400 leading-none mt-1 uppercase tracking-wider">
-                                                                ({{ node.data.endpoint.count }} total)
-                                                            </span>
+                                                        <!-- Slider -->
+                                                        <div class="flex-1 w-full flex items-center min-w-[100px] px-2 py-2">
+                                                            <p-slider
+                                                                (onSlideEnd)="gerarDadosMock($event, node.data)"
+                                                                [(ngModel)]="node.data.endpoint.generation_count"
+                                                                [disabled]="isLoading(node.data.endpoint.id)"
+                                                                [max]="100"
+                                                                [min]="0"
+                                                                [step]="1"
+                                                                class="w-full"
+                                                            />
                                                         </div>
                                                     </div>
 
-                                                    <div class="flex-1 w-full py-1 sm:py-0 flex items-center">
-                                                        <p-slider
-                                                            (onSlideEnd)="gerarDadosMock($event, node.data)"
-                                                            [(ngModel)]="node.data.endpoint.generation_count"
+                                                    <!-- Botões de Ação (Sempre Visíveis) -->
+                                                    <div class="flex flex-wrap lg:flex-nowrap justify-end items-center gap-2 shrink-0 w-full lg:w-auto mt-2 lg:mt-0">
+                                                        <p-button
+                                                            (onClick)="adicionarFilho(node.data.endpoint)"
                                                             [disabled]="isLoading(node.data.endpoint.id)"
-                                                            [max]="100"
-                                                            [min]="0"
-                                                            [step]="1"
-                                                            class="w-full flex-1"
-                                                            styleClass="w-full"
-                                                        />
+                                                            [outlined]="true"
+                                                            [rounded]="true"
+                                                            pTooltip="Adicionar Filho"
+                                                            severity="success"
+                                                            size="small"
+                                                            styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
+                                                            tooltipPosition="top"
+                                                        >
+                                                            <i class="pi pi-plus text-[1.1rem]"></i>
+                                                        </p-button>
+
+                                                        <p-button
+                                                            (onClick)="visualizarDados(node.data.endpoint)"
+                                                            [disabled]="isLoading(node.data.endpoint.id)"
+                                                            [outlined]="true"
+                                                            [rounded]="true"
+                                                            pTooltip="Visualizar dados"
+                                                            severity="secondary"
+                                                            size="small"
+                                                            styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
+                                                            tooltipPosition="top"
+                                                        >
+                                                            <i class="pi pi-database text-[1.1rem]"></i>
+                                                        </p-button>
+
+                                                        <p-button
+                                                            (click)="editar(node.data.endpoint)"
+                                                            [disabled]="isLoading(node.data.endpoint.id)"
+                                                            [outlined]="true"
+                                                            [rounded]="true"
+                                                            pTooltip="Configurar endpoint"
+                                                            severity="info"
+                                                            size="small"
+                                                            styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
+                                                            tooltipPosition="top"
+                                                        >
+                                                            <i class="pi pi-cog text-[1.1rem]"></i>
+                                                        </p-button>
+
+                                                        <p-button
+                                                            (onClick)="excluir($event, node.data.endpoint)"
+                                                            [disabled]="isLoading(node.data.endpoint.id)"
+                                                            [outlined]="true"
+                                                            [rounded]="true"
+                                                            pTooltip="Excluir endpoint"
+                                                            severity="danger"
+                                                            size="small"
+                                                            styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
+                                                            tooltipPosition="top"
+                                                        >
+                                                            <i class="pi pi-trash text-[1.1rem]"></i>
+                                                        </p-button>
                                                     </div>
-
-                                                    <!-- Desktop Numbers -->
-                                                    <div class="hidden sm:flex flex-col items-center justify-center shrink-0 min-w-[60px]">
-                                                        <span class="font-black text-xl text-primary leading-none" pTooltip="Itens gerados por pai" tooltipPosition="top">
-                                                            {{ node.data.endpoint.generation_count }}
-                                                        </span>
-                                                        <span class="text-[10px] font-semibold text-surface-400 leading-none mt-1 uppercase tracking-wider" pTooltip="Registros totais no banco" tooltipPosition="top">
-                                                            ({{ node.data.endpoint.count }} total)
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <!-- AÇÕES -->
-                                                <div
-                                                    class="flex flex-wrap xl:flex-nowrap justify-end gap-2 shrink-0 w-full xl:w-auto pt-1 xl:pt-0">
-                                                    <p-button
-                                                        (onClick)="adicionarFilho(node.data.endpoint)"
-                                                        [disabled]="isLoading(node.data.endpoint.id)"
-                                                        [outlined]="true"
-                                                        [rounded]="true"
-                                                        pTooltip="Adicionar Filho"
-                                                        severity="success"
-                                                        size="small"
-                                                        styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
-                                                        tooltipPosition="top"
-                                                    >
-                                                        <i class="pi pi-plus text-[1.1rem]"></i>
-                                                    </p-button>
-
-                                                    <p-button
-                                                        (onClick)="visualizarDados(node.data.endpoint)"
-                                                        [disabled]="isLoading(node.data.endpoint.id)"
-                                                        [outlined]="true"
-                                                        [rounded]="true"
-                                                        pTooltip="Visualizar dados"
-                                                        severity="secondary"
-                                                        size="small"
-                                                        styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
-                                                        tooltipPosition="top"
-                                                    >
-                                                        <i class="pi pi-database text-[1.1rem]"></i>
-                                                    </p-button>
-
-                                                    <p-button
-                                                        (click)="editar(node.data.endpoint)"
-                                                        [disabled]="isLoading(node.data.endpoint.id)"
-                                                        [outlined]="true"
-                                                        [rounded]="true"
-                                                        pTooltip="Configurar endpoint"
-                                                        severity="info"
-                                                        size="small"
-                                                        styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
-                                                        tooltipPosition="top"
-                                                    >
-                                                        <i class="pi pi-cog text-[1.1rem]"></i>
-                                                    </p-button>
-
-                                                    <p-button
-                                                        (onClick)="excluir($event, node.data.endpoint)"
-                                                        [disabled]="isLoading(node.data.endpoint.id)"
-                                                        [outlined]="true"
-                                                        [rounded]="true"
-                                                        pTooltip="Excluir endpoint"
-                                                        severity="danger"
-                                                        size="small"
-                                                        styleClass="w-10 h-10 p-0 flex items-center justify-center bg-surface-0 dark:bg-surface-800"
-                                                        tooltipPosition="top"
-                                                    >
-                                                        <i class="pi pi-trash text-[1.1rem]"></i>
-                                                    </p-button>
                                                 </div>
                                             </div>
 
