@@ -28,6 +28,8 @@ export default [
     {
         label: 'Endereço',
         items: [
+            { label: 'Logradouro', value: '[location.place]' },
+            { label: 'Número casa', value: '[location.number]' },
             { label: 'Cidade', value: '[location.city]' },
             { label: 'Estado', value: '[location.state]' },
             { label: 'País', value: '[location.country]' },
@@ -100,8 +102,13 @@ export default [
     {
         label: 'Números',
         items: [
-            { label: 'Inteiro', value: '[number.int]' },
-            { label: 'Decimal', value: '[number.float]' },
+            { label: 'Número Inteiro', value: '[number.int]' },
+            { label: 'Número Decimal', value: '[number.float]' }
+        ]
+    },
+    {
+        label: 'Vars',
+        items: [
             { label: 'Booleano', value: '[datatype.boolean]' }
         ]
     },

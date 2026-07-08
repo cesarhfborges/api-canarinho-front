@@ -44,7 +44,6 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ConditionBuilderModalComponent } from '../condition-builder-modal/condition-builder-modal.component';
 import { FORBIDDEN_HEADERS } from '@/app/core/utils/forbidden-headers';
 import { TableModule } from 'primeng/table';
-import { Ripple } from 'primeng/ripple';
 
 export function conditionalSchemaValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -84,8 +83,7 @@ export function conditionalSchemaValidator(): ValidatorFn {
         TooltipModule,
         DialogModule,
         NgClass,
-        TableModule,
-        Ripple
+        TableModule
     ],
     templateUrl: './endpoint-editar.html',
     styleUrl: './endpoint-editar.scss',
@@ -114,6 +112,8 @@ export class EndpointEditar implements OnInit {
     saving = signal<boolean>(false);
     projectId: number | null = null;
     endpointId: number | string | null = null;
+    parentId: number | null = null;
+    parentPrefix: string = '';
     username: string = ':username';
     projectSlug: string = ':project';
     formValue = signal<any>({});
@@ -249,6 +249,8 @@ export class EndpointEditar implements OnInit {
 
         return responses;
     });
+    clonedHeaders: { [s: string]: any } = {};
+    editingRows: { [s: string]: boolean } = {};
     private readonly fb = inject(FormBuilder);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
@@ -317,6 +319,11 @@ export class EndpointEditar implements OnInit {
         const rawEndpointId = this.route.snapshot.paramMap.get('endpointId');
         this.endpointId = rawEndpointId === 'add' ? 'add' : Number(rawEndpointId);
 
+        const rawParentId = this.route.snapshot.queryParamMap.get('parentId');
+        if (rawParentId) {
+            this.parentId = Number(rawParentId);
+        }
+
         try {
             // Load user profile if missing
             if (!this._perfilService.userProfile()) {
@@ -336,18 +343,31 @@ export class EndpointEditar implements OnInit {
                 const resource = await lastValueFrom(
                     this._endpointsService.obter(this.projectId, this.endpointId as number)
                 );
+                this.parentId = resource.parent_id || null;
                 this.form.patchValue(resource);
-                this.endpointHeaders.set((resource?.custom_headers || []).map((h: any) => h._id ? h : { ...h, _id: crypto.randomUUID() }));
+                this.endpointHeaders.set(
+                    (resource?.custom_headers || []).map((h: any) => (h._id ? h : { ...h, _id: crypto.randomUUID() }))
+                );
 
-                resource?.resourceSchema?.forEach((schema) => {
+                resource?.resourceSchema?.forEach((schema: any) => {
                     this.resourceSchemaFormArray.push(this.createGroupSchema(schema));
                 });
 
-                resource?.endpoints?.forEach((endpoint, index) => {
+                resource?.endpoints?.forEach((endpoint: any, index: number) => {
                     this.endpointsFormArray.push(this.createGroupEndpoint(endpoint, index === 0));
                 });
             } else {
                 this.initializeDefaultForm();
+            }
+
+            if (this.parentId && this.projectId) {
+                const parent = await lastValueFrom(this._endpointsService.obter(this.projectId, this.parentId));
+                if (parent) {
+                    const listEndpoint = parent.endpoints?.find(
+                        (c: any) => c.method === 'GET' && !c.url?.endsWith('/:id')
+                    );
+                    this.parentPrefix = listEndpoint?.url || `/${parent.name}`;
+                }
             }
         } catch (err) {
             this.messageService.add({
@@ -364,15 +384,17 @@ export class EndpointEditar implements OnInit {
             this.formValue.set(val);
 
             const safeName = val.name ? val.name : '';
+            const prefix = this.parentPrefix ? `${this.parentPrefix}/:parentId` : '';
+
             this.endpointsFormArray.controls.forEach((ctrl) => {
                 const method = ctrl.get('method')?.value;
-                const hasId = ctrl.get('url')?.value?.includes('/:id');
+                const hasId = ctrl.get('url')?.value?.endsWith('/:id');
                 if (method === 'GET' && hasId) {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}/:id`, { emitEvent: false });
                 } else if (method === 'GET' || method === 'POST') {
-                    ctrl.get('url')?.setValue(`/${safeName}`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}`, { emitEvent: false });
                 } else if (method === 'PUT' || method === 'DELETE') {
-                    ctrl.get('url')?.setValue(`/${safeName}/:id`, { emitEvent: false });
+                    ctrl.get('url')?.setValue(`${prefix}/${safeName}/:id`, { emitEvent: false });
                 }
             });
         });
@@ -443,7 +465,7 @@ export class EndpointEditar implements OnInit {
         return g;
     }
 
-    createGroupEndpoint(value?: Endpoint, first?: boolean): FormGroup {
+    createGroupEndpoint(value?: Partial<Endpoint>, first?: boolean): FormGroup {
         const group: FormGroup = this.fb.group({
             enabled: [value?.enabled ?? true],
             method: [value?.method ?? 'GET'],
@@ -525,12 +547,15 @@ export class EndpointEditar implements OnInit {
 
         const data = this.form.value;
         data.custom_headers = this.endpointHeaders();
+        if (this.parentId) {
+            data.parent_id = this.parentId;
+        }
         const resourceId = this.endpointId !== 'add' ? (this.endpointId as number) : null;
         const projectId = this.projectId;
 
         if (resourceId) {
             this._endpointsService.atualizar(resourceId, data).subscribe({
-                next: (res) => {
+                next: (_res) => {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Sucesso',
@@ -553,7 +578,7 @@ export class EndpointEditar implements OnInit {
             });
         } else if (projectId) {
             this._endpointsService.criar(projectId, data).subscribe({
-                next: (res) => {
+                next: (_res) => {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Sucesso',
@@ -597,6 +622,84 @@ export class EndpointEditar implements OnInit {
     getEndpointURL(value: string): string {
         const base = `${environment.apiUrl}/mock/${this.username}/${this.projectSlug}`;
         return base + (value?.startsWith('/') ? value : `/${value || ''}`);
+    }
+
+    adicionarHeader() {
+        const headers = [...this.endpointHeaders()];
+        const newId = crypto.randomUUID();
+        const newHeader = { _id: newId, key: '', value: '', active: true };
+        headers.push(newHeader);
+        this.endpointHeaders.set(headers);
+
+        this.clonedHeaders[newId] = { ...newHeader };
+        this.editingRows[newId] = true;
+    }
+
+    excluirHeader(index: number) {
+        const headers = [...this.endpointHeaders()];
+        headers.splice(index, 1);
+        this.endpointHeaders.set(headers);
+        this.messageService.add({ severity: 'success', summary: 'Excluída', detail: 'Header removida com sucesso.' });
+    }
+
+    onRowEditInit(header: any) {
+        this.clonedHeaders[header._id] = { ...header };
+        this.editingRows[header._id] = true;
+    }
+
+    onRowEditSave(header: any, index: number) {
+        const key = header.key?.trim() || '';
+
+        if (!key) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header inválida',
+                detail: 'A chave da header não pode ser vazia.'
+            });
+            return;
+        }
+
+        const headerRegex = /^[a-zA-Z0-9-]+$/;
+        if (!headerRegex.test(key)) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header inválida',
+                detail: 'A chave deve conter apenas letras, números e hifens (sem espaços).'
+            });
+            return;
+        }
+
+        if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Header não permitida',
+                detail: 'Esta header é privativa do sistema e não pode ser configurada manualmente.'
+            });
+            return;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+
+        const headers = [...this.endpointHeaders()];
+        headers[index] = header;
+        this.endpointHeaders.set(headers);
+        this.messageService.add({ severity: 'success', summary: 'Salva', detail: 'Header configurada com sucesso.' });
+    }
+
+    onRowEditCancel(header: any, index: number) {
+        const headers = [...this.endpointHeaders()];
+        const cloned = this.clonedHeaders[header._id];
+
+        if (cloned && cloned.key === '' && cloned.value === '') {
+            headers.splice(index, 1);
+        } else {
+            headers[index] = cloned;
+        }
+
+        delete this.clonedHeaders[header._id];
+        delete this.editingRows[header._id];
+        this.endpointHeaders.set(headers);
     }
 
     protected onCopySuccess(value: string): void {
@@ -826,78 +929,5 @@ export class EndpointEditar implements OnInit {
                 response: '$mockData'
             })
         );
-    }
-
-    clonedHeaders: { [s: string]: any } = {};
-    editingRows: { [s: string]: boolean } = {};
-
-    adicionarHeader() {
-        const headers = [...this.endpointHeaders()];
-        const newId = crypto.randomUUID();
-        const newHeader = { _id: newId, key: '', value: '', active: true };
-        headers.push(newHeader);
-        this.endpointHeaders.set(headers);
-
-        this.clonedHeaders[newId] = { ...newHeader };
-        this.editingRows[newId] = true;
-    }
-
-    excluirHeader(index: number) {
-        const headers = [...this.endpointHeaders()];
-        headers.splice(index, 1);
-        this.endpointHeaders.set(headers);
-        this.messageService.add({ severity: 'success', summary: 'Excluída', detail: 'Header removida com sucesso.' });
-    }
-
-    onRowEditInit(header: any) {
-        this.clonedHeaders[header._id] = { ...header };
-        this.editingRows[header._id] = true;
-    }
-
-    onRowEditSave(header: any, index: number) {
-        const key = header.key?.trim() || '';
-
-        if (!key) {
-            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave da header não pode ser vazia.' });
-            return;
-        }
-
-        const headerRegex = /^[a-zA-Z0-9-]+$/;
-        if (!headerRegex.test(key)) {
-            this.messageService.add({ severity: 'error', summary: 'Header inválida', detail: 'A chave deve conter apenas letras, números e hifens (sem espaços).' });
-            return;
-        }
-
-        if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Header não permitida',
-                detail: 'Esta header é privativa do sistema e não pode ser configurada manualmente.'
-            });
-            return;
-        }
-
-        delete this.clonedHeaders[header._id];
-        delete this.editingRows[header._id];
-
-        const headers = [...this.endpointHeaders()];
-        headers[index] = header;
-        this.endpointHeaders.set(headers);
-        this.messageService.add({ severity: 'success', summary: 'Salva', detail: 'Header configurada com sucesso.' });
-    }
-
-    onRowEditCancel(header: any, index: number) {
-        const headers = [...this.endpointHeaders()];
-        const cloned = this.clonedHeaders[header._id];
-
-        if (cloned && cloned.key === '' && cloned.value === '') {
-            headers.splice(index, 1);
-        } else {
-            headers[index] = cloned;
-        }
-
-        delete this.clonedHeaders[header._id];
-        delete this.editingRows[header._id];
-        this.endpointHeaders.set(headers);
     }
 }
