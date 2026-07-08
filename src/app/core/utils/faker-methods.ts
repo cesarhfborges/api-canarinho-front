@@ -28,6 +28,8 @@ export default [
     {
         label: 'Endereço',
         items: [
+            { label: 'Logradouro', value: '[location.place]' },
+            { label: 'Número casa', value: '[location.number]' },
             { label: 'Cidade', value: '[location.city]' },
             { label: 'Estado', value: '[location.state]' },
             { label: 'País', value: '[location.country]' },
