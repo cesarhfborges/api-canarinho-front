@@ -34,7 +34,7 @@ export class EndpointVisualizar implements OnInit {
 
         const username = this.dialogConfig.data?.username;
         const projectSlug = this.dialogConfig.data?.projectSlug;
-        const endpointName = this.dialogConfig.data?.endpoint?.name;
+        const endpointName = this.dialogConfig.data?.endpoint?.fullPath || this.dialogConfig.data?.endpoint?.name;
         const token = this.dialogConfig.data?.token;
 
         if (!username || !projectSlug || !endpointName || !token) {

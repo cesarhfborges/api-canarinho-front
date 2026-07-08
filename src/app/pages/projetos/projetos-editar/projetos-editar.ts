@@ -540,6 +540,14 @@ export class ProjetosEditar implements OnInit {
             }
         });
 
+        const setPath = (ep: any, currentPath: string) => {
+            ep.fullPath = currentPath ? `${currentPath}/:parentId/${ep.name}` : ep.name;
+            if (ep.children) {
+                ep.children.forEach((child: any) => setPath(child, ep.fullPath));
+            }
+        };
+        roots.forEach(root => setPath(root, ''));
+
         const convertToTreeNode = (ep: any): TreeNode => {
             return {
                 key: ep.id.toString(),
