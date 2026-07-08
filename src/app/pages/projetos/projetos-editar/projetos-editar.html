@@ -238,16 +238,19 @@
                         </div>
                     } @else {
                         @if (loading()) {
-                            <div class="flex flex-col items-center justify-center p-8 text-surface-500">
-                                <i class="pi pi-spin pi-spinner text-3xl mb-4 text-primary"></i>
-                                <span class="text-lg">Carregando endpoints...</span>
+                            <div class="flex flex-col items-center justify-center p-12 text-surface-500 bg-surface-50/50 dark:bg-surface-800/50 rounded-2xl border border-surface-200 dark:border-surface-700/50">
+                                <i class="pi pi-spin pi-spinner text-4xl mb-4 text-primary"></i>
+                                <span class="text-lg font-medium">Carregando estrutura...</span>
+                                <span class="text-sm mt-2 text-surface-400">Preparando seus endpoints para exibição</span>
                             </div>
                         } @else {
-                            <div
-                                class="flex flex-col items-center justify-center p-8 text-surface-500 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-xl bg-surface-50 dark:bg-surface-800">
-                                <i class="pi pi-inbox text-4xl mb-4 text-surface-400"></i>
-                                <span class="text-lg font-medium">Nenhum endpoint configurado</span>
-                                <span class="text-sm mt-1">Crie um novo endpoint para começar a gerar mocks.</span>
+                            <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-2xl bg-surface-50/50 dark:bg-surface-800/50 text-center transition-colors hover:border-primary/30 hover:bg-surface-50 dark:hover:bg-surface-800">
+                                <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                                    <i class="pi pi-inbox text-2xl text-primary"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-surface-900 dark:text-surface-0 mb-2">Nenhum endpoint configurado</h3>
+                                <p class="text-surface-500 max-w-sm mx-auto mb-6">Crie um novo endpoint para começar a estruturar sua API mock e simular respostas dinâmicas.</p>
+                                <p-button (onClick)="editar(null)" icon="pi pi-plus" label="Novo Endpoint" severity="success" [rounded]="true"></p-button>
                             </div>
                         }
                     }
@@ -256,177 +259,201 @@
 
             <!-- TOKENS TAB -->
             <p-tabpanel value="1">
-                <div class="card flex-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold">Tokens Ativos</h2>
-                        <p-button (onClick)="abrirModalToken()" icon="pi pi-plus" label="Gerar Token"
-                                  severity="success" />
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-0 dark:bg-surface-800/80 p-5 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-xs">
+                        <div>
+                            <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0">Tokens de Acesso</h2>
+                            <p class="text-sm text-surface-500 mt-1">Gerencie as chaves de API utilizadas para autenticar requisições neste projeto.</p>
+                        </div>
+                        <p-button (onClick)="abrirModalToken()" icon="pi pi-key" label="Novo Token" severity="success" [rounded]="true" />
                     </div>
 
-                    <p-table [tableStyle]="{ 'min-width': '40rem', 'table-layout': 'fixed' }" [value]="tokens()"
-                             responsiveLayout="scroll">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th class="w-[25%]">Nome</th>
-                                <th class="w-[40%]">Token</th>
-                                <th class="w-[20%]">Criado em</th>
-                                <th class="w-[15%] text-center">Ações</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template let-token pTemplate="body">
-                            <tr>
-                                <td [title]="token.name" class="font-medium truncate">{{ token.name }}</td>
-                                <td class="font-mono text-sm text-surface-500">
-                                    <div class="flex items-center gap-2 overflow-hidden w-full">
-                                        <span [title]="token.token" class="truncate flex-1">
-                                            {{ isTokenVisible(token.id) ? token.token : '***************************************************' }}
-                                        </span>
-                                        <p-button
-                                            (onClick)="toggleTokenVisibility(token.id)"
-                                            [icon]="isTokenVisible(token.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
-                                            [rounded]="true"
-                                            [text]="true"
-                                            class="shrink-0"
-                                            pTooltip="Alternar visibilidade"
-                                            severity="secondary"
-                                            size="small"
-                                            tooltipPosition="top"
-                                        />
-                                    </div>
-                                </td>
-                                <td class="text-sm truncate">{{ token.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-                                <td class="text-center">
-                                    <p-button (onClick)="excluirToken($event, token)" [disabled]="loading()"
-                                              [outlined]="true" icon="pi pi-trash" pTooltip="Revogar Token"
-                                              severity="danger" size="small" tooltipPosition="top" />
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td class="text-center p-4" colspan="4">Nenhum token gerado para este projeto.</td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
+                    <div class="bg-surface-0 dark:bg-surface-800/80 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-xs overflow-hidden">
+                        <p-table [value]="tokens()" [tableStyle]="{ 'min-width': '40rem' }" responsiveLayout="scroll" styleClass="p-datatable-sm p-datatable-striped">
+                            <ng-template pTemplate="header">
+                                <tr class="bg-surface-50 dark:bg-surface-900/50">
+                                    <th class="w-[25%] font-semibold">Nome da Chave</th>
+                                    <th class="w-[45%] font-semibold">Token (Bearer)</th>
+                                    <th class="w-[20%] font-semibold">Criado em</th>
+                                    <th class="w-[10%] text-center font-semibold">Ações</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template let-token pTemplate="body">
+                                <tr class="group">
+                                    <td class="font-medium text-surface-800 dark:text-surface-100">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-shield text-surface-400"></i>
+                                            <span class="truncate max-w-[200px]" [title]="token.name">{{ token.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="font-mono text-sm">
+                                        <div class="flex items-center gap-2 bg-surface-100 dark:bg-surface-900/50 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700/50 w-full">
+                                            <span class="truncate flex-1 text-surface-600 dark:text-surface-300 tracking-wider">
+                                                {{ isTokenVisible(token.id) ? token.token : '••••••••••••••••••••••••••••••••••••••••••••••••' }}
+                                            </span>
+                                            <p-button
+                                                (onClick)="toggleTokenVisibility(token.id)"
+                                                [icon]="isTokenVisible(token.id) ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                                                [rounded]="true"
+                                                [text]="true"
+                                                class="shrink-0"
+                                                pTooltip="Exibir Token"
+                                                severity="secondary"
+                                                size="small"
+                                                styleClass="w-8 h-8 p-0"
+                                                tooltipPosition="top"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td class="text-sm text-surface-500">
+                                        {{ token.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                    </td>
+                                    <td class="text-center">
+                                        <p-button (onClick)="excluirToken($event, token)" [disabled]="loading()"
+                                                  [rounded]="true" [text]="true" icon="pi pi-trash" pTooltip="Revogar Token"
+                                                  severity="danger" size="small" styleClass="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity" tooltipPosition="left" />
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td class="text-center p-8 text-surface-500" colspan="4">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <i class="pi pi-key text-3xl text-surface-300"></i>
+                                            <span>Nenhum token ativo para este projeto.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
                 </div>
             </p-tabpanel>
 
             <!-- HEADERS TAB -->
             <p-tabpanel value="2">
-                <div class="card flex-auto">
-                    <div class="flex flex-col gap-2 mb-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold">Headers Personalizados do Projeto</h2>
-                            <p-button (onClick)="adicionarHeader()" icon="pi pi-plus" label="Adicionar Header"
-                                      severity="info" />
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-0 dark:bg-surface-800/80 p-5 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-xs">
+                        <div>
+                            <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0">Headers Global do Projeto</h2>
+                            <p class="text-sm text-surface-500 mt-1">Cabeçalhos HTTP que serão injetados automaticamente em todas as respostas deste projeto.</p>
                         </div>
-                        <p class="text-surface-500 text-sm">Estas headers serão incluídas em todas as respostas de todos
-                            os endpoints deste projeto.</p>
+                        <p-button (onClick)="adicionarHeader()" icon="pi pi-plus" label="Novo Header" severity="info" [rounded]="true" />
                     </div>
 
-                    <p-table
-                        [editingRowKeys]="editingRows"
-                        [showGridlines]="true"
-                        [stripedRows]="true"
-                        [tableStyle]="{ 'table-layout': 'fixed', 'width': '100%' }"
-                        [value]="projectHeaders()"
-                        dataKey="_id"
-                        editMode="row"
-                        size="small"
-                    >
-                        <ng-template #header>
-                            <tr class="h-12">
-                                <th>Chave (Key)</th>
-                                <th>Valor (Value)</th>
-                                <th class="text-center" [style.width.px]="90">Ativo</th>
-                                <th class="text-center" [style.width.px]="100">Ações</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template let-editing="editing" let-header let-ri="rowIndex" pTemplate="body">
-                            <tr [pEditableRow]="header">
-                                <td>
-                                    <p-cellEditor>
-                                        <ng-template pTemplate="input">
-                                            <input [(ngModel)]="header.key" class="w-full" pInputText type="text">
-                                        </ng-template>
-                                        <ng-template pTemplate="output">
-                                            <span
-                                                class="block w-full min-h-6 truncate">{{ header.key || 'Nenhum' }}</span>
-                                        </ng-template>
-                                    </p-cellEditor>
-                                </td>
-                                <td>
-                                    <p-cellEditor>
-                                        <ng-template pTemplate="input">
-                                            <input [(ngModel)]="header.value" class="w-full" pInputText type="text">
-                                        </ng-template>
-                                        <ng-template pTemplate="output">
-                                            <span
-                                                class="block w-full min-h-6 truncate">{{ header.value || 'Nenhum' }}</span>
-                                        </ng-template>
-                                    </p-cellEditor>
-                                </td>
-                                <td class="text-center">
-                                    <p-cellEditor>
-                                        <ng-template pTemplate="input">
-                                            <p-toggleswitch [(ngModel)]="header.active"></p-toggleswitch>
-                                        </ng-template>
-                                        <ng-template pTemplate="output">
-                                            <p-tag [severity]="header.active ? 'success' : 'secondary'"
-                                                   [value]="header.active ? 'Ativo' : 'Inativo'"></p-tag>
-                                        </ng-template>
-                                    </p-cellEditor>
-                                </td>
-                                <td>
-                                    <div class="flex items-center justify-center gap-2">
-                                        @if (!editing) {
-                                            <p-button
-                                                (click)="onRowEditInit(header)"
-                                                icon="pi pi-pencil"
-                                                pInitEditableRow
-                                                rounded
-                                                severity="secondary"
-                                                text
-                                                type="button"
-                                            ></p-button>
-                                            <p-button
-                                                (click)="excluirHeader(ri)"
-                                                icon="pi pi-trash"
-                                                rounded
-                                                severity="danger"
-                                                text
-                                                type="button"
-                                            ></p-button>
-                                        } @else {
-                                            <p-button
-                                                (click)="onRowEditSave(header, ri)"
-                                                icon="pi pi-check"
-                                                rounded
-                                                severity="success"
-                                                text
-                                                type="button"
-                                            ></p-button>
-                                            <p-button
-                                                (click)="onRowEditCancel(header, ri)"
-                                                icon="pi pi-times"
-                                                rounded
-                                                severity="danger"
-                                                text
-                                                type="button"
-                                            ></p-button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td class="text-center p-4" colspan="4">Nenhuma header personalizada definida para este
-                                    projeto.
-                                </td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
+                    <div class="bg-surface-0 dark:bg-surface-800/80 border border-surface-200 dark:border-surface-700/60 rounded-2xl shadow-xs overflow-hidden">
+                        <p-table
+                            [editingRowKeys]="editingRows"
+                            [value]="projectHeaders()"
+                            dataKey="_id"
+                            editMode="row"
+                            styleClass="p-datatable-sm p-datatable-striped"
+                            responsiveLayout="scroll"
+                        >
+                            <ng-template pTemplate="header">
+                                <tr class="bg-surface-50 dark:bg-surface-900/50">
+                                    <th class="font-semibold w-[35%]">Header (Key)</th>
+                                    <th class="font-semibold w-[35%]">Valor (Value)</th>
+                                    <th class="text-center font-semibold w-[15%]">Status</th>
+                                    <th class="text-center font-semibold w-[15%]">Ações</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template let-editing="editing" let-header let-ri="rowIndex" pTemplate="body">
+                                <tr [pEditableRow]="header" class="group">
+                                    <td>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [(ngModel)]="header.key" class="w-full p-2 text-sm border rounded bg-surface-0 dark:bg-surface-900 focus:ring-2 focus:ring-primary outline-none transition-shadow" type="text" placeholder="Ex: Access-Control-Allow-Origin">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                <span class="font-mono text-sm font-semibold text-primary block w-full truncate">{{ header.key || 'Defina a chave...' }}</span>
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [(ngModel)]="header.value" class="w-full p-2 text-sm border rounded bg-surface-0 dark:bg-surface-900 focus:ring-2 focus:ring-primary outline-none transition-shadow" type="text" placeholder="Ex: *">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                <span class="font-mono text-sm text-surface-600 dark:text-surface-300 block w-full truncate">{{ header.value || 'Defina o valor...' }}</span>
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td class="text-center">
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <p-toggleswitch [(ngModel)]="header.active"></p-toggleswitch>
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                <span
+                                                    [ngClass]="header.active ? 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400' : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                                                >
+                                                    <div class="w-1.5 h-1.5 rounded-full" [ngClass]="header.active ? 'bg-success-500' : 'bg-surface-400'"></div>
+                                                    {{ header.active ? 'Ativo' : 'Inativo' }}
+                                                </span>
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center justify-center gap-2">
+                                            @if (!editing) {
+                                                <p-button
+                                                    (click)="onRowEditInit(header)"
+                                                    icon="pi pi-pencil"
+                                                    pInitEditableRow
+                                                    rounded
+                                                    severity="secondary"
+                                                    text
+                                                    size="small"
+                                                    styleClass="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                ></p-button>
+                                                <p-button
+                                                    (click)="excluirHeader(ri)"
+                                                    icon="pi pi-trash"
+                                                    rounded
+                                                    severity="danger"
+                                                    text
+                                                    size="small"
+                                                    styleClass="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                ></p-button>
+                                            } @else {
+                                                <p-button
+                                                    (click)="onRowEditSave(header, ri)"
+                                                    icon="pi pi-check"
+                                                    rounded
+                                                    severity="success"
+                                                    text
+                                                    size="small"
+                                                    styleClass="w-8 h-8 p-0"
+                                                ></p-button>
+                                                <p-button
+                                                    (click)="onRowEditCancel(header, ri)"
+                                                    icon="pi pi-times"
+                                                    rounded
+                                                    severity="danger"
+                                                    text
+                                                    size="small"
+                                                    styleClass="w-8 h-8 p-0"
+                                                ></p-button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td class="text-center p-8 text-surface-500" colspan="4">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <i class="pi pi-bars text-3xl text-surface-300"></i>
+                                            <span>Nenhum header personalizado definido para este projeto.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
                 </div>
             </p-tabpanel>
 
@@ -436,16 +463,20 @@
 </div>
 
 <!-- DIALOG NOVO TOKEN -->
-<p-dialog [(visible)]="showTokenDialog" [modal]="true" [style]="{width: '400px'}" header="Gerar Novo Token">
-    <div class="flex flex-col gap-4 pt-2">
-        <label class="font-semibold text-surface-700" for="tokenName">Nome de identificação</label>
-        <input (ngModelChange)="newTokenName.set($event)" [ngModel]="newTokenName()" id="tokenName" pInputText
-               placeholder="Ex: Produção, FrontEnd Demo" type="text" />
+<p-dialog [(visible)]="showTokenDialog" [modal]="true" [style]="{width: '450px'}" header="Novo Token de Acesso" [draggable]="false" [resizable]="false">
+    <div class="flex flex-col gap-4 py-4">
+        <p class="text-sm text-surface-500 mb-2">Crie um token exclusivo para autenticar suas requisições aos endpoints deste projeto.</p>
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-sm text-surface-700 dark:text-surface-300" for="tokenName">Nome de Identificação</label>
+            <input (ngModelChange)="newTokenName.set($event)" [ngModel]="newTokenName()" id="tokenName" pInputText
+                   class="w-full p-3 rounded-lg border-surface-300 dark:border-surface-600 focus:ring-primary"
+                   placeholder="Ex: Servidor de Produção, App FrontEnd" type="text" />
+        </div>
     </div>
     <ng-template pTemplate="footer">
-        <p-button (onClick)="showTokenDialog.set(false)" [outlined]="true" icon="pi pi-times" label="Cancelar"
-                  severity="secondary" />
-        <p-button (onClick)="gerarToken()" [disabled]="!newTokenName()" icon="pi pi-check" label="Gerar"
-                  severity="success" />
+        <div class="flex gap-2 justify-end pt-4 border-t border-surface-100 dark:border-surface-800">
+            <p-button (onClick)="showTokenDialog.set(false)" [text]="true" label="Cancelar" severity="secondary" [rounded]="true" />
+            <p-button (onClick)="gerarToken()" [disabled]="!newTokenName()" icon="pi pi-check" label="Gerar Token" severity="success" [rounded]="true" />
+        </div>
     </ng-template>
 </p-dialog>
