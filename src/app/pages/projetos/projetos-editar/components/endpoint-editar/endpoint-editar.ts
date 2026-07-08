@@ -555,7 +555,7 @@ export class EndpointEditar implements OnInit {
 
         if (resourceId) {
             this._endpointsService.atualizar(resourceId, data).subscribe({
-                next: (res) => {
+                next: (_res) => {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Sucesso',
@@ -578,7 +578,7 @@ export class EndpointEditar implements OnInit {
             });
         } else if (projectId) {
             this._endpointsService.criar(projectId, data).subscribe({
-                next: (res) => {
+                next: (_res) => {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Sucesso',
