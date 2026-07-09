@@ -15,7 +15,13 @@ import { InputTextModule } from 'primeng/inputtext';
         <form [formGroup]="form" (ngSubmit)="salvar()" class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
                 <label for="name">Nome do Projeto <span class="text-red-500">*</span></label>
-                <input pInputText id="name" formControlName="name" placeholder="Ex: E-commerce Mock" />
+                <input
+                    pInputText
+                    id="name"
+                    formControlName="name"
+                    placeholder="Ex: E-commerce Mock"
+                    autocomplete="off"
+                />
                 <small class="text-red-500" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
                     O nome é obrigatório.
                 </small>
@@ -23,7 +29,13 @@ import { InputTextModule } from 'primeng/inputtext';
 
             <div class="flex flex-col gap-2">
                 <label for="slug">Slug <span class="text-red-500">*</span></label>
-                <input pInputText id="slug" formControlName="slug" placeholder="Ex: ecommerce-mock" />
+                <input
+                    pInputText
+                    id="slug"
+                    formControlName="slug"
+                    placeholder="Ex: ecommerce-mock"
+                    autocomplete="off"
+                />
                 <small class="text-muted-color">O slug será usado na URL da API.</small>
                 <small class="text-red-500" *ngIf="form.get('slug')?.invalid && form.get('slug')?.touched">
                     O slug é obrigatório.
@@ -31,8 +43,20 @@ import { InputTextModule } from 'primeng/inputtext';
             </div>
 
             <div class="flex justify-end gap-2 mt-4">
-                <p-button label="Cancelar" icon="pi pi-times" [outlined]="true" severity="secondary" (onClick)="cancelar()" />
-                <p-button label="Salvar" icon="pi pi-check" type="submit" [loading]="loading" [disabled]="form.invalid" />
+                <p-button
+                    label="Cancelar"
+                    icon="pi pi-times"
+                    [outlined]="true"
+                    severity="secondary"
+                    (onClick)="cancelar()"
+                />
+                <p-button
+                    label="Salvar"
+                    icon="pi pi-check"
+                    type="submit"
+                    [loading]="loading"
+                    [disabled]="form.invalid"
+                />
             </div>
         </form>
     `
@@ -50,7 +74,7 @@ export class ProjetoEditar implements OnInit {
 
     ngOnInit(): void {
         const projeto = this.config.data?.projeto;
-        
+
         if (projeto) {
             this.projetoId = projeto.id;
         }
@@ -73,24 +97,40 @@ export class ProjetoEditar implements OnInit {
         if (this.projetoId) {
             this.projetosService.atualizar(this.projetoId, dados).subscribe({
                 next: (res) => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto atualizado com sucesso.' });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Projeto atualizado com sucesso.'
+                    });
                     this.loading = false;
                     this.ref.close(res);
                 },
                 error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error?.error || 'Erro ao atualizar projeto.' });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: err.error?.error || 'Erro ao atualizar projeto.'
+                    });
                     this.loading = false;
                 }
             });
         } else {
             this.projetosService.criar(dados).subscribe({
                 next: (res) => {
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Projeto criado com sucesso.' });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Projeto criado com sucesso.'
+                    });
                     this.loading = false;
                     this.ref.close(res);
                 },
                 error: (err) => {
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error?.error || 'Erro ao criar projeto.' });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: err.error?.error || 'Erro ao criar projeto.'
+                    });
                     this.loading = false;
                 }
             });

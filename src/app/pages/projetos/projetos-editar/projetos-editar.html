@@ -93,7 +93,7 @@
                                             <div class="absolute -left-[14px] sm:-left-[24px] border-l-2 border-surface-300 dark:border-surface-600 z-0"
                                                  [style.top]="first && level === 0 ? '2.5rem' : '-1rem'"
                                                  [style.bottom]="last ? 'calc(100% - 2.5rem)' : '0'"></div>
-                                            
+
                                             <!-- Linha Horizontal -->
                                             <div class="absolute -left-[14px] sm:-left-[24px] w-[14px] sm:w-[24px] border-t-2 border-surface-300 dark:border-surface-600 z-0"
                                                  style="top: 2.5rem"></div>
@@ -129,7 +129,7 @@
 
                                                 <!-- ANDAR 2: Controle (Slider) e Ações -->
                                                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full p-4 bg-surface-50/50 dark:bg-surface-900/20">
-                                                    
+
                                                     <!-- Bloco de Geração (Slider) -->
                                                     <div class="flex-1 flex items-center gap-4 w-full lg:max-w-2xl bg-surface-0 dark:bg-surface-900/50 p-3 sm:px-4 rounded-xl border border-surface-200 dark:border-surface-700/50">
                                                         <!-- Quantidades -->
@@ -460,7 +460,7 @@
             <label class="font-semibold text-sm text-surface-700 dark:text-surface-300" for="tokenName">Nome de Identificação</label>
             <input (ngModelChange)="newTokenName.set($event)" [ngModel]="newTokenName()" id="tokenName" pInputText
                    class="w-full p-3 rounded-lg border-surface-300 dark:border-surface-600 focus:ring-primary"
-                   placeholder="Ex: Servidor de Produção, App FrontEnd" type="text" />
+                   placeholder="Ex: Servidor de Produção, App FrontEnd" type="text" autocomplete="off"/>
         </div>
     </div>
     <ng-template pTemplate="footer">
