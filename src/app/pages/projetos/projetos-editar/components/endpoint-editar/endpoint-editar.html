@@ -53,9 +53,9 @@
 
                                         <div class="flex flex-col gap-8 mt-4">
                                             <p-floatlabel>
-                                                <input class="w-full p-4 text-lg font-medium" formControlName="name"
-                                                       id="endpoint-name" pInputText
-                                                       type="text" />
+                                                <input autocomplete="off" class="w-full p-4 text-lg font-medium"
+                                                       formControlName="name" id="endpoint-name"
+                                                       pInputText type="text" />
                                                 <label for="endpoint-name">Nome do Recurso (ex: Usuários,
                                                     Produtos)</label>
                                             </p-floatlabel>
@@ -74,10 +74,12 @@
                                                     </p-inputgroup-addon>
                                                     <input #basePath (focus)="selectAll(basePath)"
                                                            [value]="getEndpointURL('')"
+                                                           autocomplete="off"
                                                            class="font-mono text-primary-600! dark:text-primary-400! bg-surface-100! dark:bg-surface-900! border-none!"
                                                            id="basePath"
                                                            pInputText
-                                                           readonly />
+                                                           readonly
+                                                    />
                                                     <p-inputgroup-addon
                                                         class="bg-surface-200! dark:bg-surface-700! border-none! p-0!">
                                                         <p-button
@@ -130,6 +132,7 @@
                                                             [id]="`schema-${$index}-id`"
                                                             [ngClass]="{'ng-invalid ng-dirty': schema.get('name')?.invalid && schema.get('name')?.touched}"
                                                             [readOnly]="schema.get('type')?.value === 'Object.ID'"
+                                                            autocomplete="off"
                                                             formControlName="name"
                                                             pInputText
                                                             pSize="large"
@@ -259,6 +262,7 @@
                                                             @case ('String') {
                                                                 <input
                                                                     [id]="`schema-${$index}-value`"
+                                                                    autocomplete="off"
                                                                     class="w-full"
                                                                     formControlName="value"
                                                                     pInputText
@@ -271,6 +275,7 @@
                                                                 <p-input-number
                                                                     [id]="`schema-${$index}-value`"
                                                                     [showButtons]="true"
+                                                                    autocomplete="off"
                                                                     class="w-full"
                                                                     formControlName="value"
                                                                     mode="decimal"
@@ -301,6 +306,7 @@
                                                             @case ('Array') {
                                                                 <input
                                                                     [id]="`schema-${$index}-value`"
+                                                                    autocomplete="off"
                                                                     class="w-full"
                                                                     formControlName="value"
                                                                     pInputText
@@ -449,10 +455,12 @@
                                                                         #urlPath
                                                                         (focus)="selectAll(urlPath)"
                                                                         [value]="getEndpointURL(endpoint.get('url')?.value)"
+                                                                        autocomplete="off"
                                                                         class="font-mono text-sm border-surface-300! dark:border-surface-600!"
                                                                         id="simple"
                                                                         pInputText
-                                                                        readonly />
+                                                                        readonly
+                                                                    />
                                                                     <p-inputgroup-addon
                                                                         class="border-surface-300! dark:border-surface-600! p-0!"
                                                                     >
@@ -641,9 +649,11 @@
                                                                 <ng-template pTemplate="input">
                                                                     <input [(ngModel)]="header.key"
                                                                            [ngModelOptions]="{standalone: true}"
+                                                                           autocomplete="off"
                                                                            class="w-full"
                                                                            pInputText
-                                                                           type="text">
+                                                                           type="text"
+                                                                    />
                                                                 </ng-template>
                                                                 <ng-template pTemplate="output">
                                                                     <span
@@ -656,9 +666,11 @@
                                                                 <ng-template pTemplate="input">
                                                                     <input [(ngModel)]="header.value"
                                                                            [ngModelOptions]="{standalone: true}"
+                                                                           autocomplete="off"
                                                                            class="w-full"
                                                                            pInputText
-                                                                           type="text">
+                                                                           type="text"
+                                                                    />
                                                                 </ng-template>
                                                                 <ng-template pTemplate="output">
                                                                     <span
