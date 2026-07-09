@@ -137,13 +137,14 @@
                                                             <span class="text-[10px] font-bold text-surface-400 uppercase tracking-wider leading-none mb-1">Gerar</span>
                                                             <div class="flex items-baseline gap-1">
                                                                 <span class="font-black text-primary text-xl leading-none">{{ node.data.endpoint.generation_count }}</span>
-                                                                <span class="text-[11px] font-semibold text-surface-400 leading-none">/ {{ node.data.endpoint.count }}</span>
+                                                                <span class="text-[11px] font-semibold text-surface-400 leading-none">/ 100</span>
                                                             </div>
                                                         </div>
 
                                                         <!-- Slider -->
                                                         <div class="flex-1 w-full flex items-center min-w-[100px] px-2 py-2">
                                                             <p-slider
+                                                                (onChange)="changing(node.data.endpoint.id)"
                                                                 (onSlideEnd)="gerarDadosMock($event, node.data)"
                                                                 [(ngModel)]="node.data.endpoint.generation_count"
                                                                 [disabled]="isLoading(node.data.endpoint.id)"
@@ -152,6 +153,16 @@
                                                                 [step]="1"
                                                                 class="w-full"
                                                             />
+                                                        </div>
+                                                        <div class="flex flex-col items-end justify-center min-w-[75px] shrink-0 gap-1.5">
+                                                            @if (previewingEndpointId() === node.data.endpoint.id) {
+                                                                <span [ngClass]="getProjectedTotal(node.data) <= 5000 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'"
+                                                                      class="text-[11px] font-bold leading-none bg-surface-100 dark:bg-surface-800 px-2 py-1 rounded-md shadow-xs border border-surface-200 dark:border-surface-700/50" pTooltip="Projeção total de novos registros ao gerar" tooltipPosition="top">
+                                                                Gerar: {{ getProjectedTotal(node.data) }}
+                                                            </span>
+                                                            } @else {
+                                                                <span class="text-[11px] font-semibold text-surface-400 leading-none" pTooltip="Registros já criados neste endpoint" tooltipPosition="top">Total: {{ node.data.endpoint.count }}</span>
+                                                            }
                                                         </div>
                                                     </div>
 

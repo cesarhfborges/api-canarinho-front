@@ -56,6 +56,7 @@ export class ProjetosEditar implements OnInit {
     files = signal<TreeNode[]>([]);
     tokens = signal<any[]>([]);
 
+    previewingEndpointId = signal<number | null>(null);
     showTokenDialog = signal<boolean>(false);
     newTokenName = signal<string>('');
     project = signal<any>(null);
@@ -79,6 +80,10 @@ export class ProjetosEditar implements OnInit {
     constructor() {
         this.id = Number(this.route.snapshot.paramMap.get('id'));
     }
+
+    changing(id: number): void {
+        this.previewingEndpointId.set(id);
+    };
 
     isLoading(endpointId: number): boolean {
         return !!this.loadingEndpoints()[endpointId];
@@ -310,12 +315,13 @@ export class ProjetosEditar implements OnInit {
                 item.data.endpoint.generation_count = genCount;
                 // Set only this endpoint to null as it finished
                 this.loadingEndpoints.update((prev) => ({ ...prev, [endpointId]: null }));
-            } catch (err) {
+            } catch (err: any) {
+                const errorMsg = err.error?.error || err.error?.message || `Falha ao gerar dados para ${item.label}`;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
-                    detail: `Falha ao gerar dados para ${item.label}`,
-                    life: 3000
+                    detail: errorMsg,
+                    life: 5000
                 });
                 console.error(err);
                 hasError = true;
@@ -447,11 +453,40 @@ export class ProjetosEditar implements OnInit {
     }
 
     protected async gerarDadosMock($event: SliderSlideEndEvent, data: any): Promise<void> {
+        this.previewingEndpointId.set(null);
+        
         if ($event.value === undefined) {
             return;
         }
 
         if (this.id === null) return;
+
+        let parentCount = 1;
+        if (data.endpoint.parent_id) {
+            const parentNode = this.getAllNodes(this.files()).find(
+                (n) => n.data.endpoint.id === data.endpoint.parent_id
+            );
+            if (parentNode) {
+                parentCount = parentNode.data.endpoint.count || 0;
+            }
+        }
+
+        const count = data.endpoint.generation_count || 10;
+        const totalToGenerate = count * parentCount;
+
+        if (totalToGenerate > 5000) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Limite Excedido',
+                detail: `A geração resultaria em ${totalToGenerate} registros. O limite máximo é de 5000 registros por endpoint.`,
+                life: 5000
+            });
+
+            if (parentCount > 0) {
+                data.endpoint.generation_count = Math.floor(5000 / parentCount);
+            }
+            return;
+        }
 
         this.loadingEndpoints.update((prev) => ({ ...prev, [data.endpoint.id]: 'gerando' }));
 
@@ -477,6 +512,19 @@ export class ProjetosEditar implements OnInit {
         } finally {
             this.loadingEndpoints.update((prev) => ({ ...prev, [data.endpoint.id]: null }));
         }
+    }
+
+    getProjectedTotal(data: any): number {
+        let parentCount = 1;
+        if (data.endpoint.parent_id) {
+            const parentNode = this.getAllNodes(this.files()).find(
+                (n) => n.data.endpoint.id === data.endpoint.parent_id
+            );
+            if (parentNode) {
+                parentCount = parentNode.data.endpoint.count || 0;
+            }
+        }
+        return (data.endpoint.generation_count || 0) * parentCount;
     }
 
     private async carregar() {
@@ -548,7 +596,7 @@ export class ProjetosEditar implements OnInit {
                 ep.children.forEach((child: any) => setPath(child, ep.fullPath));
             }
         };
-        roots.forEach(root => setPath(root, ''));
+        roots.forEach((root) => setPath(root, ''));
 
         const convertToTreeNode = (ep: any): TreeNode => {
             return {
